@@ -453,6 +453,7 @@ public:
     else {
       for (size_t i = 0; i < this->mit.getNumberOfTerms(); ++i) {
         localSum += this->outData[i];
+        this->mit.next();
       }
     }
     MPI_Reduce(&localSum, &globalSum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
