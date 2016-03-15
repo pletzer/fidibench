@@ -319,7 +319,8 @@ public:
     MPI_Win_create(srcData, n, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
 
     MultiArrayIter sit(sLo, sHi, false);
-    this->winData.insert( std::pair< std::vector<int>, std::pair<double*, double*> >(side, std::pair<double*, double*>(srcData, dstData) ) );
+    std::pair<double*, double*> pSrcDst(srcData, dstData);
+    this->winData.insert( std::pair< std::vector<int>, std::pair<double*, double*> >(side, pSrcDst) );
     this->windows.insert( std::pair< std::vector<int>, MPI_Win >(side, win) );
     this->winIter.insert( std::pair< std::vector<int>, MultiArrayIter >(side, sit) );
   }
