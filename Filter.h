@@ -128,7 +128,7 @@ public:
 
 /**
  * Get remote data and store the result in dstData
- * @param otherRank rank form which the data will be fetched
+ * @param otherRank rank from which the data will be fetched
  * @param side window side as defined with respect to the data source window
  */
  double* fetch(int otherRank, const std::vector<int>& side) {
@@ -144,6 +144,7 @@ public:
 
   MPI_Win_fence(MPI_MODE_NOSUCCEED, win); 
 
+  return dstData;
  }
 
 /**
