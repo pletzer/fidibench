@@ -10,6 +10,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <iostream>
 #include "MultiArrayIter.h"
 
 #ifndef WRITE_VTK_H
