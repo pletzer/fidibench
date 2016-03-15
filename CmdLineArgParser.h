@@ -4,7 +4,7 @@
  *
  * This software is provided with the hope that it will be 
  * useful. It comes with no warranty whatsoever. 
- * Please send bug reports to pletzer@psu.edu.
+ * Please send bug reports to alexander@gokliya.net.
  */
 
 #include <cstdlib>
@@ -29,7 +29,7 @@ class CmdLineArgParser {
   CmdLineArgParser() {
     // always activate -h
     this->set("-h", false, "Print help.");
-    this->footer = "\nReport bugs to pletzer@psu.edu\n";    
+    this->footer = "\nReport bugs to alexander@gokliya.net\n";    
   }
   
   // Setters

@@ -4,7 +4,7 @@
  *
  * This software is provided with the hope that it will be 
  * useful. It comes with no warranty whatsoever. 
- * Please send bug reports to pletzer@psu.edu.
+ * Please send bug reports to alexander@gokliya.net.
  */
 #include <vector>
 #include <map>
