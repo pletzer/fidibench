@@ -10,6 +10,8 @@ if (NOT CMAKE_BUILD_TYPE)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 endif()
 
+option(BUILD_WITH_TAU "Build with TAU compilers (only on AIX)" OFF) 
+
 # special treatment for AIX because find_package(MPI) fails on fitzroy
 if (${CMAKE_SYSTEM_NAME} STREQUAL "AIX")
   message(STATUS "AIX detected")
@@ -28,6 +30,10 @@ else ()
   set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
 endif()
 
+if (BUILD_WITH_TAU)
+  set(CMAKE_CXX_COMPILER "tau_cxx.sh")
+endif()
+
 add_executable(testMultiArrayIter testMultiArrayIter.cxx)
 add_executable(testCubeDecomp testCubeDecomp.cxx)
 add_executable(laplacian laplacian.cxx CmdLineArgParser.cpp)
@@ -38,6 +44,8 @@ if (OPENMP_FOUND)
   add_executable(upwindTemplated upwindTemplated.cxx)
 endif()
 
+message(STATUS "==============================================================")
+message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "==============================================================")
 message(STATUS "Compiler flags: ${CMAKE_CXX_FLAGS}")
 message(STATUS "==============================================================")

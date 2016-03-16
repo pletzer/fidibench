@@ -1,5 +1,5 @@
 /**
- * @brief test driver for a Laplacian-type differencing
+ * @brief test driver for Laplacian-type differencing
  * @author Alexander Pletzer
  *
  * This software is provided with the hope that it will be 
