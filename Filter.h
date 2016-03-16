@@ -316,7 +316,8 @@ public:
     MPI_Alloc_mem(sizeof(double)*n, MPI_INFO_NULL, &dstData);
 
     MPI_Win win;
-    MPI_Win_create(srcData, n, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
+    MPI_Win_create(srcData, n*sizeof(double), sizeof(double), 
+                   MPI_INFO_NULL, MPI_COMM_WORLD, &win);
 
     MultiArrayIter sit(sLo, sHi, false);
     std::pair<double*, double*> pSrcDst(srcData, dstData);
