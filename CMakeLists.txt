@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required (VERSION 2.8)
 project(laplacian)
 
 # make sure the default build is of Release type
@@ -31,8 +31,13 @@ else ()
 endif()
 
 if (NOT "${TAU_MAKEFILE}" STREQUAL "")
-  get_filename_component(TAU_LIBRARY_DIR "${TAU_MAKEFILE}" DIRECTORY)
-  get_filename_component(TAU_DIR "${TAU_LIBRARY_DIR}" DIRECTORY)
+  if ("${CMAKE_VERSION}" VERSION_LESS 2.8.12)
+    get_filename_component(TAU_LIBRARY_DIR "${TAU_MAKEFILE}" PATH)
+    get_filename_component(TAU_DIR "${TAU_LIBRARY_DIR}" PATH)
+  else ()
+    get_filename_component(TAU_LIBRARY_DIR "${TAU_MAKEFILE}" DIRECTORY)
+    get_filename_component(TAU_DIR "${TAU_LIBRARY_DIR}" DIRECTORY)
+  endif ()
   message("*******************************************************************")
   message("Building with TAU enabled, set the following prior to typing 'make'")
   message("export PATH=${TAU_DIR}/bin:$PATH")
