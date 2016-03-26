@@ -76,3 +76,4 @@ int main() {
   dims[0] = 2; dims[1] = 3; dims[2] = 4;
   test(nprocs, dims);
 }
+

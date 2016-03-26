@@ -35,3 +35,4 @@ int main() {
   std::cout << "column major test:\n";
   test(false);
 }
+
