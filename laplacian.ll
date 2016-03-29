@@ -21,5 +21,5 @@
 #
 # @ queue
 
-poe ./laplacian -numDims 3 -numCells 128
+poe ./laplacian -numDims 3 -numCells 512
 
