@@ -21,5 +21,6 @@
 #
 # @ queue
 
-poe ./laplacian -numDims 3 -numCells 512
+export TAU_TRACE=1
+poe ./laplacian -numDims 3 -numCells 128
 
