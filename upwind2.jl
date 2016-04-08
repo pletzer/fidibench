@@ -24,7 +24,6 @@ function advect!(up::Upwind,deltaTime::Float64)
             up.f[i] -= (deltaTime * up.velocity[j] * up.upDirection[j]) * (oldF[upI]-oldF[i])/up.deltas[j]
             inds[j] = oldIndex
         end
-
     end 
 end
 
@@ -42,9 +41,6 @@ function getIndexSet(up::Upwind,flatIndex::Integer)
     end
     return res
 end
- 
-
-
 
 function checksum(up::Upwind)
     return sum(up.f)

@@ -1,4 +1,3 @@
-using Base.LinAlg.BLAS #for gemm!
 
 type Upwind
     ndims::Int
@@ -16,32 +15,36 @@ type Upwind
 end
 
 function advect!(up::Upwind,deltaTime)
-    oldF = deepcopy(up.f)
-    inds = zeros(Integer,up.ndims,up.ntot)
-    
-    for j = 0:up.ndims-1
-        inds[j+1,:] = [0:up.ntot]
-        inds[j+1,:] /= up.dimProd[j+1]
-        inds[j+1,:] %= up.numCells[j+1]
-    end
 
+    # copy
+    oldF = deepcopy(up.f)
+
+    # index set for each cell
+    inds = zeros(Integer, up.ndims, up.ntot)
+    
+    for j = 1:up.ndims
+        inds[j,:] = collect(1:up.ntot)
+        inds[j,:] /= up.dimProd[j]
+        inds[j,:] %= up.numCells[j]
+    end
 
     indsUp = deepcopy(inds)
     
     # Update the field in each spatial direction
-    for j = 0:up.ndims-1
-        # Apply offset
-        indsUp[j+1,:] += up.upDirection[j+1]
-        indsUp[j+1,:] %= up.numCells[j+1]
+    for j = 1:up.ndims
 
-        #compute flat indicies corresponding to the offset index sets
-        flatIndsUp = dot(up.dimProd,indsUp)
+        # Apply offset
+        indsUp[j,:] += up.upDirection[j]
+        indsUp[j,:] %= up.numCells[j]
+
+        #compute flat indices corresponding to the offset index sets
+        flatIndsUp = dot(up.dimProd, indsUp)
 
         #update 
-        up.f -= (deltaTime * up.coeff[j+1])*(oldF[flatIndsUp]-oldF)
+        up.f -= (deltaTime * up.coeff[j])*(oldF[flatIndsUp] - oldF)
 
         # Reset
-        indsUp[j+1,:] = deepcopy(inds[j,:])
+        indsUp[j,:] = deepcopy(inds[j,:])
     end
 end
 
