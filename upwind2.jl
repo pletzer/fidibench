@@ -52,8 +52,8 @@ end
 
 #Beginning of main program
 ndims = 3
-ncells = int(ARGS[1])
-numTimeSteps = int(ARGS[2])
+ncells = parse(Int, ARGS[1])
+numTimeSteps = parse(Int, ARGS[2])
 
 #Same resolution in each direction.
 numCells = [ncells,ncells,ncells]

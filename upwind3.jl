@@ -46,17 +46,14 @@ function advect!(up::Upwind,deltaTime)
 end
 
 function getFlatIndex(up::Upwind,inds)
-    ans = int(dot(up.dimProd,inds))
+    ans = Int(dot(up.dimProd,inds))
     return ans
 end
 
 function getIndexSet(up::Upwind,flatIndex)
     res = zeros(Int,up.ndims)
     for i = 0:up.ndims-1
-        #println("res[",i,"]= ",res[i])
-        #println("flatIndex/up.dimProd=",int(floor(flatIndex/up.dimProd[i+1])))
-        res[i+1] =  mod(int(floor(flatIndex/up.dimProd[i+1])), up.numCells[i+1])
-        #println("res[",i,"]= ",res[i])
+        res[i+1] =  mod(Int(floor(flatIndex/up.dimProd[i+1])), up.numCells[i+1])
     end
     return res
 end
@@ -76,13 +73,13 @@ ndims = 3
 #For quick development, I will hard code now
 #Later I will take these as parameters.
 #ncells = 1
-ncells = int(ARGS[1])
+ncells = parse(Int, ARGS[1])
 #numTimeSteps = 1
-numTimeSteps = int(ARGS[2])
+numTimeSteps = parse(Int, ARGS[2])
 
 #Same resolution in each direction.
 numCells = [ncells,ncells,ncells]
-floatingnumCells = [convert(FloatingPoint,ncells),convert(FloatingPoint,ncells),convert(FloatingPoint,ncells)]
+floatingnumCells = [convert(AbstractFloat,ncells),convert(AbstractFloat,ncells),convert(AbstractFloat,ncells)]
 println(numCells)
 
 
