@@ -10,8 +10,6 @@ if (NOT CMAKE_BUILD_TYPE)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 endif()
 
-option(BUILD_WITH_TAU "Build with TAU compilers (only on AIX)" OFF) 
-
 # special treatment for AIX because find_package(MPI) fails on fitzroy
 if (${CMAKE_SYSTEM_NAME} STREQUAL "AIX")
   message(STATUS "AIX detected")
