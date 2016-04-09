@@ -45,7 +45,7 @@ class Upwind:
   def saveVTK(self, fname):
     f = open(fname, 'w')
     print >> f, "# vtk Data Version 2.0"
-    print >> f, "upwind.cxx"
+    print >> f, "upwind.py"
     print >> f, "ASCII"
     print >> f, "DATASET RECTILINEAR_GRID"
     print >> f, "DIMENSIONS"
@@ -139,6 +139,6 @@ def main():
 
   #up.printOut()
   print "check sum: ", up.checksum()
-  #up.saveVTK("up.vtk")
+  up.saveVTK("up.vtk")
 
 if __name__ == '__main__': main()

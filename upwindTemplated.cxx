@@ -216,5 +216,5 @@ int main(int argc, char** argv) {
   }
   //up.print();
   std::cout << "check sum: " << up.checksum() << '\n';
-  //up.saveVTK("up.vtk");
+  up.saveVTK("up.vtk");
 }

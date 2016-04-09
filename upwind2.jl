@@ -1,4 +1,3 @@
-01234567890123456789012345678901234567890123456789012345678901234567890123456789
 ################################################################################
 # Upwind advection
 # 
@@ -33,7 +32,7 @@ type Upwind
     f::Array
 
     #
-    # Constructor
+    # Internal constructor
     #
     function Upwind(ndims::Int, velocity::Array, lengths::Array, numCells::Array)
 
@@ -99,6 +98,79 @@ function checksum(up::Upwind)
     return sum(up.f)
 end
 
+function saveVTK(up::Upwind, fname::AbstractString)
+
+    f = open(fname, "w")
+    write(f, "# vtk Data Version 2.0\n")
+    write(f, "upwind2.jl\n")
+    write(f, "ASCII\n")
+    write(f,  "DATASET RECTILINEAR_GRID\n")
+    write(f,  "DIMENSIONS")
+
+    # Number of nodes in each direction
+    if up.ndims >= 1
+        write(f, @sprintf(" %d", up.numCells[1] + 1))
+        if up.ndims >= 2
+            write(f, @sprintf(" %d", up.numCells[2] + 1))
+            if up.ndims >= 3
+                write(f, @sprintf(" %d\n", up.numCells[3] + 1))
+            else
+                write(f, " 1\n")
+            end
+        else
+            write(f, " 1")
+        end
+    else
+        write(f, " 1")
+    end
+
+    write(f,  "X_COORDINATES ")
+    if up.ndims >= 1
+      write(f,  @sprintf("%d double\n", up.numCells[1] + 1))
+      for i in 1:up.numCells[1] + 1
+        write(f,  @sprintf("%f ", 0.0 + up.deltas[1] * (i-1)))
+      end 
+    else
+      write(f,  "1 double\n")
+      write(f,  "0.0\n")
+    end
+
+    write(f,  "\nY_COORDINATES ")
+    if up.ndims >= 2
+      write(f, @sprintf("%d double\n", up.numCells[2] + 1))
+      for i in 1:up.numCells[2] + 1 
+        write(f, @sprintf("%f ", 0.0 + up.deltas[2] * (i-1)))
+      end
+    else
+        write(f,  "1 double\n")
+        write(f,  "0.0\n")
+    end
+
+    write(f,  "\nZ_COORDINATES ")
+    if up.ndims >= 3
+        write(f, @sprintf("%d double\n", up.numCells[3] + 1))
+        for i in 1:up.numCells[3] + 1
+            write(f, @sprintf("%f ", 0.0 + up.deltas[3] * (i-1)))
+        end
+    else
+        write(f,  "1 double\n")
+        write(f,  "0.0\n")
+    end
+
+    write(f, @sprintf("\nCELL_DATA %d\n", up.ntot))
+    write(f, "SCALARS f double 1\n")
+    write(f, "LOOKUP_TABLE default\n")
+    for i in eachindex(up.f)
+        write(f, @sprintf("%f ", up.f[i]))
+        if i % 10 == 0
+            write(f, "\n")
+        end
+    end
+    write(f, "\n")
+
+    close(f)
+end
+
 # Beginning of main program
 
 ndims = 3
@@ -142,7 +214,8 @@ up = Upwind(ndims,velocity,lengths,numCells)
 for i = 1:numTimeSteps
    advect!(up, dt)
 end 
-println("Time evolution complete")
 
 #Do the checksum
-println("Check_sum = ",checksum(up))
+println("check sum: ",checksum(up))
+
+saveVTK(up, "upwind2.vtk")
