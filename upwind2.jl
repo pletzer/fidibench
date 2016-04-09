@@ -101,7 +101,7 @@ end
 function saveVTK(up::Upwind, fname::AbstractString)
 
     f = open(fname, "w")
-    write(f, "# vtk Data Version 2.0\n")
+    write(f, "# vtk DataFile Version 2.0\n")
     write(f, "upwind2.jl\n")
     write(f, "ASCII\n")
     write(f,  "DATASET RECTILINEAR_GRID\n")

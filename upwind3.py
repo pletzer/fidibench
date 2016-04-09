@@ -66,7 +66,7 @@ class Upwind:
 
   def saveVTK(self, fname):
     f = open(fname, 'w')
-    print >> f, "# vtk Data Version 2.0"
+    print >> f, "# vtk DataFile Version 2.0"
     print >> f, "upwind3.py"
     print >> f, "ASCII"
     print >> f, "DATASET RECTILINEAR_GRID"
