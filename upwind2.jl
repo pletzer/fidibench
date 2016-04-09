@@ -189,7 +189,7 @@ end
 
 # Same resolution in each direction.
 numCells = [ncells,ncells,ncells]
-println(numCells)
+println("number of cells: ", numCells)
 
 
 # Initalizing vector velocity and lengths
