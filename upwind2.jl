@@ -1,4 +1,8 @@
-
+01234567890123456789012345678901234567890123456789012345678901234567890123456789
+################################################################################
+# Upwind advection
+# 
+# Original code from Christopher Blanton ()
 type Upwind
     ndims::Int
     velocity::Array
@@ -14,7 +18,7 @@ end
 function advect!(up::Upwind,deltaTime::Float64)
     oldF = deepcopy(up.f)
     for i = 1:up.ntot
-        inds = getIndexSet(up,i)
+        inds = getIndexSet(up, i)
         for j = 1:up.ndims
             oldIndex = inds[j]
             #periodic BCs
@@ -24,16 +28,13 @@ function advect!(up::Upwind,deltaTime::Float64)
             up.f[i] -= (deltaTime * up.velocity[j] * up.upDirection[j]) * (oldF[upI]-oldF[i])/up.deltas[j]
             inds[j] = oldIndex
         end
-
     end 
 end
-
 
 function getFlatIndex(up::Upwind,inds::Array)
     ans = mod1(dot(up.dimProd,inds),up.ntot)
     return ans
 end
-
   
 function getIndexSet(up::Upwind,flatIndex::Integer)
     res = zeros(Integer,up.ndims)
@@ -42,30 +43,39 @@ function getIndexSet(up::Upwind,flatIndex::Integer)
     end
     return res
 end
- 
-
-
 
 function checksum(up::Upwind)
     return sum(up.f)
 end
 
-#Beginning of main program
-ndims = 3
-ncells = parse(Int, ARGS[1])
-numTimeSteps = parse(Int, ARGS[2])
+# Beginning of main program
 
-#Same resolution in each direction.
+ndims = 3
+
+# Parse command line arguments
+if length(ARGS) < 1
+    println("Must specify number of cells in each direction.")
+    println("Usage: ", basename(Base.source_path()), " numCells [numTimeSteps]")
+    exit(1)
+end
+ncells = parse(Int, ARGS[1])
+
+numTimeSteps = 100
+if length(ARGS) > 1
+    numTimeSteps = parse(Int, ARGS[2])
+end
+
+# Same resolution in each direction.
 numCells = [ncells,ncells,ncells]
 println(numCells)
 
 
-#Initalizing vector velocity and lengths
+# Initalizing vector velocity and lengths
 velocity = ones(Float64,ndims)
 lengths   = ones(Float64,ndims)
 
 
-#computer dt
+# Compute time step
 courant = 0.1
 dt = Inf
 dx = 0.00e0
@@ -73,10 +83,8 @@ for i = 1:ndims
     dx = lengths[i]/float(numCells[i])
     dt = min((courant*dx)/velocity[i],dt)
 end
-#println(dx)
-#println(dt)
 
-#This is where upwind class is constructed in C++ and python version of this code
+# This is where upwind class is constructed in C++ and python version of this code
 v = velocity
 deltas = zeros(Float64,ndims::Integer)
 upDirection = zeros(Integer,ndims::Integer)
