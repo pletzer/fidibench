@@ -82,15 +82,15 @@ function advect!(up::Upwind, deltaTime::Float64)
     end 
 end
 
-function getFlatIndex(up::Upwind,inds::Array)
-    ans = mod1(dot(up.dimProd,inds),up.ntot)
+function getFlatIndex(up::Upwind, inds::Array)
+    ans = mod1(dot(up.dimProd,inds), up.ntot)
     return ans
 end
   
-function getIndexSet(up::Upwind,flatIndex::Integer)
+function getIndexSet(up::Upwind, flatIndex::Integer)
     res = zeros(Integer,up.ndims)
     for i = 1:up.ndims
-        res[i] = mod1(div((flatIndex-1),up.dimProd[i]), up.numCells[i])
+        res[i] = mod1(div((flatIndex-1), up.dimProd[i]), up.numCells[i])
     end
     return res
 end
@@ -122,28 +122,27 @@ println(numCells)
 
 
 # Initalizing vector velocity and lengths
-velocity = ones(Float64,ndims)
-lengths   = ones(Float64,ndims)
+velocity = ones(Float64, ndims)
+lengths   = ones(Float64, ndims)
 
 
 # Compute time step
 courant = 0.1
 dt = Inf
-dx = 0.00e0
+dx = 0.0
 for i = 1:ndims
     dx = lengths[i]/float(numCells[i])
-    dt = min((courant*dx)/velocity[i],dt)
+    dt = min((courant*dx)/velocity[i], dt)
 end
 
-# This is where upwind class is constructed in C++ and python version of this code
-v = velocity
+# Create Upwind instance
 up = Upwind(ndims,velocity,lengths,numCells)
 
-
+# Advect
 for i = 1:numTimeSteps
-   advect!(up,dt)
+   advect!(up, dt)
 end 
 println("Time evolution complete")
 
 #Do the checksum
-println("Check_sum= ",checksum(up))
+println("Check_sum = ",checksum(up))
