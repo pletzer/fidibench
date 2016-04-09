@@ -32,7 +32,7 @@ function getFlatIndex(up::Upwind,inds)
 end
 
 function getIndexSet(up::Upwind,flatIndex)
-    res = zeros(Int,up.ndims)
+    res = zeros(Int, up.ndims)
     for i = 0:up.ndims-1
         res[i+1] =  mod(Int(floor(flatIndex/up.dimProd[i+1])), up.numCells[i+1])
     end
@@ -47,14 +47,21 @@ function checksum(up::Upwind)
     return sum(up.f)
 end
 
-#Beginning of main program
+# Beginning of main program
 ndims = 3
-#For quick development, I will hard code now
-#Later I will take these as parameters.
-#ncells = 1
+
+# Parse command line arguments
+if length(ARGS) < 1
+    println("Must specify number of cells in each direction.")
+    println("Usage: ", basename(Base.source_path()), " numCells [numTimeSteps]")
+    exit(1)
+end
 ncells = parse(Int, ARGS[1])
-#numTimeSteps = 1
-numTimeSteps = parse(Int, ARGS[2])
+
+numTimeSteps = 100
+if length(ARGS) > 1
+    numTimeSteps = parse(Int, ARGS[2])
+end
 
 #Same resolution in each direction.
 numCells = [ncells,ncells,ncells]

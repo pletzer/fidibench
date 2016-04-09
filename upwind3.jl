@@ -14,18 +14,19 @@ type Upwind
     f::Array
 end
 
-function advect!(up::Upwind,deltaTime)
+function advect!(up::Upwind, deltaTime)
 
-    # copy
+    # copy the old field
     oldF = deepcopy(up.f)
 
     # index set for each cell
     inds = zeros(Integer, up.ndims, up.ntot)
     
     for j = 1:up.ndims
-        inds[j,:] = collect(1:up.ntot)
+        inds[j,:] = collect(0:up.ntot-1)
         inds[j,:] /= up.dimProd[j]
         inds[j,:] %= up.numCells[j]
+        inds[j,:] += 1
     end
 
     indsUp = deepcopy(inds)
