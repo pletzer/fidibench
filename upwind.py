@@ -139,6 +139,6 @@ def main():
 
   #up.printOut()
   print "check sum: ", up.checksum()
-  up.saveVTK("up.vtk")
+  #up.saveVTK("up.vtk")
 
 if __name__ == '__main__': main()

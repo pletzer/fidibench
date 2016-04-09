@@ -82,14 +82,13 @@ function advect!(up::Upwind, deltaTime::Float64)
 end
 
 function getFlatIndex(up::Upwind, inds::Array)
-    ans = mod1(dot(up.dimProd,inds), up.ntot)
-    return ans
+    return dot(up.dimProd, inds - 1) + 1
 end
   
 function getIndexSet(up::Upwind, flatIndex::Integer)
     res = zeros(Integer,up.ndims)
     for i = 1:up.ndims
-        res[i] = mod1(div((flatIndex-1), up.dimProd[i]), up.numCells[i])
+        res[i] = mod(div((flatIndex - 1), up.dimProd[i]), up.numCells[i]) + 1
     end
     return res
 end
@@ -217,5 +216,4 @@ end
 
 #Do the checksum
 println("check sum: ",checksum(up))
-
-saveVTK(up, "upwind2.vtk")
+# saveVTK(up, "up.vtk")
