@@ -2,20 +2,71 @@
 ################################################################################
 # Upwind advection
 # 
-# Original code from Christopher Blanton ()
+# Original code from Christopher Blanton (cjb47@psu.edu)
+# Modified by Alex Pletzer (alexander@gokliya.net)
 type Upwind
+    # Number of space dimensions
     ndims::Int
+
+    # Constant advection velocity
     velocity::Array
+
+    # Domain length
     lengths::Array
+
+    # Number of cells along each direction
     numCells::Array
+
+    #
+    # Internal variables (derived from the above)
+    #
+
+    # Grid size along each direction
     deltas::Array
+    # Direction of upwind
     upDirection::Array
+    # Total number of cells
     ntot::Int
+    # Product of the dimensions, used to go from flat index to index set
     dimProd::Array
+    # Field
     f::Array
+
+    #
+    # Constructor
+    #
+    function Upwind(ndims::Int, velocity::Array, lengths::Array, numCells::Array)
+
+        this = new(ndims, velocity, lengths, numCells)
+
+        this.deltas = zeros(Float64, ndims::Integer)
+
+        this.upDirection = zeros(Integer, ndims::Integer)
+        this.ntot = 1
+        for i in 1:ndims
+            this.upDirection[i] = -1
+            if this.velocity[i] < 0.0
+                this.upDirection[i] = +1
+            end
+            this.deltas[i] = lengths[i]/numCells[i]
+            this.ntot *= numCells[i]
+        end
+        this.dimProd = ones(Integer,ndims::Integer)
+        for i = 2:ndims
+            this.dimProd[i] = this.dimProd[i-1] * this.numCells[i-1]
+        end
+
+        # 
+        # Set the initial field
+        #
+        this.f = zeros(this.ntot)
+        this.f[1] = 1.0
+
+        return this
+    end
 end
 
-function advect!(up::Upwind,deltaTime::Float64)
+function advect!(up::Upwind, deltaTime::Float64)
     oldF = deepcopy(up.f)
     for i = 1:up.ntot
         inds = getIndexSet(up, i)
@@ -86,25 +137,7 @@ end
 
 # This is where upwind class is constructed in C++ and python version of this code
 v = velocity
-deltas = zeros(Float64,ndims::Integer)
-upDirection = zeros(Integer,ndims::Integer)
-ntot = 1
-for i in 1:ndims
-    upDirection[i] = -1
-    if velocity[i] < 0.00
-        upDirection[i] = +1
-    end
-    deltas[i] = lengths[i]/numCells[i]
-    ntot *= numCells[i]
-end
-dimProd= ones(Integer,ndims::Integer)
-for i = 2:ndims
-   dimProd[i] = dimProd[i-1]*numCells[i-1]
-end
-
-f = zeros(ntot)
-f[1] = 1.00e0
-up = Upwind(ndims,velocity,lengths,numCells,deltas,upDirection,ntot,dimProd,f)
+up = Upwind(ndims,velocity,lengths,numCells)
 
 
 for i = 1:numTimeSteps
