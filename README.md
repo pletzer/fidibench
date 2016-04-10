@@ -1,10 +1,11 @@
-# fidibench
+# FiDiBench
 
 FiDiBench is a simple finite difference suite of codes that can be used to benchmark 
 performance on HPC and other systems. The code examples are small enough to be well
 understood, typically averaging a few hundred lines of code, but also relevant to 
-scientific computing, which often involves nearest neighbour stencils. FiDiBench 
-can also be used to compare the execution speed obtained by implementing an 
+scientific computing, which often involves nearest neighbour communication. 
+
+FiDiBench can also be used to compare the execution speed obtained by implementing an 
 algorithm in different languages (eg C++ vs Python vs Julia).
 
 ## Requirements
@@ -33,7 +34,8 @@ ctest
 ctest
 ```
 
-Some tests will not run if there are missing requirements (eg absence of Julia)
+Some tests will not run if there are missing components, eg Julia scripts will not run if
+julia is noit installed on your platform.
 
 
 
