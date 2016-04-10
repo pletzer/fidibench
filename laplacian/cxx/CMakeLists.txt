@@ -4,9 +4,6 @@ add_executable(testCubeDecomp testCubeDecomp.cxx)
 
 if (MPI_FOUND)
   add_executable(laplacian laplacian.cxx CmdLineArgParser.cpp)
-endif()
-
-if (OPENMP_FOUND)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  add_executable(upwindCxx upwind.cxx)
+  add_test(NAME laplacian2D COMMAND ${MPI_EXEC} -n 8 -numDims 2 -numCells 1024)
+  add_test(NAME laplacian3D COMMAND ${MPI_EXEC} -n 8 -numDims 3 -numCells 512)
 endif()

@@ -60,6 +60,6 @@ message(STATUS "Compiler flags: ${CMAKE_CXX_FLAGS}")
 message(STATUS "==============================================================")
 
 add_subdirectory(laplacian)
-#add_subdirectory(upwind)
+add_subdirectory(upwind)
 
 enable_testing()
