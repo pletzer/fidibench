@@ -1,6 +1,6 @@
 # FiDiBench
 
-FiDiBench is a simple finite difference suite of codes that can be used to benchmark 
+FiDiBench is a finite difference suite of codes that can be used to benchmark 
 performance on HPC and other systems. The code examples are small enough to be well
 understood, typically averaging a few hundred lines of code, but also relevant to 
 scientific computing, which often involves nearest neighbour communication. 
