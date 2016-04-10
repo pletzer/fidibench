@@ -30,17 +30,23 @@ class Upwind:
     self.f[0] = 1
 
   def advect(self, deltaTime):
+
     oldF = copy.deepcopy(self.f)
-    for i in xrange(self.ntot): 
-      inds = self.getIndexSet(i)
-      for j in range(self.ndims):
+
+    for j in range(self.ndims):
+      c = deltaTime * self.v[j] * self.upDirection[j] / self.deltas[j]
+
+      for i in xrange(self.ntot):
+
+        inds = self.getIndexSet(i)
+        
         oldIndex = inds[j]
         # periodic BCs
         inds[j] += self.upDirection[j] + self.numCells[j]
         inds[j] %= self.numCells[j]
 
         upI = self.getFlatIndex(inds)
-        self.f[i] -= deltaTime * self.v[j] * self.upDirection[j] * (oldF[upI] - oldF[i])/self.deltas[j]
+        self.f[i] -= c * (oldF[upI] - oldF[i])
         inds[j] = oldIndex
 
   def saveVTK(self, fname):
