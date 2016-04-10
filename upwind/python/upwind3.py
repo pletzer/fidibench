@@ -2,6 +2,7 @@
 
 import numpy
 import copy
+import saveVTK
 
 class Upwind: 
 
@@ -65,52 +66,16 @@ class Upwind:
       indsUp[j, :] = inds[j, :]
 
   def saveVTK(self, fname):
-    f = open(fname, 'w')
-    print >> f, "# vtk DataFile Version 2.0"
-    print >> f, "upwind3.py"
-    print >> f, "ASCII"
-    print >> f, "DATASET RECTILINEAR_GRID"
-    print >> f, "DIMENSIONS", 
-    # in VTK the first dimension varies fastest so need 
-    # to invert the order of the dimensions
+    xAxis = [0.0]
+    yAxis = [0.0]
+    zAxis = [0.0]
     if self.ndims > 2:
-      print >> f, '%d' % (self.numCells[2] + 1),
-    else:
-      print >> f, " 1",
+      xAxis = [0.0 + self.deltas[2] * i for i in range(self.numCells[2] + 1)]
     if self.ndims > 1:
-      print >> f, '%d' % (self.numCells[1] + 1),
-    else:
-      print >> f, " 1",
-    print >> f, '%d' % (self.numCells[0] + 1)
-    print >> f, "X_COORDINATES",
-    if self.ndims > 2:
-      print >> f, "%d double" % (self.numCells[2] + 1)
-      for i in range(self.numCells[2] + 1):
-        print >> f, " %f" % (0.0 + self.deltas[2] * i),   
-    else:
-      print >> f, "1 double"
-      print >> f, "0.0"
-    print >> f, "\nY_COORDINATES",
-    if self.ndims > 1:
-      print >> f, "%d double" % (self.numCells[1] + 1)
-      for i in range(self.numCells[1] + 1): 
-        print >> f, " %f" % (0.0 + self.deltas[1] * i),  
-    else:
-      print >> f, "1 double"
-      print >> f, "0.0"
-    print >> f, "\nZ_COORDINATES",
-    print >> f, "%d double" % (self.numCells[0] + 1)
-    for i in range(self.numCells[0] + 1):
-      print >> f, " %f" % (0.0 + self.deltas[0] * i),
-    print >> f, "\nCELL_DATA %d" % self.ntot
-    print >> f, "SCALARS f double 1"
-    print >> f, "LOOKUP_TABLE default"
-    for i in range(self.ntot):
-      print >> f, self.f[i],
-      if (i + 1) % 10 == 0: 
-        print >> f
-    print >> f
-    f.close()
+      yAxis = [0.0 + self.deltas[1] * i for i in range(self.numCells[1] + 1)]
+    if self.ndims > 0:
+      zAxis = [0.0 + self.deltas[0] * i for i in range(self.numCells[0] + 1)]
+    saveVTK.rectilinear(fname, xAxis, yAxis, zAxis, self.f.reshape(self.numCells))
 
   def checksum(self):
     return numpy.sum(self.f)
