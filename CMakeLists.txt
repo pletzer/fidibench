@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 2.8)
 project(fidibench)
 
+enable_testing()
+
 # make sure the default build is of Release type
 # use cmake -D CMAKE_BUILD_TYPE=Debug to create a debug version
 if (NOT CMAKE_BUILD_TYPE)
@@ -61,5 +63,3 @@ message(STATUS "==============================================================")
 
 add_subdirectory(laplacian)
 add_subdirectory(upwind)
-
-enable_testing()
