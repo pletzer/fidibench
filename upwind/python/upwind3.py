@@ -120,6 +120,8 @@ def main():
 
   #up.printOut()
   print "check sum: ", up.checksum()
-  #up.saveVTK("up.vtk")
+
+  if len(sys.argv) > 3 and sys.argv[3] == 'vtk':
+    up.saveVTK("upwind.vtk")
 
 if __name__ == '__main__': main()

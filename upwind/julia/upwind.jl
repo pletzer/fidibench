@@ -217,4 +217,6 @@ end
 
 # Do the checksum
 println("check sum: ",checksum(up))
-#saveVTK(up, "up.vtk")
+
+if length(ARGS) > 2 && ARGS[3] == "vtk"
+   saveVTK(up, "upwind.vtk")

@@ -86,6 +86,7 @@ def main():
   numTimeSteps = 100
   if len(sys.argv) > 2:
     numTimeSteps = int(sys.argv[2])
+  print "number of time steps: ", numTimeSteps
 
 
   velocity = numpy.ones( (ndims,), numpy.float64 )
@@ -107,6 +108,8 @@ def main():
 
   #up.printOut()
   print "check sum: ", up.checksum()
-  up.saveVTK("up.vtk")
+
+  if len(sys.argv) > 3 and sys.argv[3] == 'vtk':
+    up.saveVTK("upwind.vtk")
 
 if __name__ == '__main__': main()
