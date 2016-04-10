@@ -67,15 +67,16 @@ end
 
 function advect!(up::Upwind, deltaTime::Float64)
     oldF = deepcopy(up.f)
-    for i = 1:up.ntot
-        inds = getIndexSet(up, i)
-        for j = 1:up.ndims
+    for j = 1:up.ndims
+        c = deltaTime * up.velocity[j] * up.upDirection[j] / up.deltas[j]
+        for i = 1:up.ntot
+            inds = getIndexSet(up, i)
             oldIndex = inds[j]
             #periodic BCs
             inds[j] += up.upDirection[j] + up.numCells[j] 
-            inds[j] = mod1(inds[j],up.numCells[j])
-            upI = getFlatIndex(up,inds)
-            up.f[i] -= (deltaTime * up.velocity[j] * up.upDirection[j]) * (oldF[upI]-oldF[i])/up.deltas[j]
+            inds[j] = mod1(inds[j], up.numCells[j])
+            upI = getFlatIndex(up, inds)
+            up.f[i] -= c * (oldF[upI] - oldF[i])
             inds[j] = oldIndex
         end
     end 
@@ -214,6 +215,6 @@ for i = 1:numTimeSteps
    advect!(up, dt)
 end 
 
-#Do the checksum
+# Do the checksum
 println("check sum: ",checksum(up))
-# saveVTK(up, "up.vtk")
+#saveVTK(up, "up.vtk")
