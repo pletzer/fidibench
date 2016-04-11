@@ -11,13 +11,18 @@
 #include <iostream>
 #include <sstream>
 
+#ifdef HAVE_OPENMP
 #include <omp.h>
+#endif
 
 template <size_t NDIMS>
 class Upwind {
 public:
   // ctor
-  Upwind(const std::vector<double>& velocity, const std::vector<double>& lengths, const std::vector<size_t>& numCells) {
+  Upwind(const std::vector<double>& velocity, 
+         const std::vector<double>& lengths, 
+         const std::vector<size_t>& numCells) {
+
     this->numCells = numCells;
     this->deltas.resize(NDIMS);
     this->upDirection.resize(NDIMS);
@@ -167,7 +172,7 @@ int main(int argc, char** argv) {
 
   const int ndims = 3;
 
-  if (argc <= 1) {
+  if (argc < 2) {
     std::cout << "must specify number of cells in each direction.\n";
     return 1;
   }
@@ -177,11 +182,14 @@ int main(int argc, char** argv) {
     numTimeSteps = atoi(argv[2]);
   }
 
-
 #pragma omp parallel
   {
-    int numThreads = omp_get_num_threads();
-    int threadId = omp_get_thread_num();
+    int numThreads = 1;
+    int threadId = 0;
+#ifdef HAVE_OPENMP
+    onumThreads = mp_get_num_threads();
+    threadId = omp_get_thread_num();
+#endif
     if (threadId == 0)
       std::cout << "number of threads: " << numThreads << '\n';
   }
@@ -193,6 +201,7 @@ int main(int argc, char** argv) {
     std::cout << ' ' << numCells[i];
   }
   std::cout << '\n';
+  std::cout << "number of time steps: " << numTimeSteps << '\n';
 
   std::vector<double> velocity(numCells.size(), 1.0);
   std::vector<double> lengths(numCells.size(), 1.0);
