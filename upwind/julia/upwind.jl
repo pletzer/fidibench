@@ -3,6 +3,10 @@
 # 
 # Original code from Christopher Blanton (cjb47@psu.edu)
 # Modified by Alex Pletzer (alexander@gokliya.net)
+
+include("saveVTK.jl")
+import saveVTK
+
 type Upwind
     # Number of space dimensions
     ndims::Int
@@ -98,77 +102,13 @@ function checksum(up::Upwind)
     return sum(up.f)
 end
 
-function saveVTK(up::Upwind, fname::AbstractString)
+function save2VTK(up::Upwind, fname::AbstractString)
 
-    f = open(fname, "w")
-    write(f, "# vtk DataFile Version 2.0\n")
-    write(f, "upwind2.jl\n")
-    write(f, "ASCII\n")
-    write(f,  "DATASET RECTILINEAR_GRID\n")
-    write(f,  "DIMENSIONS")
+    xAxis = linspace(0.0, up.lengths[1], up.numCells[1] + 1)
+    yAxis = linspace(0.0, up.lengths[2], up.numCells[2] + 1)
+    zAxis = linspace(0.0, up.lengths[3], up.numCells[3] + 1)
+    saveVTK.rectilinear(fname, xAxis, yAxis, zAxis, up.f)
 
-    # Number of nodes in each direction
-    if up.ndims >= 1
-        write(f, @sprintf(" %d", up.numCells[1] + 1))
-        if up.ndims >= 2
-            write(f, @sprintf(" %d", up.numCells[2] + 1))
-            if up.ndims >= 3
-                write(f, @sprintf(" %d\n", up.numCells[3] + 1))
-            else
-                write(f, " 1\n")
-            end
-        else
-            write(f, " 1")
-        end
-    else
-        write(f, " 1")
-    end
-
-    write(f,  "X_COORDINATES ")
-    if up.ndims >= 1
-      write(f,  @sprintf("%d double\n", up.numCells[1] + 1))
-      for i in 1:up.numCells[1] + 1
-        write(f,  @sprintf("%f ", 0.0 + up.deltas[1] * (i-1)))
-      end 
-    else
-      write(f,  "1 double\n")
-      write(f,  "0.0\n")
-    end
-
-    write(f,  "\nY_COORDINATES ")
-    if up.ndims >= 2
-      write(f, @sprintf("%d double\n", up.numCells[2] + 1))
-      for i in 1:up.numCells[2] + 1 
-        write(f, @sprintf("%f ", 0.0 + up.deltas[2] * (i-1)))
-      end
-    else
-        write(f,  "1 double\n")
-        write(f,  "0.0\n")
-    end
-
-    write(f,  "\nZ_COORDINATES ")
-    if up.ndims >= 3
-        write(f, @sprintf("%d double\n", up.numCells[3] + 1))
-        for i in 1:up.numCells[3] + 1
-            write(f, @sprintf("%f ", 0.0 + up.deltas[3] * (i-1)))
-        end
-    else
-        write(f,  "1 double\n")
-        write(f,  "0.0\n")
-    end
-
-    write(f, @sprintf("\nCELL_DATA %d\n", up.ntot))
-    write(f, "SCALARS f double 1\n")
-    write(f, "LOOKUP_TABLE default\n")
-    for i in eachindex(up.f)
-        write(f, @sprintf("%f ", up.f[i]))
-        if i % 10 == 0
-            write(f, "\n")
-        end
-    end
-    write(f, "\n")
-
-    close(f)
 end
 
 # Beginning of main program
@@ -219,4 +159,5 @@ end
 println("check sum: ",checksum(up))
 
 if length(ARGS) > 2 && ARGS[3] == "vtk"
-   saveVTK(up, "upwind.vtk")
+   save2VTK(up, "upwind.vtk")
+end
