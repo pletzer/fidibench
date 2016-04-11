@@ -1,4 +1,10 @@
-if (PYTHON_FOUND)
-  add_test(NAME upwindPython COMMAND ${PYTHON_EXECUTABLE} upwind.py 128 10)
-  add_test(NAME upwindPython3 COMMAND ${PYTHON_EXECUTABLE} upwind3.py 128 10)
+if (PYTHON_EXECUTABLE)
+  set(ENV{PYTHONPATH} "${CMAKE_SOURCE_DIR}/upwind/python:$ENV{PYTHONPATH}")
+  message("PYTHONPATH set to $ENV{PYTHONPATH}")
+  add_test(NAME upwindPython 
+  	       COMMAND "${PYTHON_EXECUTABLE}" 
+  	       "${CMAKE_SOURCE_DIR}/upwind/python/upwind.py" 32 10)
+  add_test(NAME upwindPython3 
+  	       COMMAND "${PYTHON_EXECUTABLE}" 
+  	       "${CMAKE_SOURCE_DIR}/upwind/python/upwind3.py" 32 10)
 endif()
