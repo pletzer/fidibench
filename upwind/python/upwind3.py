@@ -63,7 +63,7 @@ class Upwind:
       self.f -= (deltaTime * self.coeff[j]) * (oldF[flatIndsUp] - oldF)
 
       # reset
-      indsUp[j, :] = inds[j, :]
+      indsUp[j, :] = self.inds[j, :]
 
   def saveVTK(self, fname):
     xAxis = [0.0]
