@@ -131,6 +131,7 @@ end
 # Same resolution in each direction.
 numCells = [ncells,ncells,ncells]
 println("number of cells: ", numCells)
+println("number of time steps: ", numTimeSteps)
 
 
 # Initalizing vector velocity and lengths
