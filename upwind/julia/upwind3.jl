@@ -1,158 +1,179 @@
+################################################################################
+# Upwind advection
+# 
+# Original code from Christopher Blanton (cjb47@psu.edu)
+# Modified by Alex Pletzer (alexander@gokliya.net)
+
+include("saveVTK.jl")
+import saveVTK
 
 type Upwind
+    # Number of space dimensions
     ndims::Int
+
+    # Constant advection velocity
     velocity::Array
+
+    # Domain length
     lengths::Array
+
+    # Number of cells along each direction
     numCells::Array
+
+    #
+    # Internal variables (derived from the above)
+    #
+
+    # Grid size along each direction
     deltas::Array
+    # Direction of upwind
     upDirection::Array
-    offsetMat::Array
-    numCellsExt::Array
-    coeff::Array
+    # Total number of cells
     ntot::Int
+    # Product of the dimensions, used to go from flat index to index set
     dimProd::Array
+    # Field
     f::Array
+    # Index set
+    inds::Array
+
+    #
+    # Internal constructor
+    #
+    function Upwind(ndims::Int, velocity::Array, lengths::Array, numCells::Array)
+
+        this = new(ndims, velocity, lengths, numCells)
+
+        this.deltas = zeros(Float64, ndims::Integer)
+
+        this.upDirection = zeros(Integer, ndims::Integer)
+        this.ntot = 1
+        for i in 1:ndims
+            this.upDirection[i] = -1
+            if this.velocity[i] < 0.0
+                this.upDirection[i] = +1
+            end
+            this.deltas[i] = lengths[i]/numCells[i]
+            this.ntot *= numCells[i]
+        end
+        this.dimProd = ones(Integer, ndims::Integer)
+        for i = 2:ndims
+            this.dimProd[i] = this.dimProd[i-1] * this.numCells[i-1]
+        end
+
+        # 
+        # Set the initial field
+        #
+        this.f = zeros(this.ntot)
+        this.f[1] = 1.0
+
+        # Build the index set
+        this.inds = zeros(Integer, (this.ntot, this.ndims))
+        for j = 1:ndims
+            this.inds[:, j] = mod(div(collect(0:this.ntot - 1), this.dimProd[j]), this.numCells[j])
+        end
+
+        return this
+    end
 end
 
-function advect!(up::Upwind, deltaTime)
+function advect!(up::Upwind, deltaTime::Float64)
 
-    # copy the old field
     oldF = deepcopy(up.f)
 
-    # index set for each cell
-    inds = zeros(Integer, up.ndims, up.ntot)
-    
-    for j = 1:up.ndims
-        inds[j,:] = collect(0:up.ntot-1)
-        inds[j,:] /= up.dimProd[j]
-        inds[j,:] %= up.numCells[j]
-        inds[j,:] += 1
-    end
+    indsUp = deepcopy(up.inds)
 
-    indsUp = deepcopy(inds)
-    
-    # Update the field in each spatial direction
     for j = 1:up.ndims
 
-        # Apply offset
-        indsUp[j,:] += up.upDirection[j]
-        indsUp[j,:] %= up.numCells[j]
+        indsUp[:, j] = mod(up.inds[:, j] + up.upDirection[j], up.numCells[j])
 
-        #compute flat indices corresponding to the offset index sets
-        flatIndsUp = dot(up.dimProd, indsUp)
+        # compute flat indices corresponding to the offset index sets
+        flatIndsUp = up.dimProd'indsUp' + 1 #dot(indsUp, up.dimProd) + 1
 
-        #update 
-        up.f -= (deltaTime * up.coeff[j])*(oldF[flatIndsUp] - oldF)
+        # update
+        c = deltaTime * up.velocity[j] * up.upDirection[j] / up.deltas[j]
+        up.f -= c * (oldF[flatIndsUp'] - oldF)
 
-        # Reset
-        indsUp[j,:] = deepcopy(inds[j,:])
+        # reset
+        indsUp[:, j] = up.inds[:, j]
+
     end
+
 end
 
-function getFlatIndex(up::Upwind,inds)
-    ans = Int(dot(up.dimProd,inds))
-    return ans
+function getFlatIndex(up::Upwind, inds::Array)
+    return dot(up.dimProd, inds - 1) + 1
 end
-
-function getIndexSet(up::Upwind,flatIndex)
-    res = zeros(Int,up.ndims)
-    for i = 0:up.ndims-1
-        res[i+1] =  mod(Int(floor(flatIndex/up.dimProd[i+1])), up.numCells[i+1])
+  
+function getIndexSet(up::Upwind, flatIndex::Integer)
+    res = zeros(Integer,up.ndims)
+    for i = 1:up.ndims
+        res[i] = mod(div((flatIndex - 1), up.dimProd[i]), up.numCells[i]) + 1
     end
     return res
-end
-
-function  saveVTK(up::Upwind)
-
 end
 
 function checksum(up::Upwind)
     return sum(up.f)
 end
 
+function save2VTK(up::Upwind, fname::AbstractString)
 
+    xAxis = linspace(0.0, up.lengths[1], up.numCells[1] + 1)
+    yAxis = linspace(0.0, up.lengths[2], up.numCells[2] + 1)
+    zAxis = linspace(0.0, up.lengths[3], up.numCells[3] + 1)
+    saveVTK.rectilinear(fname, xAxis, yAxis, zAxis, up.f)
 
-#Beginning of main program
+end
+
+# Beginning of main program
+
 ndims = 3
-#For quick development, I will hard code now
-#Later I will take these as parameters.
-#ncells = 1
+
+# Parse command line arguments
+if length(ARGS) < 1
+    println("Must specify number of cells in each direction.")
+    println("Usage: ", basename(Base.source_path()), " numCells [numTimeSteps]")
+    exit(1)
+end
 ncells = parse(Int, ARGS[1])
-#numTimeSteps = 1
-numTimeSteps = parse(Int, ARGS[2])
 
-#Same resolution in each direction.
+numTimeSteps = 100
+if length(ARGS) > 1
+    numTimeSteps = parse(Int, ARGS[2])
+end
+
+# Same resolution in each direction.
 numCells = [ncells,ncells,ncells]
-floatingnumCells = [convert(AbstractFloat,ncells),convert(AbstractFloat,ncells),convert(AbstractFloat,ncells)]
-println(numCells)
+println("number of cells: ", numCells)
+println("number of time steps: ", numTimeSteps)
 
 
-
-#Initalizing vector velocity and lengths
-velocity = ones(Float64,ndims)
-#println(velocity)
-lengths   = ones(Float64,ndims)
-#println(lengths)
+# Initalizing vector velocity and lengths
+velocity = ones(Float64, ndims)
+lengths   = ones(Float64, ndims)
 
 
-#computer dt
+# Compute time step
 courant = 0.1
 dt = Inf
-dx = 0.00e0
+dx = 0.0
 for i = 1:ndims
     dx = lengths[i]/float(numCells[i])
-    dt = min((courant*dx)/velocity[i],dt)
+    dt = min((courant*dx)/velocity[i], dt)
 end
-#println(dx)
-#println(dt)
 
-#This is where upwind class is constructed in C++ and python version of this code
-v = velocity
-deltas = zeros(Float64,ndims)
-upDirection = zeros(Integer,ndims)
-floatupDirection = zeros(Float64,ndims)
-offsetMat = eye(ndims,ndims)
-numCellsExt = zeros(Float64,ndims,ndims)
-BLAS.ger!(1.0,floatingnumCells,ones(Float64,ndims),numCellsExt)
+# Create Upwind instance
+up = Upwind(ndims,velocity,lengths,numCells)
 
-ntot = 1
-for i in 1:ndims
-    upDirection[i] = -1
-    floatupDirection[i] = -1.00e0
-    if velocity[i] < 0.00
-        upDirection[i] = +1
-        floatupDirection[i] = +1.00e0
-    end
-    deltas[i] = lengths[i]/numCells[i]
-    offsetMat[i,i] = upDirection[1]
-    ntot *= numCells[i]
-end
-#println("upDirection= ",upDirection)
-#println("ntot= ",ntot)
-#println("delta= ",deltas)
-dimProd= ones(Integer,ndims)
-for i = ndims-2:-1:0
-    dimProd[i+1] = dimProd[i+2]*numCells[i+2]
-end
-#println("dimProd= ",dimProd)
-
-coeff = zeros(Float64,ndims)
-for i in 1:ndims
-    coeff[i] = velocity[i] * floatupDirection[i] / deltas[i]
-end 
-
-f = zeros(ntot)
-f[1] = 1.00e0
-up = Upwind(ndims,velocity,lengths,numCells,deltas,upDirection,offsetMat,numCellsExt,coeff,ntot,dimProd,f)
-#println(up)
-
-
-#Do the time evolution of the upwind class
+# Advect
 for i = 1:numTimeSteps
-   advect!(up,dt) 
+   advect!(up, dt)
 end 
-println("Time evolution complete")
 
-#Do the checksum
-#println("Last f= ",up.f)
-println("Check_sum= ",checksum(up))
+# Do the checksum
+println("check sum: ",checksum(up))
+
+if length(ARGS) > 2 && ARGS[3] == "vtk"
+   save2VTK(up, "upwind.vtk")
+end
