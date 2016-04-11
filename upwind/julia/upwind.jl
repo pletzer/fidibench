@@ -77,7 +77,7 @@ function advect!(up::Upwind, deltaTime::Float64)
             inds = getIndexSet(up, i)
             oldIndex = inds[j]
             #periodic BCs
-            inds[j] += up.upDirection[j] + up.numCells[j] 
+            inds[j] += up.upDirection[j]
             inds[j] = mod1(inds[j], up.numCells[j])
             upI = getFlatIndex(up, inds)
             up.f[i] -= c * (oldF[upI] - oldF[i])

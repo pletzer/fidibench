@@ -59,5 +59,7 @@ def rectilinear(fname, xAxis, yAxis, zAxis, data):
   print >> f, "LOOKUP_TABLE default"
     
   for i in range(len(flatData)):
-    print >> f, flatData[i]
+    print >> f, flatData[i],
+    if (i + 1) % 10 == 0:
+        print >> f
   f.close()

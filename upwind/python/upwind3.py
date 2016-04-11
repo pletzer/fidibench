@@ -35,19 +35,19 @@ class Upwind:
     # initialize lower corner to one
     self.f[0] = 1
 
+    # array of index sets for each cell
+    self.inds = numpy.zeros( (self.ndims, self.ntot), numpy.int )
+    for j in range(self.ndims):
+      self.inds[j, :] = numpy.arange(self.ntot)
+      self.inds[j, :] /= self.dimProd[j]
+      self.inds[j, :] %= self.numCells[j]
+
   def advect(self, deltaTime):
 
     # copy 
     oldF = self.f.copy()
 
-    # array of index sets for each cell
-    inds = numpy.zeros( (self.ndims, self.ntot), numpy.int )
-    for j in range(self.ndims):
-      inds[j, :] = numpy.arange(self.ntot)
-      inds[j, :] /= self.dimProd[j]
-      inds[j, :] %= self.numCells[j]
-
-    indsUp = inds.copy()
+    indsUp = self.inds.copy()
 
     # update the field in each spatial direction
     for j in range(self.ndims):
