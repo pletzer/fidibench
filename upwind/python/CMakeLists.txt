@@ -9,4 +9,7 @@ if (PYTHON_EXECUTABLE)
   	       COMMAND "${PYTHON_EXECUTABLE}" 
   	       "${CMAKE_SOURCE_DIR}/upwind/python/upwind3.py"
   	       "${NUM_CELLS}" "${NUM_TIME_STEPS}")
+
+  set_tests_properties(upwindPython upwindPython3 
+  	                   PROPERTIES PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1\\.0|0\\.999]")
 endif()
