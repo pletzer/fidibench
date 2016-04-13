@@ -5,7 +5,14 @@ export rectilinear
 function rectilinear(fname::AbstractString,
                      xAxis::LinSpace, yAxis::LinSpace, zAxis::LinSpace,
                      data::Array)
-
+    """
+    Save data on rectilinear grid in VTK file
+    @param fname file name
+    @param xAxis x axis (nodes)
+    @param yAxis y axis (nodes)
+    @param zAxis z axis (nodes)
+    @param data field data
+    """
     f = open(fname, "w")
     write(f, "# vtk DataFile Version 2.0\n")
     write(f, "upwind.jl\n")

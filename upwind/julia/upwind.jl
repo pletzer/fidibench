@@ -35,11 +35,14 @@ type Upwind
     # Field
     f::Array
 
-    #
-    # Internal constructor
-    #
     function Upwind(ndims::Int, velocity::Array, lengths::Array, numCells::Array)
-
+        """
+        Internal constructor
+        @param ndims number of space dimensions
+        @param velocity velocity array of size ndims
+        @param lengths domain lengths array of size ndims
+        @param numCells number of cells, array of size ndims
+        """
         this = new(ndims, velocity, lengths, numCells)
 
         this.deltas = zeros(Float64, ndims::Integer)
@@ -69,45 +72,62 @@ type Upwind
     end
 end
 
-function advect!(up::Upwind, deltaTime::Float64)
-    oldF = deepcopy(up.f)
-    for j = 1:up.ndims
-        c = deltaTime * up.velocity[j] * up.upDirection[j] / up.deltas[j]
-        for i = 1:up.ntot
+function advect!(this::Upwind, deltaTime::Float64)
+    """
+    Advance the solution by one time step
+    @param this instance
+    @param deltaTime time increment
+    """
+    oldF = deepcopy(this.f)
+    for j = 1:this.ndims
+        c = deltaTime * this.velocity[j] * this.upDirection[j] / this.deltas[j]
+        for i = 1:this.ntot
             inds = getIndexSet(up, i)
             oldIndex = inds[j]
             #periodic BCs
-            inds[j] += up.upDirection[j]
-            inds[j] = mod1(inds[j], up.numCells[j])
+            inds[j] += this.upDirection[j]
+            inds[j] = mod1(inds[j], this.numCells[j])
             upI = getFlatIndex(up, inds)
-            up.f[i] -= c * (oldF[upI] - oldF[i])
+            this.f[i] -= c * (oldF[upI] - oldF[i])
             inds[j] = oldIndex
         end
     end 
 end
 
-function getFlatIndex(up::Upwind, inds::Array)
-    return dot(up.dimProd, inds - 1) + 1
+function getFlatIndex(this::Upwind, inds::Array)
+    """
+    Get the flat index from an index set
+    @param this instance
+    @param inds index set, eg [i, j, k]
+    @return integer index of field array
+    """
+    return dot(this.dimProd, inds - 1) + 1
 end
   
-function getIndexSet(up::Upwind, flatIndex::Integer)
-    res = zeros(Integer,up.ndims)
-    for i = 1:up.ndims
-        res[i] = mod(div((flatIndex - 1), up.dimProd[i]), up.numCells[i]) + 1
+function getIndexSet(this::Upwind, flatIndex::Integer)
+    """
+    Get the index set of a falt index
+    @param this instance
+    @param flatIndex flat index 
+    @return index set, eg [i, j, k]
+    """
+    res = zeros(Integer,this.ndims)
+    for i = 1:this.ndims
+        res[i] = mod(div((flatIndex - 1), this.dimProd[i]), this.numCells[i]) + 1
     end
     return res
 end
 
-function checksum(up::Upwind)
-    return sum(up.f)
-end
-
-function save2VTK(up::Upwind, fname::AbstractString)
-
-    xAxis = linspace(0.0, up.lengths[1], up.numCells[1] + 1)
-    yAxis = linspace(0.0, up.lengths[2], up.numCells[2] + 1)
-    zAxis = linspace(0.0, up.lengths[3], up.numCells[3] + 1)
-    saveVTK.rectilinear(fname, xAxis, yAxis, zAxis, up.f)
+function save2VTK(this::Upwind, fname::AbstractString)
+    """
+    Save data in VTK file
+    @param this instance
+    @param fname file name
+    """
+    xAxis = linspace(0.0, this.lengths[1], this.numCells[1] + 1)
+    yAxis = linspace(0.0, this.lengths[2], this.numCells[2] + 1)
+    zAxis = linspace(0.0, this.lengths[3], this.numCells[3] + 1)
+    saveVTK.rectilinear(fname, xAxis, yAxis, zAxis, this.f)
 
 end
 
@@ -157,7 +177,7 @@ for i = 1:numTimeSteps
 end 
 
 # Do the checksum
-println("check sum: ",checksum(up))
+println("check sum: ", sum(up.f))
 
 if length(ARGS) > 2 && ARGS[3] == "vtk"
    save2VTK(up, "upwind.vtk")
