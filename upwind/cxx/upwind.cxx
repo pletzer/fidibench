@@ -187,7 +187,7 @@ int main(int argc, char** argv) {
     int numThreads = 1;
     int threadId = 0;
 #ifdef HAVE_OPENMP
-    onumThreads = mp_get_num_threads();
+    numThreads = omp_get_num_threads();
     threadId = omp_get_thread_num();
 #endif
     if (threadId == 0)

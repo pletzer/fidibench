@@ -115,6 +115,7 @@ contains
         oldF = obj % f
 
         ! iterate over the cells
+        ! $OMP DO PRIVATE(i)
         do i = 1, obj % ntot
 
             ! compute the index set of this cell
@@ -143,6 +144,7 @@ contains
                 inds(j) = oldIndex
            enddo
         enddo
+        ! $OMP END DO 
 
     end subroutine
 
@@ -268,12 +270,21 @@ program main
 
     integer, parameter :: ndims = 3
     
-    integer :: argc, numCells(ndims), n, ier, numTimeSteps, i, j
+    integer :: argc, numCells(ndims), n, ier, numTimeSteps, i, j, numThreads
+#ifdef HAVE_OPENMP
+    integer :: omp_get_num_threads
+#endif
     character(len=32) :: argv
     real(r8) :: velocity(ndims)
     real(r8) :: lengths(ndims)
     real(r8) :: courant, dt, dx, val, chksum
     type(upwind_type) :: up
+    
+    numThreads = 1
+#ifdef HAVE_OPENMP    
+    numThreads = omp_get_num_threads()
+#endif
+    print *,' number of threads: ', numThreads
 
     numCells = -1
     
