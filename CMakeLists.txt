@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
 project(fidibench)
 
+enable_language(Fortran)
 enable_testing()
 
 # make sure the default build is of Release type
