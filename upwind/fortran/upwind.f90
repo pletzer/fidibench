@@ -31,8 +31,8 @@ contains
         obj % lengths = lengths
         obj % numCells = numCells
         
-        allocate(obj % upDirection, size=obj % ndims)
-        allocate(obj % deltas, size=obj % ndims)
+        allocate(obj % upDirection(obj % ndims))
+        allocate(obj % deltas(obj % ndims))
         
         obj % ntot = 1       
         do j = 1, obj % ndims
@@ -44,14 +44,14 @@ contains
             obj % ntot = obj % ntot * numCells(j)
         enddo
         
-        allocate(obj % dimProd, size = obj % ndims)
+        allocate(obj % dimProd(obj % ndims))
         
-        obj % dimProd(ndims) = 1
+        obj % dimProd(obj % ndims) = 1
         do j = obj % ndims - 1, 1, -1
             obj % dimProd(j) =  obj % dimProd(j + 1) * obj % numCells(j + 1)
         enddo
         
-        allocate(obj % f, size = obj % ntot)
+        allocate(obj % f(obj % ntot))
         
         ! initialize
         obj % f = 0
@@ -76,7 +76,7 @@ contains
     ! Advance by one time step
     subroutine upwind_advect(obj, deltaTime)
         type(upwind_type) :: obj
-        real(r8), intent(in) :: deltatTime
+        real(r8), intent(in) :: deltaTime
 
         real(r8), allocatable :: oldF(:)
         integer :: i, j, oldIndex, upI
@@ -90,7 +90,7 @@ contains
                 do j = 1, obj % ndims
                     oldIndex = inds(j)
                     ! periodic BCs
-                    inds(j) = mod(inds(j) + obj % numCells(j) - 1, obj%numCells) + 1
+                    inds(j) = mod(inds(j) + obj % numCells(j) - 1, obj % numCells(j)) + 1
                     
                     call upwind_getFlatIndex(obj, inds, upI)
                     
@@ -110,72 +110,63 @@ contains
         integer iunit, i
         
         open(newunit = iunit, file = filename, status = 'new')
-        write(iunit, *) "# vtk DataFile Version 2.0"
-        write(iunit, *) "upwind.cxx"
-        write(iunit, *) "ASCII"
-        write(iunit, *) "DATASET RECTILINEAR_GRID"
-        write(iunit, *) "DIMENSIONS"
+        write(iunit, *) '# vtk DataFile Version 2.0'
+        write(iunit, *) 'upwind.cxx'
+        write(iunit, *) 'ASCII'
+        write(iunit, *) 'DATASET RECTILINEAR_GRID'
+        write(iunit, *) 'DIMENSIONS'
         ! in VTK the first dimension varies fastest so need 
         ! to invert the order of the dimensions
-        if (NDIMS > 2) then
-            write(iunit, *) ' ' << this->numCells[2] + 1
+        if (obj % ndims > 2) then
+            write(iunit, *) ' ', obj % numCells(3) + 1
         else
-            write(iunit, *) " 1"
+            write(iunit, *) ' 1'
         endif 
         
-        if (NDIMS > 1) then
-            write(iunit, *) ' ' << this->numCells[1] + 1
+        if (obj % ndims > 1) then
+            write(iunit, *) ' ', obj % numCells(2) + 1
         else
-            write(iunit, *) " 1"
+            write(iunit, *) ' 1'
         endif
         
-        write(iunit, *) ' ' << this->numCells[0] + 1
-        write(iunit, *) "X_COORDINATES "
-        if (NDIMS > 2) then
-            write(iunit, *) this->numCells[2] + 1 << " double"
-            do i = 1: i < this->numCells[3] 
-                write(iunit, *) ' ' << 0.0 + this->deltas[2] * i
+        write(iunit, *) ' ', obj % numCells(1) + 1
+        write(iunit, *) 'X_COORDINATES '
+        if (obj % ndims > 2) then
+            write(iunit, *) obj % numCells(3) + 1, ' double'
+            do i = 1, obj % numCells(3)
+                write(iunit, *) ' ', 0.0 + obj % deltas(3) * i
             enddo     
   
         else 
-            write(iunit, *) "1 double"
-            write(iunit, *) "0.0"
+            write(iunit, *) '1 double'
+            write(iunit, *) '0.0'
         endif
     
-        write(iunit, *) "Y_COORDINATES "
-        if (NDIMS > 1) then
-            write(iunit, *) this->numCells[1] + 1 << " double"
-            do i = 1:this->numCells[3] then
-                write(iunit, *) ' ' << 0.0 + this->deltas[1] * i
+        write(iunit, *) 'Y_COORDINATES '
+        if (obj % ndims > 1) then
+            write(iunit, *) obj % numCells(2) + 1, ' double'
+            do i = 1, obj % numCells(2)
+                write(iunit, *) ' ', 0.0 + obj % deltas(2) * i
             enddo      
         else
-            write(iunit, *) "1 double"
-            write(iunit, *) "0.0"
+            write(iunit, *) '1 double'
+            write(iunit, *) '0.0'
         endif
       
-        write(iunit, *) "Z_COORDINATES "
-        write(iunit, *) this->numCells[0] + 1 << " double"
-        do i = 1:this->numCells[1]
-            write(iunit, *) ' ' << 0.0 + this->deltas[0] * i
+        write(iunit, *) 'Z_COORDINATES '
+        write(iunit, *) obj % numCells(1) + 1, ' double'
+        do i = 1, obj % numCells(1)
+            write(iunit, *) ' ', 0.0 + obj % deltas(1) * i
         enddo
-        write(iunit, *) "CELL_DATA " << this->ntot << ''
-        write(iunit, *) "SCALARS f double 1"
-        write(iunit, *) "LOOKUP_TABLE default"
-        do i = 1:this->ntot
-            write(iunit, *) this->f[i] << " "
-            if (mod(i, 10) == 0) write(iunit, *) ''
+        write(iunit, *) 'CELL_DATA ', obj % ntot
+        write(iunit, *) 'SCALARS f double 1'
+        write(iunit, *) 'LOOKUP_TABLE default'
+        do i = 1, obj % ntot
+            write(iunit, *) obj % f(i), ' '
         enddo
     
         close(iunit)
     
-    end subroutine
-
-    subroutine upwind_checksum(obj, res)
-        type(upwind_type) :: obj
-        real(r8), intent(out) :: res
-        
-        res = sum(obj % f)    
-
     end subroutine
 
     subroutine upwind_print(obj)
@@ -183,7 +174,7 @@ contains
         
         integer :: i
         
-        do i = 1:obj % ntot
+        do i = 1, obj % ntot
             print *, 'i = ', i, ' f = ',  obj % f(i)
         enddo
  
@@ -195,8 +186,8 @@ contains
         integer, intent(out) :: res(:)
     
         integer :: i
-        do i = 1:obj % ndims
-            res(i) = mod(div((flatIndex - 1), obj % dimProd[i]), obj % numCells[i]) + 1
+        do i = 1, obj % ndims
+            res(i) = mod((flatIndex - 1)/obj % dimProd(i), obj % numCells(i)) + 1
         enddo
     end subroutine
     
@@ -254,7 +245,7 @@ program main
     enddo
 
     if (argc < 2) then
-        print *, "must specify number of cells in each direction."
+        print *, 'must specify number of cells in each direction.'
         stop(1)
     endif
 
@@ -267,20 +258,20 @@ program main
     ! compute dt 
     courant = 0.1_r8
     dt = huge(1.0_r8)
-    do j = 1:ndims
-        dx = lengths(j)/numCells(j])
+    do j = 1, ndims
+        dx = lengths(j) / numCells(j)
         val = courant * dx / velocity(j)
-        dt = minval(val, dt)
+        dt = min(val, dt)
     enddo
 
-    call upwdin_new(up, velocity, lengths, numCells)
-    ! call upwind_saveVTK(up, "up0.vtk")
-    do i = 1:numTimeSteps
+    call upwind_new(up, velocity, lengths, numCells)
+    ! call upwind_saveVTK(up, 'up0.vtk')
+    do i = 1,numTimeSteps
         call upwind_advect(up, dt)
     enddo
     ! call upwind_print(up)
-    print *, "check sum: ", sum(up.f)
-    call upwind_saveVTK(up"up.vtk")
+    print *, 'check sum: ', sum(up % f)
+    call upwind_saveVTK(up, 'up.vtk')
     
     call upwind_del(up)
 
