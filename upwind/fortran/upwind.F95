@@ -156,55 +156,57 @@ contains
         
         ! f2008
         open(newunit = iunit, file = filename, status = 'unknown')
-        write(iunit, *) '# vtk DataFile Version 2.0'
-        write(iunit, *) 'upwind.f90'
-        write(iunit, *) 'ASCII'
-        write(iunit, *) 'DATASET RECTILINEAR_GRID'
+        write(iunit, '(a)') '# vtk DataFile Version 2.0'
+        write(iunit, '(a)') 'upwind.f90'
+        write(iunit, '(a)') 'ASCII'
+        write(iunit, '(a)') 'DATASET RECTILINEAR_GRID'
 
         ! in VTK the first dimension varies fastest so need 
         ! to invert the order of the dimensions
         if (obj % ndims > 2) then
-            write(iunit, *) 'DIMENSIONS ', obj % numCells(3) + 1, obj % numCells(2) + 1, obj % numCells(1) + 1
+            write(iunit, '(a, i10, i10, i10)') 'DIMENSIONS ', &
+             & obj % numCells(3) + 1, obj % numCells(2) + 1, obj % numCells(1) + 1
         else
             if (obj % ndims > 1) then
-                write(iunit, *) 'DIMENSIONS 1', obj % numCells(2) + 1, obj % numCells(1) + 1
+                write(iunit, '(a, i10, i10)') 'DIMENSIONS 1', &
+             & obj % numCells(2) + 1, obj % numCells(1) + 1
             else
-                write(iunit, *) 'DIMENSIONS 1 1', obj % numCells(1) + 1
+                write(iunit, '(a, i10)') 'DIMENSIONS 1 1', obj % numCells(1) + 1
             endif 
         endif 
         
-        write(iunit, *) 'X_COORDINATES ', obj % numCells(1) + 1, ' double'
+        write(iunit, '(a, i10, a)') 'X_COORDINATES ', obj % numCells(1) + 1, ' double'
         do i = 1, obj % numCells(1) + 1
-            write(iunit, *) ' ', 0.0 + obj % deltas(1) * (i - 1)
+            write(iunit, '(e20.7)') 0.0 + obj % deltas(1) * (i - 1)
         enddo
 
         write(iunit, *) 
         if (obj % ndims > 1) then
-            write(iunit, *) 'Y_COORDINATES ', obj % numCells(2) + 1, ' double'
+            write(iunit, '(a, i10, a)') 'Y_COORDINATES ', obj % numCells(2) + 1, ' double'
             do i = 1, obj % numCells(2) + 1
-                write(iunit, *) ' ', 0.0 + obj % deltas(2) * (i - 1)
+                write(iunit, '(e20.7)') 0.0 + obj % deltas(2) * (i - 1)
             enddo      
         else
-            write(iunit, *) 'Y_COORDINATES 1 double'
-            write(iunit, *) '0.0'
+            write(iunit, '(a)') 'Y_COORDINATES 1 double'
+            write(iunit, '(a)') '0.0'
         endif
 
         write(iunit, *) 
         if (obj % ndims > 2) then
-            write(iunit, *) 'Z_COORDINATES ', obj % numCells(3) + 1, ' double'
+            write(iunit, '(a, i10, a)') 'Z_COORDINATES ', obj % numCells(3) + 1, ' double'
             do i = 1, obj % numCells(3) + 1
-                write(iunit, *) ' ', 0.0 + obj % deltas(3) * (i - 1)
+                write(iunit, '(e20.7)') 0.0 + obj % deltas(3) * (i - 1)
             enddo      
         else
-            write(iunit, *) 'Z_COORDINATES 1 double'
-            write(iunit, *) '0.0'
+            write(iunit, '(a)') 'Z_COORDINATES 1 double'
+            write(iunit, '(a)') '0.0'
         endif
 
-        write(iunit, *) 'CELL_DATA ', obj % ntot
-        write(iunit, *) 'SCALARS f double 1'
-        write(iunit, *) 'LOOKUP_TABLE default'
+        write(iunit, '(a, i20)') 'CELL_DATA ', obj % ntot
+        write(iunit, '(a)') 'SCALARS f double 1'
+        write(iunit, '(a)') 'LOOKUP_TABLE default'
         do i = 1, obj % ntot
-            write(iunit, *) obj % f(i), ' '
+            write(iunit, '(e20.7)') obj % f(i)
         enddo
     
         close(iunit)
