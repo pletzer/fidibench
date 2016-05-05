@@ -303,12 +303,12 @@ program main
         stop(1)
     endif
 
-    write(*,'(a)', advance='no') 'number of cells: '
+    write(*, '(a)', advance='no') 'number of cells: '
     do i = 1, ndims
-        write(*,'(i10, a)', advance='no') numCells(i), ' '
+        write(*, '(i10, a)', advance='no') numCells(i), ' '
     enddo
-    write(*, *) ' '
-    write(*,'(a,i10)') 'number of time steps: ', numTimeSteps
+    write(*, *) ' ' ! new line
+    write(*, '(a,i10)') 'number of time steps: ', numTimeSteps
     
     ! velocity field
     velocity = 1
@@ -320,18 +320,18 @@ program main
     courant = 0.1_r8
     dt = huge(1.0_r8)
     do j = 1, ndims
-        dx = lengths(j) / numCells(j)
+        dx = lengths(j) / real(numCells(j), r8)
         val = courant * dx / velocity(j)
         dt = min(val, dt)
     enddo
 
-    ! instantiate upwind object 
+    ! instantiate up
     call upwind_new(up, velocity, lengths, numCells)
     
     ! call upwind_saveVTK(up, 'up0.vtk')
     
     ! advance 
-    do i = 1,numTimeSteps
+    do i = 1, numTimeSteps
         call upwind_advect(up, dt)
     enddo
     
