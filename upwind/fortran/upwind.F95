@@ -303,7 +303,11 @@ program main
         stop(1)
     endif
 
-    write(*,'(a,i10)') 'number of cells: ', numCells
+    write(*,'(a)', advance='no') 'number of cells: '
+    do i = 1, ndims
+        write(*,'(i10, a)', advance='no') numCells(i), ' '
+    enddo
+    write(*, *) ' '
     write(*,'(a,i10)') 'number of time steps: ', numTimeSteps
     
     ! velocity field
