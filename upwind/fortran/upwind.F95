@@ -219,7 +219,7 @@ contains
         integer :: i
         
         do i = 1, obj % ntot
-            print *, 'i = ', i, ' f = ',  obj % f(i)
+            write(*, '(a, i10, a, e20.14)') 'i = ', i, ' f = ',  obj % f(i)
         enddo
  
     end subroutine
@@ -279,7 +279,7 @@ program main
 #ifdef HAVE_OPENMP    
     numThreads = omp_get_num_threads()
 #endif
-    print *,' number of threads: ', numThreads
+    write(*,'(a,i10)')'number of threads: ', numThreads
 
     numCells = -1
     
@@ -299,12 +299,12 @@ program main
     enddo
 
     if (argc < 2) then
-        print *, 'must specify number of cells in each direction.'
+        write(*, '(a)') 'must specify number of cells in each direction.'
         stop(1)
     endif
 
-    print *, 'number of cells: ', numCells
-    print *, 'number of time steps: ', numTimeSteps
+    write(*,'(a,i10)') 'number of cells: ', numCells
+    write(*,'(a,i10)') 'number of time steps: ', numTimeSteps
     
     ! velocity field
     velocity = 1
@@ -332,7 +332,7 @@ program main
     enddo
     
     ! call upwind_print(up)
-    print *, 'check sum: ', sum(up % f)
+    write(*,'(a, f15.9)') 'check sum: ', sum(up % f)
     call upwind_saveVTK(up, 'up.vtk')
     
     ! clean up
