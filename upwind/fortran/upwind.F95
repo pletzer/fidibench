@@ -138,7 +138,7 @@ contains
                     
                 ! update the field
                 obj % f(upI) = obj % f(upI) - &
-              &               deltaTime*obj % v(j)*obj % upDirection(j)*(oldF(upI) - oldF(i))/obj % deltas(j)
+              &   deltaTime*obj % v(j)*obj % upDirection(j)*(oldF(upI) - oldF(i))/obj % deltas(j)
                     
                 ! reset the index
                 inds(j) = oldIndex
@@ -161,20 +161,19 @@ contains
         write(iunit, *) 'ASCII'
         write(iunit, *) 'DATASET RECTILINEAR_GRID'
 
-        write(iunit, *) 'DIMENSIONS'
         ! in VTK the first dimension varies fastest so need 
         ! to invert the order of the dimensions
         if (obj % ndims > 2) then
             write(iunit, *) 'DIMENSIONS ', obj % numCells(3) + 1, obj % numCells(2) + 1, obj % numCells(1) + 1
         else
             if (obj % ndims > 1) then
-		write(iunit, *) 'DIMENSIONS 1', obj % numCells(2) + 1, obj % numCells(1) + 1
-	    else
-		write(iunit, *) 'DIMENSIONS 1 1', obj % numCells(1) + 1
+                write(iunit, *) 'DIMENSIONS 1', obj % numCells(2) + 1, obj % numCells(1) + 1
+            else
+                write(iunit, *) 'DIMENSIONS 1 1', obj % numCells(1) + 1
             endif 
         endif 
         
-	write(iunit, *) 'Z_COORDINATES ', obj % numCells(1) + 1, ' double'
+        write(iunit, *) 'X_COORDINATES ', obj % numCells(1) + 1, ' double'
         do i = 1, obj % numCells(1) + 1
             write(iunit, *) ' ', 0.0 + obj % deltas(1) * (i - 1)
         enddo
