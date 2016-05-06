@@ -137,7 +137,7 @@ contains
                 call upwind_getFlatIndex(obj, inds, upI)
                     
                 ! update the field
-                obj % f(upI) = obj % f(upI) - &
+                obj % f(i) = obj % f(i) - &
               &   deltaTime*obj % v(j)*obj % upDirection(j)*(oldF(upI) - oldF(i))/obj % deltas(j)
                     
                 ! reset the index
