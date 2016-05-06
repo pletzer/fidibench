@@ -131,7 +131,7 @@ contains
                 inds(j) = inds(j) + obj % upDirection(j)
                 
                 ! apply periodic BCs
-                inds(j) = mod(inds(j) + obj % numCells(j) - 1, obj % numCells(j)) + 1
+                inds(j) = modulo(inds(j) + obj % numCells(j) - 1, obj % numCells(j)) + 1
                   
                 ! compute the new flat index 
                 call upwind_getFlatIndex(obj, inds, upI)
