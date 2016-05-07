@@ -11,7 +11,7 @@ from numpy import linspace
 parser = argparse.ArgumentParser(description='Generate picture.')
 parser.add_argument('--filename', dest='filename', default='',
                    help='VTK file')
-parser.add_argument('--levels', dest='levels', default="linspace(0, 1., 21)",
+parser.add_argument('--levels', dest='levels', default="linspace(0, 1., 5)",
 	               help='Contour levels')
 
 args = parser.parse_args()
@@ -26,8 +26,12 @@ mapper = vtk.vtkPolyDataMapper()
 actor = vtk.vtkActor()
 
 reader.SetFileName(args.filename)
-
-lut.SetRange(0., 1.) # data range
+reader.Update()
+pdata = reader.GetOutput()
+cellData = pdata.GetCellData()
+fmin, fmax = cellData.GetArray(0).GetRange()
+print 'min/max field values: {0} {1}'.format(fmin, fmax)
+lut.SetTableRange(fmin, fmax)
 lut.SetNumberOfTableValues(3)
 lut.SetTableValue(0, ( 0., 0.,  1., 1.))  # blue
 lut.SetTableValue(1, (0.5, 1., 0.5, 1.))  # greenish
@@ -35,19 +39,17 @@ lut.SetTableValue(2, ( 1., 0.,  0., 1.))  # red
 
 contour.SetNumberOfContours(len(levels))
 for i in range(len(levels)):
-    contour.SetValue(i, levels[i]);
+    contour.SetValue(i, fmin + (fmax - fmin)*levels[i]);
 
 mapper.SetLookupTable(lut)
 
 # Connect
-pdata = reader.GetOutput()
 cell2pt.SetInputConnection(reader.GetOutputPort())
 contour.SetInputConnection(cell2pt.GetOutputPort())
 mapper.SetInputConnection(contour.GetOutputPort())
 actor.SetMapper(mapper)
 
 mapper.Update()
-
 
 numScalars = reader.GetNumberOfScalarsInFile()
 for i in range(numScalars):
