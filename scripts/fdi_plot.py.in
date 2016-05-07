@@ -1,15 +1,24 @@
 #!/usr/bin/env python
 
+"""
+Plot solution
+"""
+
 import argparse
 import vtk
+from numpy import linspace
 
 parser = argparse.ArgumentParser(description='Generate picture.')
 parser.add_argument('--filename', dest='filename', default='',
                    help='VTK file')
+parser.add_argument('--levels', dest='levels', default="linspace(0, 1., 21)",
+	               help='Contour levels')
 
 args = parser.parse_args()
 
+levels = eval(args.levels)
 
+lut = vtk.vtkLookupTable()
 reader = vtk.vtkRectilinearGridReader()
 cell2pt = vtk.vtkCellDataToPointData()
 contour = vtk.vtkContourFilter()
@@ -17,19 +26,18 @@ mapper = vtk.vtkPolyDataMapper()
 actor = vtk.vtkActor()
 
 reader.SetFileName(args.filename)
-reader.ReadAllScalarsOn()
 
-numCont = 11
-fmin, fmax = 0., 1.
-contour.SetNumberOfContours(numCont)
-for i in range(numCont):
-    contour.SetValue(i, fmin + (fmax - fmin)*i/float(numCont - 1))
-contour.GenerateTrianglesOn()
-contour.ComputeGradientsOn()
+lut.SetRange(0., 1.) # data range
+lut.SetNumberOfTableValues(3)
+lut.SetTableValue(0, ( 0., 0.,  1., 1.))  # blue
+lut.SetTableValue(1, (0.5, 1., 0.5, 1.))  # greenish
+lut.SetTableValue(2, ( 1., 0.,  0., 1.))  # red
 
-mapper.ScalarVisibilityOff()
+contour.SetNumberOfContours(len(levels))
+for i in range(len(levels)):
+    contour.SetValue(i, levels[i]);
 
-actor.GetProperty().SetColor(1.0, 0., 0.)
+mapper.SetLookupTable(lut)
 
 # Connect
 pdata = reader.GetOutput()
@@ -40,16 +48,10 @@ actor.SetMapper(mapper)
 
 mapper.Update()
 
-#mapper.SetScalar('f')
-#print 'min/max f range: ', mapper.GetRange()
-#pdata = contour.GetOutput()
-#print pdata
 
 numScalars = reader.GetNumberOfScalarsInFile()
 for i in range(numScalars):
     print 'scalar field: ', reader.GetScalarsNameInFile(i)
-
-print contour.GetOutput()
 
 # Create the renderer, the render window, and the interactor. The
 # renderer draws into the render window, the interactor enables mouse-

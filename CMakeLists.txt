@@ -74,5 +74,6 @@ message(STATUS "==============================================================")
 message(STATUS "Compiler flags: ${CMAKE_CXX_FLAGS}")
 message(STATUS "==============================================================")
 
+add_subdirectory(scripts)
 add_subdirectory(laplacian)
 add_subdirectory(upwind)
