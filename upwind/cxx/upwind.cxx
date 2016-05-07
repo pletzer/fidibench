@@ -182,6 +182,11 @@ int main(int argc, char** argv) {
     numTimeSteps = atoi(argv[2]);
   }
 
+  bool doVtk = false;
+  if (argc > 3 && argv[3] == "vtk") {
+    doVtk = true;
+  }
+
 #pragma omp parallel
   {
     int numThreads = 1;
@@ -219,13 +224,9 @@ int main(int argc, char** argv) {
   //up.saveVTK("up0.vtk");
   for (int i = 0; i < numTimeSteps; ++i) {
     up.advect(dt);
-      //if (i % 10 == 0) {
-      // std::ostringstream ss;
-      // ss << i;
-      // up.saveVTK(std::string("up") + ss.str() + std::string(".vtk"));
-      //}
-  }
-  //up.print();
+ }
   std::cout << "check sum: " << up.checksum() << '\n';
-  up.saveVTK("up.vtk");
+  if (doVtk) {
+    up.saveVTK("up.vtk");
+  }
 }

@@ -266,6 +266,7 @@ program main
     integer, parameter :: ndims = 3
     
     integer :: argc, numCells(ndims), n, ier, numTimeSteps, i, j, numThreads
+    logical :: doVtk
 #ifdef HAVE_OPENMP
     integer :: omp_get_num_threads
 #endif
@@ -282,6 +283,7 @@ program main
     write(*,'(a,i10)')'number of threads: ', numThreads
 
     numCells = -1
+    doVtk = .FALSE.
     
     ! default number of steps
     numTimeSteps = 100  
@@ -294,6 +296,8 @@ program main
             numCells = n
         else if (argc == 2) then
             numTimeSteps = n
+        else if (argc == 3 .and. argv == 'vtk') then
+            doVtk = .TRUE.
         endif
         argc = argc + 1
     enddo
@@ -337,7 +341,10 @@ program main
     
     ! call upwind_print(up)
     write(*,'(a, f15.9)') 'check sum: ', sum(up % f)
-    call upwind_saveVTK(up, 'up.vtk')
+
+    if (doVtk) then 
+        call upwind_saveVTK(up, 'up.vtk')
+    endif
     
     ! clean up
     call upwind_del(up)
