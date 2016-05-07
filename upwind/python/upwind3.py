@@ -100,6 +100,9 @@ def main():
   if len(sys.argv) > 2:
     numTimeSteps = int(sys.argv[2])
 
+  doVtk = False
+  if len(sys.argv) > 3 and sys.argv[3] == 'vtk':
+    doVtk = True
 
   velocity = numpy.ones( (ndims,), numpy.float64 )
   lengths = numpy.ones( (ndims,), numpy.float64 )
@@ -115,13 +118,10 @@ def main():
   #up.saveVTK("up0.vtk")
   for i in range(numTimeSteps):
     up.advect(dt)
-    #if i % 10 == 0:
-    #up.saveVTK("up" + str(i) + ".vtk")
 
-  #up.printOut()
   print "check sum: ", up.checksum()
 
-  if len(sys.argv) > 3 and sys.argv[3] == 'vtk':
-    up.saveVTK("upwind.vtk")
+  if doVtk:
+    up.saveVTK("up.vtk")
 
 if __name__ == '__main__': main()

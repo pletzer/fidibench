@@ -139,6 +139,9 @@ def main():
   if len(sys.argv) > 2:
     numTimeSteps = int(sys.argv[2])
 
+  doVtk = False
+  if len(sys.argv) > 3 and sys.argv[3] == 'vtk':
+    doVtk = True
 
   velocity = numpy.ones( (ndims,), numpy.float64 )
   lengths = numpy.ones( (ndims,), numpy.float64 )
@@ -169,11 +172,12 @@ def main():
   chksum = up.checksum()
   if up.rk == 0: print "check sum: ", chksum
 
-#  data = up.gatherRoot()
-#  if up.rk == 0:
-#    xAxis = numpy.array([0.0 + i*up.deltas[0] for i in range(numCells[0] + 1)])
-#    yAxis = numpy.array([0.0 + j*up.deltas[1] for j in range(numCells[1] + 1)])
-#    zAxis = numpy.array([0.0 + k*up.deltas[1] for k in range(numCells[2] + 1)])
-#    saveVTK.rectilinear('upwindMPI.vtk', xAxis, yAxis, zAxis, data)
+  if doVtk:
+    data = up.gatherRoot()
+    if rk == 0:
+      xAxis = numpy.array([0.0 + i*up.deltas[0] for i in range(numCells[0] + 1)])
+      yAxis = numpy.array([0.0 + j*up.deltas[1] for j in range(numCells[1] + 1)])
+      zAxis = numpy.array([0.0 + k*up.deltas[1] for k in range(numCells[2] + 1)])
+      saveVTK.rectilinear('upMPI.vtk', xAxis, yAxis, zAxis, data)
 
 if __name__ == '__main__': main()
