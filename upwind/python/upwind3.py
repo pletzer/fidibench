@@ -11,7 +11,7 @@ class Upwind:
     self.numCells = numCells
     self.ndims = len(velocity)
     self.deltas = numpy.zeros( (self.ndims,), numpy.float64 )
-    self.upDirection = numpy.zeros( (self.ndims,), numpy.float64 )
+    self.upDirection = numpy.zeros( (self.ndims,), numpy.int )
     self.v = velocity
     self.lengths = lengths
     self.ntot = 1
@@ -40,7 +40,7 @@ class Upwind:
     self.inds = numpy.zeros( (self.ndims, self.ntot), numpy.int )
     for j in range(self.ndims):
       self.inds[j, :] = numpy.arange(self.ntot)
-      self.inds[j, :] /= self.dimProd[j]
+      self.inds[j, :] //= self.dimProd[j]
       self.inds[j, :] %= self.numCells[j]
 
   def advect(self, deltaTime):

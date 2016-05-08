@@ -11,7 +11,7 @@ class Upwind:
     self.numCells = numCells
     self.ndims = len(velocity)
     self.deltas = numpy.zeros( (self.ndims,), numpy.float64 )
-    self.upDirection = numpy.zeros( (self.ndims,), numpy.float64 )
+    self.upDirection = numpy.zeros( (self.ndims,), numpy.int )
     self.v = velocity
     self.lengths = lengths
     self.ntot = 1
