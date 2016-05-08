@@ -1,5 +1,6 @@
 #/usr/bin/env python
 
+from __future__ import print_function
 import numpy
 import copy
 import saveVTK
@@ -82,23 +83,24 @@ class Upwind:
 
   def printOut(self):
     for i in range(len(self.f)):
-      print i, ' ', self.f[i]
+      print(i, ' ', self.f[i])
 
-############################################################################################################
+#################################################################################################
 def main():
   import sys
 
   if len(sys.argv) <= 1:
-    print "must specify number of cells in each direction."
+    print("must specify number of cells in each direction.")
     return sys.exit(1)
 
   ndims = 3
   numCells = [int(sys.argv[1])] * 3
-  print "number of cells: ", numCells
+  print("number of cells: ", numCells)
 
   numTimeSteps = 100
   if len(sys.argv) > 2:
     numTimeSteps = int(sys.argv[2])
+  print("number of time steps: ", numTimeSteps)
 
   doVtk = False
   if len(sys.argv) > 3 and sys.argv[3] == 'vtk':
@@ -115,12 +117,10 @@ def main():
     dt = min(courant * dx / velocity[j], dt)
 
   up = Upwind(velocity, lengths, numCells)
-  #up.saveVTK("up0.vtk")
   for i in range(numTimeSteps):
     up.advect(dt)
 
-  print "check sum: ", up.checksum()
-
+  print("check sum: ", up.checksum())
   if doVtk:
     up.saveVTK("up.vtk")
 
