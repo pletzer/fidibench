@@ -1,6 +1,3 @@
-// clang -I/usr/local/openmp-llvm/include/ -O3 upwindTemplated.cxx -L/usr/local/openmp-llvm/lib/ -lstdc++ -liomp5
-// g++ -fopenmp -O3 upwindTemplated.cxx
-
 #include <vector>
 #include <functional>
 #include <algorithm>
@@ -183,7 +180,7 @@ int main(int argc, char** argv) {
   }
 
   bool doVtk = false;
-  if (argc > 3 && argv[3] == "vtk") {
+  if (argc > 3 && strcmp(argv[3], "vtk") == 0) {
     doVtk = true;
   }
 
