@@ -7,6 +7,7 @@
 #include <limits>
 #include <iostream>
 #include <sstream>
+#include <cstring>
 
 #ifdef HAVE_OPENMP
 #include <omp.h>
