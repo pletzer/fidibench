@@ -1,0 +1,1 @@
+configure_file("${CMAKE_SOURCE_DIR}/scripts/fdi_plot.py.in" "fdi_plot.py")
