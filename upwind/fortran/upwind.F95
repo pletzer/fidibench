@@ -155,7 +155,10 @@ contains
         integer iunit, i
         
         ! f2008
-        open(newunit = iunit, file = filename, status = 'unknown')
+        !open(newunit = iunit, file = filename, status = 'unknown')
+        iunit = 10
+        ! f95
+        open(unit = iunit, file = filename, status = 'unknown')
         write(iunit, '(a)') '# vtk DataFile Version 2.0'
         write(iunit, '(a)') 'upwind.f90'
         write(iunit, '(a)') 'ASCII'
@@ -303,8 +306,7 @@ program main
     enddo
 
     if (argc < 2) then
-        write(*, '(a)') 'must specify number of cells in each direction.'
-        stop(1)
+        stop 'must specify number of cells in each direction.'
     endif
 
     write(*, '(a)', advance='no') 'number of cells: '
