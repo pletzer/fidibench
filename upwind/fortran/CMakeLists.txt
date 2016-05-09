@@ -1,4 +1,4 @@
-
+configure_file(upwindFortran_fitzroy.ll.in upwindFortran_fitzroy.ll)
 if (HAVE_OPENMP)
 	add_definitions(-DHAVE_OPENMP)
 	message(STATUS "OpenMP enabled in Fortran")
