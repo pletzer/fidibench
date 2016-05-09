@@ -51,14 +51,19 @@ contains
         
         ! f95 will allocate and copy
         obj % ndims = size(velocity)
-        obj % v = velocity
-        obj % lengths = lengths
-        obj % numCells = numCells
         
         allocate(obj % upDirection(obj % ndims))
         allocate(obj % deltas(obj % ndims))
+	allocate(obj % v(obj % ndims))
+	allocate(obj % lengths(obj % ndims))
+	allocate(obj % numCells(obj % ndims))
+        allocate(obj % dimProd(obj % ndims))
         
-        ! compute the otal number of cells and other stuff
+        obj % v = velocity
+        obj % lengths = lengths
+        obj % numCells = numCells
+
+        ! compute the total number of cells and other stuff
         obj % ntot = 1       
         do j = 1, obj % ndims
             obj % upDirection(j) = -1
@@ -68,8 +73,6 @@ contains
             obj % deltas(j) = lengths(j) / numCells(j)
             obj % ntot = obj % ntot * numCells(j)
         enddo
-        
-        allocate(obj % dimProd(obj % ndims))
         
         obj % dimProd(obj % ndims) = 1
         do j = obj % ndims - 1, 1, -1
@@ -111,7 +114,8 @@ contains
         integer :: i, j, oldIndex, upI
         integer :: inds(obj % ndims)
         
-        ! allocate and copy the field (f95)
+        ! allocate and copy the field
+	allocate(oldF(obj % ntot))
         oldF = obj % f
 
         ! iterate over the cells
@@ -144,7 +148,7 @@ contains
                 inds(j) = oldIndex
            enddo
         enddo
-        ! $OMP END DO 
+        ! $OMP END DO
 
     end subroutine
 
