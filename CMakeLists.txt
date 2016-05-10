@@ -45,9 +45,11 @@ endif()
 
 message(STATUS "Looking for MPI")
 find_package(MPI)
-set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
-set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
-set(CMAKE_Fortran_COMPILER ${MPI_Fortran_COMPILER})
+if (MPI_FOUND)
+    set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+    set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
+    set(CMAKE_Fortran_COMPILER ${MPI_Fortran_COMPILER})
+endif()
 
 # enable profiling and tracing with TAU
 if (NOT "${TAU_MAKEFILE}" STREQUAL "")
