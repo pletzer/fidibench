@@ -286,9 +286,9 @@ program main
     numThreads = 1
 #ifdef HAVE_OPENMP    
     numThreads = omp_get_num_threads()
-    print *,'Running with OpenMP enabled'
+    write(*,'(a)') 'Running with OpenMP enabled'
 #endif
-    write(*,'(a,i10)')'number of threads: ', numThreads
+    write(*,'(a, i10)') 'number of threads: ', numThreads
 
     numCells = -1
     doVtk = .FALSE.
