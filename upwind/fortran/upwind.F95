@@ -272,10 +272,11 @@ program main
 
     integer, parameter :: ndims = 3
     
-    integer :: argc, numCells(ndims), n, ier, numTimeSteps, i, j, numThreads
+    integer :: argc, numCells(ndims), n, ier, numTimeSteps, i, j, & 
+   &           numThreads, maxNumThreads, threadId
     logical :: doVtk
 #ifdef HAVE_OPENMP
-    integer :: omp_get_num_threads
+    integer :: omp_get_num_threads, omp_get_max_threads, omp_get_thread_num
 #endif
     character(len=32) :: argv
     real(r8) :: velocity(ndims)
@@ -284,11 +285,20 @@ program main
     type(upwind_type) :: up
     
     numThreads = 1
+    maxNumThreads = 1
+    threadId = 0
 #ifdef HAVE_OPENMP    
     numThreads = omp_get_num_threads()
-    write(*,'(a)') 'Running with OpenMP enabled'
+    maxNumThreads = omp_get_max_threads()
+    threadId = omp_get_thread_num()
+    if (threadId == 0) then
+        write(*,'(a)') 'Running with OpenMP enabled'
+    endif
 #endif
-    write(*,'(a, i10)') 'number of threads: ', numThreads
+    if (threadId == 0) then 
+        write(*,'(a, i10, a, i10)') 'number of threads: ', numThreads, &
+          & ' max number of threads: ', maxNumThreads
+    endif
 
     numCells = -1
     doVtk = .FALSE.

@@ -188,14 +188,18 @@ int main(int argc, char** argv) {
 #pragma omp parallel
   {
     int numThreads = 1;
+    int maxNumThreads = 1;
     int threadId = 0;
 #ifdef HAVE_OPENMP
     numThreads = omp_get_num_threads();
+    maxNumThreads = omp_get_max_threads();
     threadId = omp_get_thread_num();
-    std::cout << "Running with OpenMP enabled\n";
+    if (threadId == 0)
+      std::cout << "Running with OpenMP enabled\n";
 #endif
     if (threadId == 0)
-      std::cout << "number of threads: " << numThreads << '\n';
+      std::cout << "number of threads: " << 
+           numThreads << " max number of threads: " << maxNumThreads << '\n';
   }
 
   // same resolution in each direction
