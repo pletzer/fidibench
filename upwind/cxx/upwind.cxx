@@ -192,6 +192,7 @@ int main(int argc, char** argv) {
 #ifdef HAVE_OPENMP
     numThreads = omp_get_num_threads();
     threadId = omp_get_thread_num();
+    std::cout << "Running with OpenMP enabled\n";
 #endif
     if (threadId == 0)
       std::cout << "number of threads: " << numThreads << '\n';
