@@ -8,10 +8,35 @@ add_executable(upwindCxx upwind.cxx)
 add_executable(upwindAccCxx upwindAcc.cxx)
 
 add_test(NAME upwindCxx1
-         COMMAND "OMP_NUM_THREADS=1" upwindCxx
+         COMMAND upwindCxx
         "${NUM_CELLS}" "${NUM_TIME_STEPS}")
 set_tests_properties(upwindCxx1
                      PROPERTIES 
+                     ENVIRONMENT "OMP_NUM_THREADS=1"
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+
+add_test(NAME upwindCxx2
+         COMMAND upwindCxx
+        "${NUM_CELLS}" "${NUM_TIME_STEPS}")
+set_tests_properties(upwindCxx2
+                     PROPERTIES 
+                     ENVIRONMENT "OMP_NUM_THREADS=2"
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+
+add_test(NAME upwindCxx4
+         COMMAND upwindCxx
+        "${NUM_CELLS}" "${NUM_TIME_STEPS}")
+set_tests_properties(upwindCxx4
+                     PROPERTIES 
+                     ENVIRONMENT "OMP_NUM_THREADS=4"
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+
+add_test(NAME upwindCxx8
+         COMMAND upwindCxx
+        "${NUM_CELLS}" "${NUM_TIME_STEPS}")
+set_tests_properties(upwindCxx8
+                     PROPERTIES 
+                     ENVIRONMENT "OMP_NUM_THREADS=8"
                      PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
 
 add_test(NAME upwindCxx
