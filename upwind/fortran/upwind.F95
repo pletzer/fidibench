@@ -124,9 +124,6 @@ contains
 
             ! compute the index set of this cell
             call upwind_getIndexSet(obj, i, inds)
-
-            ! iterate over the directions
-            do j = 1, obj % ndims
                 
                 ! cache the cell index
                 oldIndex = inds(j)

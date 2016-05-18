@@ -60,7 +60,7 @@ public:
     int* dimProdPtr = &this->dimProd.front();
     int* numCellsPtr = &this->numCells.front();
 
-#pragma acc kernel copy(fPtr[0:this->ntot]) copyin(fOldPtr[0:this->ntot]) present_or_copyin(coeffPtr[0:NDIMS], dimProdPtr[0:NDIMS], upDirectionPtr[0:NDIMS], numCellsPtr[0:NDIMS], inds[0:NDIMS], deltaTime)
+#pragma acc kernel copy(fPtr[0:this->ntot]) copyin(fOldPtr[0:this->ntot]) copyin(coeffPtr[0:NDIMS], dimProdPtr[0:NDIMS], upDirectionPtr[0:NDIMS], numCellsPtr[0:NDIMS], inds[0:NDIMS], deltaTime)
     for (int i = 0; i < (int) this->ntot; ++i) {
 
       for (int k = 0; k < NDIMS; ++k) {
