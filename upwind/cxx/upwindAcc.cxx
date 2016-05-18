@@ -168,14 +168,6 @@ private:
   std::vector<int> dimProd;
   std::vector<int> numCells;
   int ntot;
-
-  std::vector<int> getIndexSet(size_t flatIndex) const {
-    std::vector<int> res(NDIMS);
-    for (size_t i = 0; i < NDIMS; ++i) {
-      res[i] = flatIndex / this->dimProd[i] % this->numCells[i];
-    }
-    return res;
-  }
 };
 
 
