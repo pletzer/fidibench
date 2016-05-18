@@ -54,7 +54,7 @@ public:
 
     // OpenACC works with primitive arrays
     double* fPtr = &this->f.front();
-    double* fOldPtr = &this->f.front();
+    double* fOldPtr = &oldF.front();
     double* coeffPtr = &this->coeff.front();
     int* upDirectionPtr = &this->upDirection.front();
     int* dimProdPtr = &this->dimProd.front();
@@ -80,7 +80,7 @@ public:
           upI += dimProdPtr[k] * inds[k];
         }
 
-        this->f[i] -= deltaTime * coeffPtr[j] * (fOldPtr[upI] - fOldPtr[i]);
+        fPtr[i] -= deltaTime * coeffPtr[j] * (fOldPtr[upI] - fOldPtr[i]);
 
         inds[j] = oldIndex;
       }
