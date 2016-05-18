@@ -23,6 +23,9 @@ set(NUM_CELLS "32" CACHE STRING "Number of cells along each direction when runni
 set(NUM_TIME_STEPS "10" CACHE STRING "Number of time steps when running tests")
 set(NUM_PROCS "8" CACHE STRING "Number of processes when running tests")
 
+# OpenACC
+option(OPENACC "Enable OpenACC support" OFF)
+
 if (${CMAKE_SYSTEM_NAME} STREQUAL "AIX")
   # On Fitzroy AIX find_package(MPI) will fail 
   # unless one sets MPI_CXX_INCLUDE_PATH and 
@@ -56,7 +59,14 @@ if (OPENMP_FOUND)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   # There is no OpenMP fortran specific flag, fall back onto C flags
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_C_FLAGS}")
-endif()
+elseif (OPENACC)
+  # These are the PGI openACC flags -- need to find out what the corresponding 
+  # options are for the CRAY, gcc, ... compilers
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -acc -Minfo=acc")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -acc -Minfo=acc")
+  # There is no OpenMP fortran specific flag, fall back onto C flags
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -acc -Minfo=acc")  
+endif ()
 
 # enable profiling and tracing with TAU
 if (NOT "${TAU_MAKEFILE}" STREQUAL "")
