@@ -224,7 +224,6 @@ int main(int argc, char** argv) {
   }
 
   Upwind<ndims> up(velocity, lengths, numCells);
-  //up.saveVTK("up0.vtk");
   for (int i = 0; i < numTimeSteps; ++i) {
     up.advect(dt);
  }

@@ -284,6 +284,7 @@ program main
     real(r8) :: courant, dt, dx, val, chksum
     type(upwind_type) :: up
     
+! $OMP PARALLEL
     numThreads = 1
     maxNumThreads = 1
     threadId = 0
@@ -299,6 +300,7 @@ program main
         write(*,'(a, i10, a, i10)') 'number of threads: ', numThreads, &
           & ' max number of threads: ', maxNumThreads
     endif
+! $OMP END PARALLEL
 
     numCells = -1
     doVtk = .FALSE.
