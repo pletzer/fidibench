@@ -115,11 +115,11 @@ contains
         integer :: inds(obj % ndims)
         
         ! allocate and copy the field
-	allocate(oldF(obj % ntot))
+        allocate(oldF(obj % ntot))
         oldF = obj % f
 
         ! iterate over the cells
-        ! $OMP DO PRIVATE(i)
+        !$OMP PARALLEL DO PRIVATE(i)
         do i = 1, obj % ntot
 
             ! compute the index set of this cell
@@ -148,7 +148,7 @@ contains
                 inds(j) = oldIndex
            enddo
         enddo
-        ! $OMP END DO
+        !$OMP END PARALLEL DO
 
     end subroutine
 
@@ -284,7 +284,7 @@ program main
     real(r8) :: courant, dt, dx, val, chksum
     type(upwind_type) :: up
     
-! $OMP PARALLEL
+!$OMP PARALLEL
     numThreads = 1
     maxNumThreads = 1
     threadId = 0
@@ -300,7 +300,7 @@ program main
         write(*,'(a, i10, a, i10)') 'number of threads: ', numThreads, &
           & ' max number of threads: ', maxNumThreads
     endif
-! $OMP END PARALLEL
+!$OMP END PARALLEL
 
     numCells = -1
     doVtk = .FALSE.
