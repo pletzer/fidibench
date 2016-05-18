@@ -8,11 +8,36 @@ else()
 endif()
 
 add_executable(upwindFortran upwind.F95)
-add_test(NAME upwindFortran
+
+add_test(NAME upwindFortran1
          COMMAND upwindFortran
         "${NUM_CELLS}" "${NUM_TIME_STEPS}")
+set_tests_properties(upwindFortran1
+                     PROPERTIES
+                     ENVIRONMENT "OMP_NUM_THREADS=1"
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
 
-set_tests_properties(upwindFortran
-                     PROPERTIES 
+add_test(NAME upwindFortran2
+         COMMAND upwindFortran
+        "${NUM_CELLS}" "${NUM_TIME_STEPS}")
+set_tests_properties(upwindFortran2
+                     PROPERTIES
+                     ENVIRONMENT "OMP_NUM_THREADS=2"
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+
+add_test(NAME upwindFortran4
+         COMMAND upwindFortran
+        "${NUM_CELLS}" "${NUM_TIME_STEPS}")
+set_tests_properties(upwindFortran4
+                     PROPERTIES
+                     ENVIRONMENT "OMP_NUM_THREADS=4"
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+
+add_test(NAME upwindFortran8
+         COMMAND upwindFortran
+        "${NUM_CELLS}" "${NUM_TIME_STEPS}")
+set_tests_properties(upwindFortran8
+                     PROPERTIES
+                     ENVIRONMENT "OMP_NUM_THREADS=8"
                      PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
 
