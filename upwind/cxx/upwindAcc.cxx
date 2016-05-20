@@ -66,9 +66,18 @@ public:
   upDirectionPtr[NDIMS], numCellsPtr[NDIMS], inds[NDIMS], deltaTime)
     for (int i = 0; i < ntot; ++i) {
 
-      for (int k = 0; k < NDIMS; ++k) {
-        inds[k] = i / dimProdPtr[k] % numCellsPtr[k];
-      }
+#if (NDIMS > 0)
+      inds[0] =  i / dimProdPtr[0] % numCellsPtr[0];
+#if (NDIMS > 1)
+      inds[1] =  i / dimProdPtr[1] % numCellsPtr[1];
+#if (NDIMS > 2)
+      inds[2] =  i / dimProdPtr[2] % numCellsPtr[2];
+#if (NDIMS > 3)
+#error Cannot run in more than 3D
+#endif
+#endif
+#endif
+#endif
 
       for (int j = 0; j < NDIMS; ++j) {
 
