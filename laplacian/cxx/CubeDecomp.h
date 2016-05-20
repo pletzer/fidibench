@@ -207,7 +207,6 @@ private:
   std::vector<size_t> getPrimeFactors(size_t n) const {
     std::vector<size_t> res(1, 1);
     size_t n2 = n / 2;
-    size_t k = 2;
     for (size_t k = 2; k <= n2; ++k) {
       if ((n / k)*k == n) {
         res.push_back(k);
