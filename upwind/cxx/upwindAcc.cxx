@@ -59,11 +59,12 @@ public:
     int* upDirectionPtr = &this->upDirection.front();
     int* dimProdPtr = &this->dimProd.front();
     int* numCellsPtr = &this->numCells.front();
+    int ntot = this->ntot;
 
-#pragma acc parallel loop copy(fPtr[0:this->ntot]) \
-  copyin(fOldPtr[0:this->ntot], coeffPtr[0:NDIMS], dimProdPtr[0:NDIMS],	\
-  upDirectionPtr[0:NDIMS], numCellsPtr[0:NDIMS], inds[0:NDIMS], deltaTime)
-    for (int i = 0; i < (int) this->ntot; ++i) {
+#pragma acc parallel loop copy(fPtr[ntot]) \
+  copyin(fOldPtr[ntot], coeffPtr[NDIMS], dimProdPtr[NDIMS],	\
+  upDirectionPtr[NDIMS], numCellsPtr[NDIMS], inds[NDIMS], deltaTime)
+    for (int i = 0; i < ntot; ++i) {
 
       for (int k = 0; k < NDIMS; ++k) {
         inds[k] = i / dimProdPtr[k] % numCellsPtr[k];
@@ -86,7 +87,7 @@ public:
 
         inds[j] = oldIndex;
       }
-    } // acc kernel
+    } // acc parallel loop
   }
 
 #include "saveVTK.h"
