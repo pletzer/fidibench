@@ -53,19 +53,23 @@ if (MPI_FOUND)
     set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
     set(CMAKE_Fortran_COMPILER ${MPI_Fortran_COMPILER})
 endif()
-if (OPENMP_FOUND)
+if ((NOT OPENACC) AND OPENMP_FOUND)
   add_definitions(-DHAVE_OPENMP)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   # There is no OpenMP fortran specific flag, fall back onto C flags
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_C_FLAGS}")
-elseif (OPENACC)
-  # These are the PGI openACC flags -- need to find out what the corresponding 
-  # options are for the CRAY, gcc, ... compilers
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -acc -Minfo=acc")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -acc -Minfo=acc")
-  # There is no OpenMP fortran specific flag, fall back onto C flags
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -acc -Minfo=acc")  
+else ()
+  # OpenACC is incompatible with OpenMP, either one or the other or none
+  if (OPENACC)
+    message(STATUS "OpenACC enabled")
+    # These are the PGI openACC flags -- need to find out what the 
+    # corresponding options are for the CRAY, gcc, ... compilers 
+    # (if they exist)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -acc -Minfo=acc")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -acc -Minfo=acc")
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -acc -Minfo=acc")
+  endif () 
 endif ()
 
 # enable profiling and tracing with TAU
