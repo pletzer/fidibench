@@ -61,42 +61,33 @@ public:
     int* numCellsPtr = &this->numCells.front();
     int ntot = this->ntot;
 
+#if (NDIMS > 3)
+#error Cannot do more than 3D
+#endif
+
 #pragma acc parallel loop copy(fPtr[ntot]) \
   copyin(fOldPtr[ntot], coeffPtr[NDIMS], dimProdPtr[NDIMS],	\
-  upDirectionPtr[NDIMS], numCellsPtr[NDIMS], inds[NDIMS], deltaTime)
+  upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime)
     for (int i = 0; i < ntot; ++i) {
 
+#include "compute_index_set.h"
+
 #if (NDIMS > 0)
-      inds[0] =  i / dimProdPtr[0] % numCellsPtr[0];
+#include "compute_flat_index_offset_x.h"
+fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upI] - fOldPtr[i]);
+#endif
+
 #if (NDIMS > 1)
-      inds[1] =  i / dimProdPtr[1] % numCellsPtr[1];
+#include "compute_flat_index_offset_y.h"
+fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
+#endif
+
 #if (NDIMS > 2)
-      inds[2] =  i / dimProdPtr[2] % numCellsPtr[2];
-#if (NDIMS > 3)
-#error Cannot run in more than 3D
-#endif
-#endif
-#endif
+#include "compute_flat_index_offset_z.h"
+fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
 #endif
 
-      for (int j = 0; j < NDIMS; ++j) {
-
-        int oldIndex = inds[j];
-
-        // periodic BCs
-        inds[j] += upDirectionPtr[j] + numCellsPtr[j];
-        inds[j] %= numCellsPtr[j];
-
-        int upI = 0;
-        for (int k = 0; k < NDIMS; ++k) {
-          upI += dimProdPtr[k] * inds[k];
-        }
-
-        fPtr[i] -= deltaTime * coeffPtr[j] * (fOldPtr[upI] - fOldPtr[i]);
-
-        inds[j] = oldIndex;
-      }
-    } // acc parallel loop
+     } // acc parallel loop
   }
 
 #include "saveVTK.h"
