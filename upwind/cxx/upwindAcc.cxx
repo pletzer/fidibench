@@ -62,10 +62,6 @@ public:
     int ntot = this->ntot;
     int upI;
 
-//#if (NDIMS != 3)
-//#error Cannot do other than 3D
-//#endif
-
 #pragma acc parallel loop copy(fPtr[ntot]) \
   copyin(fOldPtr[ntot], coeffPtr[NDIMS], dimProdPtr[NDIMS],	\
   upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime)
