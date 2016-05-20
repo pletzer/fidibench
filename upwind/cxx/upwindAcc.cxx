@@ -60,10 +60,11 @@ public:
     int* dimProdPtr = &this->dimProd.front();
     int* numCellsPtr = &this->numCells.front();
     int ntot = this->ntot;
+    int upI;
 
-#if (NDIMS > 3)
-#error Cannot do more than 3D
-#endif
+//#if (NDIMS != 3)
+//#error Cannot do other than 3D
+//#endif
 
 #pragma acc parallel loop copy(fPtr[ntot]) \
   copyin(fOldPtr[ntot], coeffPtr[NDIMS], dimProdPtr[NDIMS],	\
@@ -72,20 +73,14 @@ public:
 
 #include "compute_index_set.h"
 
-#if (NDIMS > 0)
 #include "compute_flat_index_offset_x.h"
 fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upI] - fOldPtr[i]);
-#endif
 
-#if (NDIMS > 1)
 #include "compute_flat_index_offset_y.h"
 fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
-#endif
 
-#if (NDIMS > 2)
 #include "compute_flat_index_offset_z.h"
 fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
-#endif
 
      } // acc parallel loop
   }
