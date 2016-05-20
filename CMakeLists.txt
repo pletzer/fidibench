@@ -99,7 +99,7 @@ message(STATUS "C++     compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "           flags: ${CMAKE_CXX_FLAGS}")
 message(STATUS "==============================================================")
 message(STATUS "Fortran compiler: ${CMAKE_Fortran_COMPILER}")
-message(STATUS "        flags   : ${CMAKE_Fortran_FLAGS}")
+message(STATUS "           flags: ${CMAKE_Fortran_FLAGS}")
 message(STATUS "==============================================================")
 
 add_subdirectory(scripts)
