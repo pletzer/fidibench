@@ -5,4 +5,3 @@ if (NDIMS > 2) {
 	upI += dimProdPtr[2] * ((inds[2] + upDirectionPtr[2] + numCellsPtr[2]) % numCellsPtr[2]);
 }
 
-
