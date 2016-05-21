@@ -47,8 +47,6 @@ public:
 
   void advect(double deltaTime) {
 
-    int inds[NDIMS];
-
     // copy
     std::vector<double> oldF(this->f);
 
@@ -67,19 +65,18 @@ public:
   upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime)
     for (int i = 0; i < ntot; ++i) {
 
+      int inds[NDIMS];
+
 #include "compute_index_set.h"
 
 #include "compute_flat_index_offset_x.h"
 fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upI] - fOldPtr[i]);
- std::cout << "x: i = " << i <<  " upI = " << upI << '\n';
 
 #include "compute_flat_index_offset_y.h"
 fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
 
 #include "compute_flat_index_offset_z.h"
 fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
- std::cout << "z: i = " << i <<  " upI = " << upI << '\n';
-
 
      } // acc parallel loop
   }
