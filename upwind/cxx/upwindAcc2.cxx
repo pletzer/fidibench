@@ -57,22 +57,23 @@ public:
     int upI;
 
     double* fOldPtr = new double[ntot];
-    int inds[NDIMS];
 
 #pragma acc data \
   copy(fPtr[ntot]) \
   copyin(fOldPtr[ntot]) \
-  copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS],    \
+  copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS],	\
   upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime)
-  {
+   {
 
-#pragma acc parallel loop 
+#pragma acc parallel loop
     for (int i = 0; i < ntot; ++i) {
-        fOldPtr[i] = fPtr[i];
+      fOldPtr[i] = fPtr[i];
     }
 
-#pragma acc parallel loop 
+#pragma acc parallel loop
     for (int i = 0; i < ntot; ++i) {
+
+      int inds[NDIMS];
 
 #include "compute_index_set.h"
 
@@ -85,9 +86,10 @@ fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
 #include "compute_flat_index_offset_z.h"
 fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
 
-     } 
-  } // acc data
-     delete[] fOldPtr;
+     } // acc parallel loop
+    } // acc data
+
+    delete[] fOldPtr;
   }
 
 #include "saveVTK.h"
