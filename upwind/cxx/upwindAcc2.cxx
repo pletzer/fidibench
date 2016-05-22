@@ -56,7 +56,8 @@ public:
     int ntot = this->ntot;
     int upI;
 
-    double* fOldPtr;
+    // still have allocate on the cpu even though we have create(fOldPtr)
+    double* fOldPtr = new double[ntot];
 
 #pragma acc data \
   copy(fPtr[ntot]) \
@@ -89,6 +90,7 @@ fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
      } // acc parallel loop
     } // acc data
 
+    delete[] fOldPtr;
   }
 
 #include "saveVTK.h"
