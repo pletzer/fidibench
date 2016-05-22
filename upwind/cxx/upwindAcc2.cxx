@@ -56,7 +56,7 @@ public:
     int ntot = this->ntot;
     int upI;
 
-    double* fOldPtr = new double[ntot];
+    double* fOldPtr;
 
 #pragma acc data \
   copy(fPtr[ntot]) \
@@ -89,7 +89,6 @@ fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
      } // acc parallel loop
     } // acc data
 
-    delete[] fOldPtr;
   }
 
 #include "saveVTK.h"
