@@ -39,6 +39,8 @@ public:
     // initialize lower corner to one
     this->f[0] = 1;
 
+    this->fOld.resize(this->ntot);
+
     this->coeff.resize(NDIMS);
     for (size_t j = 0; j < NDIMS; ++j) {
       this->coeff[j] = this->v[j] * this->upDirection[j] / this->deltas[j];
@@ -49,15 +51,13 @@ public:
 
     // OpenACC works with primitive arrays
     double* fPtr = &this->f.front();
+    double* fOldPtr = &this->fOld.front();
     double* coeffPtr = &this->coeff.front();
     int* upDirectionPtr = &this->upDirection.front();
     int* dimProdPtr = &this->dimProd.front();
     int* numCellsPtr = &this->numCells.front();
     int ntot = this->ntot;
     int upI;
-
-    // still have allocate on the cpu even though we have create(fOldPtr)
-    double* fOldPtr = new double[ntot];
 
 #pragma acc data \
   copy(fPtr[ntot]) \
@@ -90,7 +90,6 @@ fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
      } // acc parallel loop
     } // acc data
 
-    delete[] fOldPtr;
   }
 
 #include "saveVTK.h"
@@ -107,6 +106,7 @@ fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
 
 private:
   std::vector<double> f;
+  std::vector<double> fOld;
   std::vector<double> v;
   std::vector<double> lengths;
   std::vector<double> deltas;
