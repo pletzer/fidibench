@@ -60,7 +60,7 @@ public:
 
 #pragma acc data \
   copy(fPtr[ntot]) \
-  copyin(fOldPtr[ntot]) \
+  create(fOldPtr[ntot]) \
   copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS],	\
   upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime)
    {
