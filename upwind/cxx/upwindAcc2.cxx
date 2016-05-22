@@ -47,12 +47,8 @@ public:
 
   void advect(double deltaTime) {
 
-    // copy
-    std::vector<double> oldF(this->f);
-
     // OpenACC works with primitive arrays
     double* fPtr = &this->f.front();
-    double* fOldPtr = &oldF.front();
     double* coeffPtr = &this->coeff.front();
     int* upDirectionPtr = &this->upDirection.front();
     int* dimProdPtr = &this->dimProd.front();
@@ -60,14 +56,23 @@ public:
     int ntot = this->ntot;
     int upI;
 
-#pragma acc parallel loop \
+    double* fOldPtr = new double[ntot];
+    int inds[NDIMS];
+
+#pragma acc data \
   copy(fPtr[ntot]) \
   copyin(fOldPtr[ntot]) \
-  copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS],	\
+  copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS],    \
   upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime)
-    for (int i = 0; i < ntot; ++i) {
+  {
 
-      int inds[NDIMS];
+#pragma acc parallel loop 
+    for (int i = 0; i < ntot; ++i) {
+        fOldPtr[i] = fPtr[i];
+    }
+
+#pragma acc parallel loop 
+    for (int i = 0; i < ntot; ++i) {
 
 #include "compute_index_set.h"
 
@@ -80,7 +85,9 @@ fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
 #include "compute_flat_index_offset_z.h"
 fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
 
-     } // acc parallel loop
+     } 
+  } // acc data
+     delete[] fOldPtr;
   }
 
 #include "saveVTK.h"

@@ -6,6 +6,7 @@ endif()
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 add_executable(upwindCxx upwind.cxx)
 add_executable(upwindAccCxx upwindAcc.cxx)
+add_executable(upwindAcc2Cxx upwindAcc2.cxx)
 
 add_test(NAME upwindCxx1
          COMMAND upwindCxx
