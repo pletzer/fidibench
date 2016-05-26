@@ -32,6 +32,16 @@ module upwind_mod
         ! product of the dimensions, used to switch back and forth 
         ! between the flat index and the multi-index representations
         integer, allocatable :: dimProd(:)
+
+        contains 
+
+            procedure :: new => upwind_new
+            procedure :: del => upwind_del
+            procedure :: advect => upwind_advect
+            procedure :: saveVTK => upwind_saveVTK
+            procedure :: getIndexSet => upwind_getIndexSet
+            procedure :: getFlatIndex => upwind_getFlatIndex
+
     end type
 
 contains
@@ -42,7 +52,7 @@ contains
     ! @param numCells number of cells in the x, y, ... directions
     subroutine upwind_new(obj, velocity, lengths, numCells)
     
-        type(upwind_type) :: obj
+        class(upwind_type) :: obj
         real(r8), intent(in) :: velocity(:)
         real(r8), intent(in) :: lengths(:)
         integer, intent(in) :: numCells(:)
@@ -90,7 +100,7 @@ contains
     ! Destructor
     subroutine upwind_del(obj)
     
-        type(upwind_type) :: obj
+        class(upwind_type) :: obj
         
         deallocate(obj % v)
         deallocate(obj % lengths)
@@ -106,7 +116,7 @@ contains
     ! @param deltaTime time step
     subroutine upwind_advect(obj, deltaTime)
     
-        type(upwind_type) :: obj
+        class(upwind_type) :: obj
         real(r8), intent(in) :: deltaTime
 
         real(r8), allocatable :: oldF(:)
@@ -151,7 +161,7 @@ contains
     end subroutine
 
     subroutine upwind_saveVTK(obj, filename)
-        type(upwind_type) :: obj
+        class(upwind_type) :: obj
         character(len=*), intent(in) :: filename
         
         integer iunit, i
@@ -219,8 +229,7 @@ contains
     end subroutine
 
     subroutine upwind_print(obj)
-            type(upwind_type) :: obj
-        
+        class(upwind_type) :: obj
         integer :: i
         
         do i = 1, obj % ntot
@@ -230,7 +239,7 @@ contains
     end subroutine
 
     subroutine upwind_getIndexSet(obj, flatIndex, res) 
-        type(upwind_type) :: obj
+        class(upwind_type) :: obj
         integer, intent(in) :: flatIndex
         integer, intent(out) :: res(:)
     
@@ -241,7 +250,7 @@ contains
     end subroutine
     
     subroutine upwind_getFlatIndex(obj, inds, res) 
-        type(upwind_type) :: obj
+        class(upwind_type) :: obj
         integer, intent(in) :: inds(:)
         integer, intent(out) :: res
         
