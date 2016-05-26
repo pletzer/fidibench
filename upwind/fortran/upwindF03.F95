@@ -99,7 +99,7 @@ contains
     
     ! Destructor
     subroutine upwind_del(this)
-    
+
         class(upwind_type) :: this
         
         deallocate(this % v)
@@ -356,23 +356,22 @@ program main
     enddo
 
     ! instantiate up
-    call upwind_new(up, velocity, lengths, numCells)
+    call up % new(velocity, lengths, numCells)
     
-    ! call upwind_saveVTK(up, 'up0.vtk')
+    ! call up % saveVTK('up0.vtk')
     
     ! advance 
     do i = 1, numTimeSteps
-        call upwind_advect(up, dt)
+        call up % advect(dt)
     enddo
     
-    ! call upwind_print(up)
     write(*,'(a, f15.9)') 'check sum: ', sum(up % f)
 
     if (doVtk) then 
-        call upwind_saveVTK(up, 'up.vtk')
+        call up % saveVTK('up.vtk')
     endif
     
     ! clean up
-    call upwind_del(up)
+    call up % del()
 
 end program
