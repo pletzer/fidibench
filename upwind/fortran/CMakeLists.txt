@@ -8,6 +8,7 @@ else()
 endif()
 
 add_executable(upwindFortran upwind.F95)
+add_executable(upwindF03 upwindF03.F95)
 
 add_test(NAME upwindFortran1
          COMMAND upwindFortran

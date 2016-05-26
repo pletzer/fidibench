@@ -23,8 +23,8 @@ class Upwind:
     # decomposition
     self.dc = pnumpy.CubeDecomp(self.sz, numCells)
     if not self.dc.getDecomp():
-      print '*** No uniform decomposition could be found for {0} processes'.format(self.sz)
-      print '*** Please ajust the number of cells {0}'.format(numCells)
+      print('*** No uniform decomposition could be found for {0} processes'.format(self.sz))
+      print('*** Please adjust the number of cells {0}'.format(numCells))
       sys.exit(1)
 
     # begin/end indices of local sub-domain
@@ -32,7 +32,7 @@ class Upwind:
     self.iBeg = numpy.array([s.start for s in self.localSlices])
     self.iEnd = numpy.array([s.stop for s in self.localSlices])
     self.nsLocal = numpy.array([s.stop - s.start for s in self.localSlices])
-    print '[{0}] local number of cells: {1}'.format(self.rk, self.nsLocal)
+    print('[{0}] local number of cells: {1}'.format(self.rk, self.nsLocal))
 
     # global number of cells
     self.numCells = numCells
@@ -129,7 +129,8 @@ def main():
   import sys
 
   if len(sys.argv) <= 1:
-    if up.rk == 0: print "must specify number of cells in each direction."
+    if up.rk == 0: 
+      print("must specify number of cells in each direction.")
     return sys.exit(1)
 
   ndims = 3
@@ -167,10 +168,11 @@ def main():
 
   if up.rk == 0:
     toc = MPI.Wtime()
-    print 'Wall clock time spent in advection loop: {0} [sec]'.format(toc - tic)
+    print('Wall clock time spent in advection loop: {0} [sec]'.format(toc - tic))
 
   chksum = up.checksum()
-  if up.rk == 0: print "check sum: ", chksum
+  if up.rk == 0: 
+    print("check sum: {0}".format(chksum))
 
   if doVtk:
     data = up.gatherRoot()
