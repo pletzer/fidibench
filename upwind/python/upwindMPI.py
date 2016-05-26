@@ -176,7 +176,7 @@ def main():
 
   if doVtk:
     data = up.gatherRoot()
-    if rk == 0:
+    if up.rk == 0:
       xAxis = numpy.array([0.0 + i*up.deltas[0] for i in range(numCells[0] + 1)])
       yAxis = numpy.array([0.0 + j*up.deltas[1] for j in range(numCells[1] + 1)])
       zAxis = numpy.array([0.0 + k*up.deltas[1] for k in range(numCells[2] + 1)])
