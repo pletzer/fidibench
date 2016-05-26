@@ -132,7 +132,7 @@ contains
         do i = 1, this % ntot
 
             ! compute the index set of this cell
-            call upwind_getIndexSet(this, i, inds)
+            call this % getIndexSet(i, inds)
 
             do j = 1, this % ndims
                 
@@ -146,7 +146,7 @@ contains
                 inds(j) = modulo(inds(j) + this % numCells(j) - 1, this % numCells(j)) + 1
                   
                 ! compute the new flat index 
-                call upwind_getFlatIndex(this, inds, upI)
+                call this % getFlatIndex(inds, upI)
                     
                 ! update the field
                 this % f(i) = this % f(i) - &
