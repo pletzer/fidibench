@@ -1,5 +1,5 @@
 /**
- * @brief Apply a differening filter to input data distributed across multiple processes
+ * @brief Apply a differencing filter to input data distributed across multiple processes
  * @author Alexander Pletzer
  *
  * This software is provided with the hope that it will be 
@@ -179,6 +179,39 @@ public:
       }
     }
   }
+
+  /**
+ * Set input data by indices
+ * @param f function pointer taking a global index set and returning a value
+ */
+  void setDataByIndices( double (*f)(const std::vector<size_t>&) ) {
+
+// set the data in the main sub-domain
+    this->mit.begin();
+    for (size_t i = 0; i < this->mit.getNumberOfTerms(); ++i) {
+      std::vector<size_t> inds = this->mit.getIndices();
+      this->inData[i] = f(inds);
+      this->mit.next();
+    }
+
+// set the data in the windows
+    for (std::map< std::vector<int>, std::pair<double*, double*> >::const_iterator it = this->winData.begin(); 
+      it != winData.end(); ++it) {
+
+      const std::vector<int>& side = it->first;
+      double* srcData = this->winData.find(side)->second.first;
+      MultiArrayIter& wit = this->winIter.find(side)->second;
+
+      wit.begin();
+      for (size_t i = 0; i < wit.getNumberOfTerms(); ++i) {
+        std::vector<size_t> inds = wit.getIndices();
+        size_t bi = this->mit.computeBigIndex(inds);
+        srcData[i] = this->inData[bi];
+        wit.next();
+      }
+    }
+  }
+
 
 /** 
  * Apply filter to input data

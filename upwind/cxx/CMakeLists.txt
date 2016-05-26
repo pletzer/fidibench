@@ -3,10 +3,18 @@ if (HAVE_OPENMP)
 	add_definitions(-DHAVE_OPENMP)
 endif()
 
+include_directories(${CMAKE_SOURCE_DIR}/laplacian/cxx/)
+
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 add_executable(upwindCxx upwind.cxx)
 add_executable(upwindAccCxx upwindAcc.cxx)
 add_executable(upwindAcc2Cxx upwindAcc2.cxx)
+add_executable(upwindMpiCxx upwindMpi.cxx 
+               ${CMAKE_SOURCE_DIR}/laplacian/cxx/CmdLineArgParser.cpp
+               ${CMAKE_SOURCE_DIR}/laplacian/cxx/Filter.h 
+               ${CMAKE_SOURCE_DIR}/laplacian/cxx/CubeDecomp.h  
+               ${CMAKE_SOURCE_DIR}/laplacian/cxx/MultiArrayIter.h  
+               ${CMAKE_SOURCE_DIR}/laplacian/cxx/writeVTK.h)
 
 add_test(NAME upwindCxx1
          COMMAND upwindCxx
