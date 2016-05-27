@@ -255,14 +255,14 @@ public:
       const std::vector<int>& offset = it->first;
       double val = it->second;
 
-      // window side is the opposite to offset
+      // window side is the negative of offset
       std::vector<int> side(this->ndims);
       for (size_t i = 0; i < this->ndims; ++i) {
         side[i] = -offset[i];
       }
 
       double* dstData = this->winData.find(side)->second.second;
-      MultiArrayIter& wit = this->winIter.find(offset)->second;
+      MultiArrayIter& wit = this->winIter.find(side)->second;
 
       // iterate over all the elements of the window
       this->mit.begin();
