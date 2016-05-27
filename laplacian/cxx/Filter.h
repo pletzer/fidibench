@@ -471,6 +471,15 @@ public:
   }
 
 /**
+ * Copy the output data into the input data container
+ */
+  void copyOutToIn() {
+    for (size_t i = 0; i < this->mit.getNumberOfTerms(); ++i) {
+      this->inData[i] = this->outData[i];
+    }
+  }
+
+/**
  * Compute check sums of the data
  * @param inOrOut either "input" or "output"
  * @return check sum

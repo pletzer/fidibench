@@ -112,6 +112,7 @@ int main(int argc, char** argv) {
       // advect in time
       for (size_t i = 0; i < numSteps; ++i) {
         fltr.applyFilter();
+        fltr.copyOutToIn();
       }
 
       double toc = MPI_Wtime();
