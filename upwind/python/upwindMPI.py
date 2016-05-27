@@ -100,7 +100,7 @@ class Upwind:
 
   def printOut(self):
     for i in range(len(self.f)):
-      print i, ' ', self.f[i]
+      print('{0} {1}'.format(i, self.f[i]))
 
   def __del__(self):
     self.f.free()
@@ -155,8 +155,8 @@ def main():
     dt = min(courant * dx / velocity[j], dt)
 
   up = Upwind(velocity, lengths, numCells)
-  if up.rk == 0: print "number of cells: ", numCells
-  #up.saveVTK("up0.vtk")
+  if up.rk == 0:
+    print("number of cells: {0}".format(numCells))
 
   tic, tac = 0, 0
   if up.rk == 0: 
