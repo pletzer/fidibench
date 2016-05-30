@@ -79,13 +79,14 @@ int main(int argc, char** argv) {
     }
     if (fltr.isDecompValid()) {
 
+      fltr.setInData(func);
       double tic = MPI_Wtime();
 
       // repeat to improve statistics
       size_t numIter = 10;
       for (size_t i = 0; i < numIter; ++i) {
-        fltr.setData(func);
         fltr.applyFilter();
+        fltr.copyOutToIn();
       }
 
       double toc = MPI_Wtime();

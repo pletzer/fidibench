@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
       double tic = MPI_Wtime();
 
       // set the initial condition
-      fltr.setDataByIndices(initialCondition);
+      fltr.setInDataByIndices(initialCondition);
 
       // advect in time
       for (size_t i = 0; i < numSteps; ++i) {

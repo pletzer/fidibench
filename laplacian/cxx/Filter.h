@@ -151,7 +151,7 @@ public:
  * Set input data
  * @param f function pointer taking a position and returning a value
  */
-  void setData( double (*f)(const std::vector<double>&) ) {
+  void setInData( double (*f)(const std::vector<double>&) ) {
 
 // set the data in the main sub-domain
     this->mit.begin();
@@ -184,7 +184,7 @@ public:
  * Set input data by indices
  * @param f function pointer taking a global index set and returning a value
  */
-  void setDataByIndices( double (*f)(const std::vector<size_t>&) ) {
+  void setInDataByIndices( double (*f)(const std::vector<size_t>&) ) {
 
 // set the data in the main sub-domain
     this->mit.begin();
