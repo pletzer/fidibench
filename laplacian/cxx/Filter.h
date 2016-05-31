@@ -276,6 +276,9 @@ public:
         bool insideLocalDomain = true;
         for (size_t j = 0; j < this->ndims; ++j) {
           indOffset[j] = (int) inds[j] + offset[j];
+          // periodic boundary conditions
+          indOffset[j] %= this->globalDims[j];
+          // check if inside local MPI domain
           insideLocalDomain &= (indOffset[j] >= (int) this->lo[j]);
           insideLocalDomain &= (indOffset[j] < (int) this->hi[j]);
         }
@@ -474,9 +477,28 @@ public:
  * Copy the output data into the input data container
  */
   void copyOutToIn() {
+
     for (size_t i = 0; i < this->mit.getNumberOfTerms(); ++i) {
       this->inData[i] = this->outData[i];
     }
+
+// copy the data in the windows
+    for (std::map< std::vector<int>, std::pair<double*, double*> >::const_iterator it = this->winData.begin(); 
+      it != winData.end(); ++it) {
+
+      const std::vector<int>& side = it->first;
+      double* srcData = this->winData.find(side)->second.first;
+      MultiArrayIter& wit = this->winIter.find(side)->second;
+
+      wit.begin();
+      for (size_t i = 0; i < wit.getNumberOfTerms(); ++i) {
+        std::vector<size_t> inds = wit.getIndices();
+        size_t bi = this->mit.computeBigIndex(inds);
+        srcData[i] = this->outData[bi];
+        wit.next();
+      }
+    }
+
   }
 
 /**
