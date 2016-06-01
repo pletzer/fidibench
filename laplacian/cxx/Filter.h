@@ -300,12 +300,6 @@ public:
         else if (dstData) {
           // update using halo data
           size_t bi2 = wit.computeBigIndex(indOffset);
-            if (bi2 > 1000) {
-            std::cerr << "[" << this->rk << "] " <<
-                         " inds = " << inds[0] << ' ' << inds[1] << ' ' << inds[2] <<
-                         " indOffset = " << indOffset[0] << ' ' << indOffset[1] << ' ' << indOffset[2] <<
-            " bi2 = " << bi2 << '\n';
-            }
           // update ghosts
           this->outData[i] += val * dstData[bi2];
         }
