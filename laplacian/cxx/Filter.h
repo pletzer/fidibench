@@ -93,6 +93,10 @@ public:
 
       // get the corresponding window side on the source rank
       const std::vector<int> side = this->getSideFromOffset(offset);
+      const size_t numGhosts = this->getNumberOfGhostsFromOffset(offset);
+
+      std::pair< std::vector<int>, size_t > pSNG(side, numGhosts);
+      this->winNumGhosts.insert(pSNG);
 
       this->newWindow(side);
     }
@@ -242,24 +246,27 @@ public:
       this->mit.next();
     }
 
-    // send data from the remote src to the local dst container
+    // iterate over the stencil's branches
     for (std::map< std::vector<int>, double >::const_iterator it = this->stencil.begin();
            it != this->stencil.end(); ++it) {
       
+      // displacement from the base cell
       const std::vector<int>& offset = it->first;
+      // the stencil's weight
       const double val = it->second;
+      // the corresponding window side on the remote sub-domain
       const std::vector<int>& side = this->getSideFromOffset(offset);
 
       // apply periodic BCs, sub-domains wrap around to find the neighbor rank
       int neighborRk = this->dcmp.getNeighborRank(this->rk, offset);
 
-      // fetch the remote data
+      MultiArrayIter wit = this->getWindowIter(neighborRk, side);
+
+      // fetch the remote data and store the data in the dstData buffer
       double* dstData = NULL;
-      MultiArrayIter* wit = NULL;
-        std::map< std::vector<int>, MultiArrayIter>::iterator it2 = this->winIter.find(side);
-      if ( it2 != this->winIter.end()) {
+      std::map< std::vector<int>, MPI_Win>::iterator it2 = this->windows.find(side);
+      if (it2 != this->windows.end()) {
         dstData = this->fetch(neighborRk, side);
-        wit = &it2->second;
       }
 
       // iterate over all the elements of the local domain
@@ -268,7 +275,8 @@ public:
 
         // get the global indices
         std::vector<size_t> inds = this->mit.getIndices();
-        // the indices with offset
+
+        // indices with offsets
         std::vector<int> indOffset(this->ndims);
 
         // apply the stencil offset & check that we are still in the 
@@ -278,6 +286,7 @@ public:
           indOffset[j] = (int) inds[j] + offset[j];
           // periodic boundary conditions
           indOffset[j] %= this->globalDims[j];
+
           // check if inside local MPI domain
           insideLocalDomain &= (indOffset[j] >= (int) this->lo[j]);
           insideLocalDomain &= (indOffset[j] < (int) this->hi[j]);
@@ -288,15 +297,16 @@ public:
           int bi2 = this->mit.computeBigIndex(indOffset);
           this->outData[i] += val * this->inData[(size_t) bi2];
         }
-        else if (wit && dstData) {
+        else if (dstData) {
           // update using halo data
-          size_t bi2 = wit->computeBigIndex(indOffset);
+          size_t bi2 = wit.computeBigIndex(indOffset);
             if (bi2 > 1000) {
             std::cerr << "[" << this->rk << "] " <<
                          " inds = " << inds[0] << ' ' << inds[1] << ' ' << inds[2] <<
                          " indOffset = " << indOffset[0] << ' ' << indOffset[1] << ' ' << indOffset[2] <<
             " bi2 = " << bi2 << '\n';
             }
+          // update ghosts
           this->outData[i] += val * dstData[bi2];
         }
 
@@ -323,17 +333,41 @@ public:
     return this->sz;
   }
 
-/**
- * Create and allocate data structures associated with an MPI window
- * @param side array containing 0s, -1s, and +1s used to uniquely denote a window
- * @param numGhosts number of ghosts
+/** 
+ * Get the number of ghosts for an offset vector
+ * @param offset displacement vector
+ * @return number
+ * @note assumes offset is along one of the principal axes (only one non-zero value)
  */
-  void newWindow(const std::vector<int>& side, size_t numGhosts = 1) {
+  size_t getNumberOfGhostsFromOffset(const std::vector<int>& offset) const {
+    size_t numGhosts = 0;
+    for (size_t i = 0; i < offset.size(); ++i) {
+      size_t absOffset = std::abs(offset[i]);
+      numGhosts = (absOffset > numGhosts? absOffset: numGhosts);
+    }
+    return numGhosts;
+  }
 
-    // compute the size of the window
-    std::vector<size_t> sLo = this->lo;
-    std::vector<size_t> sHi = this->hi;
+/**
+ * Get remote window interator 
+ * @param rk MPI rank of the remote window
+ * @param side window side
+ * @return window interator
+ * @note returns the domain iterator if side == {0, 0, 0,..}
+ */
+  MultiArrayIter getWindowIter(int rk, const std::vector<int>& side) {
 
+    // domain start/end indices
+    std::vector<size_t> sLo = this->dcmp.getBegIndices(rk);
+    std::vector<size_t> sHi = this->dcmp.getEndIndices(rk);
+
+    size_t numGhosts = 0;
+    std::map< std::vector<int>, size_t >::const_iterator it = this->winNumGhosts.find(side);
+    if (it != this->winNumGhosts.end()) {
+      numGhosts = it->second;
+    }
+
+    // narrow the start/end indices to the window size
     size_t n = 1;
     for (size_t i = 0; i < this->ndims; ++i) {
       if (side[i] != 0) {
@@ -352,6 +386,19 @@ public:
       }
     }
 
+    return MultiArrayIter(sLo, sHi, false);
+  }
+
+/**
+ * Create and allocate data structures associated with an MPI window
+ * @param side array containing 0s, -1s, and +1s used to uniquely denote a window
+ * @param numGhosts number of ghosts
+ */
+  void newWindow(const std::vector<int>& side) {
+
+    MultiArrayIter sit = this->getWindowIter(this->rk, side);
+    int n = (int) sit.getNumberOfTerms();
+
     // allocate data and create window
     double* srcData = 0;
     double* dstData = 0;
@@ -362,7 +409,6 @@ public:
     MPI_Win_create(srcData, n*sizeof(double), sizeof(double), 
                    MPI_INFO_NULL, MPI_COMM_WORLD, &win);
 
-    MultiArrayIter sit(sLo, sHi, false);
     std::pair<double*, double*> pSrcDst(srcData, dstData);
     this->winData.insert( std::pair< std::vector<int>, std::pair<double*, double*> >(side, pSrcDst) );
     this->windows.insert( std::pair< std::vector<int>, MPI_Win >(side, win) );
@@ -614,11 +660,14 @@ private:
   // side to MPI window association
   std::map< std::vector<int>, MPI_Win > windows;
 
-  // src/dst data for each sub-domain
+  // side to src/dst data for each sub-domain
   std::map< std::vector<int>, std::pair<double*, double*> > winData;
 
-  // iterators for each sub-domain
+  // side to iterator for the window
   std::map< std::vector<int>, MultiArrayIter > winIter;
+
+  // side to the number of ghosts
+  std::map< std::vector<int>, size_t > winNumGhosts;
 
   // stencil 
   std::map< std::vector<int>, double > stencil;

@@ -117,6 +117,22 @@ public:
 		this->bigIndex = bi;
 	}
 
+/** 
+ * Get the low index set 
+ * @return indices
+ */
+ 	const std::vector<size_t>& getLBegIndices() const {
+ 		return this->lo;
+ 	}
+
+/** 
+ * Get the high index set 
+ * @return indices
+ */
+ 	const std::vector<size_t>& getEndIndices() const {
+ 		return this->hi;
+ 	}
+
 /**
  * Compute the big index gor the given index set
  * @param inds index set
@@ -124,6 +140,7 @@ public:
  */
   template<class T>
 	T computeBigIndex(const std::vector<T>& inds) const {
+		//std::cerr << " >>> lo = " << lo[0] << ' ' << lo[1] << ' ' << lo[2] << '\n';
 		size_t bi = 0;
 		for (size_t i = 0; i < this->ndims; ++i) {
 			bi += this->dimProd[i] * (inds[i] - this->lo[i]);
