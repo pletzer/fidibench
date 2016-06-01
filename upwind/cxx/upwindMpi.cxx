@@ -108,12 +108,14 @@ int main(int argc, char** argv) {
 
       // set the initial condition
       fltr.setInDataByIndices(initialCondition);
+      //fltr.printInData();
 
       // advect in time
       for (size_t i = 0; i < numSteps; ++i) {
         fltr.applyFilter();
         fltr.copyOutToIn();
       }
+      //fltr.printOutData();
 
       double toc = MPI_Wtime();
       double walltime = toc - tic;

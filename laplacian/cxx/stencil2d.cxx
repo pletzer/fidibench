@@ -105,10 +105,10 @@ int main(int argc, char** argv) {
 
   }
   else {
-    // error when parsing command line arguments
-    if (!success && rk == 0) {
-      std::cerr << "ERROR when parsing command line arguments\n";
-    }
+      // error when parsing command line arguments
+      if (!success && rk == 0) {
+          std::cerr << "ERROR when parsing command line arguments\n";
+      }
       args.help();
   }
 

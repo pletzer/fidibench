@@ -74,6 +74,8 @@ public:
     // build the iterator over the entire sub-domain
     this->mit.build(this->lo, this->hi, false);
     size_t n = this->mit.getNumberOfTerms();
+      
+    // allocate data
     this->inData.resize(n);
     this->outData.resize(n);
 
@@ -89,11 +91,8 @@ public:
         continue;
       }
 
-      // side is the negative of offset
-      std::vector<int> side(this->ndims);
-      for (size_t i = 0; i < this->ndims; ++i) {
-        side[i] = -offset[i];
-      }
+      // get the corresponding window side on the source rank
+      const std::vector<int> side = this->getSideFromOffset(offset);
 
       this->newWindow(side);
     }
@@ -104,11 +103,29 @@ public:
    */
   ~Filter() {
 
-    // destroy windows
-    for (std::map< std::vector<int>, MPI_Win >::const_iterator it = this->windows.begin(); 
-      it != this->windows.end(); ++it) {
-      this->deleteWindow(it->first);
+     // destroy windows
+     for (std::map< std::vector<int>, MPI_Win >::const_iterator it = this->windows.begin();
+       it != this->windows.end(); ++it) {
+       this->deleteWindow(it->first);
+     }
+  }
+    
+/**
+ * Get the side from the offset
+ * @param offset stencil offset vector from base cell
+ * @return side 
+ */
+    std::vector<int> getSideFromOffset(const std::vector<int>& offset) {
+    // side is a vector of zeroes and +/-1s with the +/-1s
+    // pointing in opposite direction of offset
+    std::vector<int> side(this->ndims);
+    for (size_t i = 0; i < this->ndims; ++i) {
+      side[i] = 0;
+      if (offset[i] != 0) {
+          side[i] = - offset[i]/std::abs(offset[i]);
+      }
     }
+    return side;
   }
 
 /**
@@ -226,49 +243,32 @@ public:
     }
 
     // send data from the remote src to the local dst container
-    for (std::map< std::vector<int>, MPI_Win >::const_iterator it = this->windows.begin(); 
-      it != this->windows.end(); ++it) {
-
-      const std::vector<int>& side = it->first;
-      MPI_Win win = it->second;
-
-      MultiArrayIter& wit = this->winIter.find(side)->second;
-      int n = (int) wit.getNumberOfTerms();
-
-      std::vector<int> offset(this->ndims);
-      for (size_t i = 0; i < this->ndims; ++i) {
-        offset[i] = -side[i];
-      }
+    for (std::map< std::vector<int>, double >::const_iterator it = this->stencil.begin();
+           it != this->stencil.end(); ++it) {
+      
+      const std::vector<int>& offset = it->first;
+      const double val = it->second;
+      const std::vector<int>& side = this->getSideFromOffset(offset);
 
       // apply periodic BCs, sub-domains wrap around to find the neighbor rank
       int neighborRk = this->dcmp.getNeighborRank(this->rk, offset);
 
       // fetch the remote data
-      this->fetch(neighborRk, side);
-
-    }
-
-    // the ghosts have been sent to the local process. We're ready to apply the filter
-    for (std::map< std::vector<int>, double >::const_iterator it = this->stencil.begin(); 
-      it != this->stencil.end(); ++it) {
-
-      const std::vector<int>& offset = it->first;
-      double val = it->second;
-
-      // window side is the negative of offset
-      std::vector<int> side(this->ndims);
-      for (size_t i = 0; i < this->ndims; ++i) {
-        side[i] = -offset[i];
+      double* dstData = NULL;
+      MultiArrayIter* wit = NULL;
+        std::map< std::vector<int>, MultiArrayIter>::iterator it2 = this->winIter.find(side);
+      if ( it2 != this->winIter.end()) {
+        dstData = this->fetch(neighborRk, side);
+        wit = &it2->second;
       }
 
-      double* dstData = this->winData.find(side)->second.second;
-      MultiArrayIter& wit = this->winIter.find(side)->second;
-
-      // iterate over all the elements of the window
+      // iterate over all the elements of the local domain
       this->mit.begin();
       for (size_t i = 0; i < this->mit.getNumberOfTerms(); ++i) {
 
+        // get the global indices
         std::vector<size_t> inds = this->mit.getIndices();
+        // the indices with offset
         std::vector<int> indOffset(this->ndims);
 
         // apply the stencil offset & check that we are still in the 
@@ -286,14 +286,21 @@ public:
         if (insideLocalDomain) {
           // local update
           int bi2 = this->mit.computeBigIndex(indOffset);
-          this->outData[i] += val * this->inData[ (size_t) bi2];
+          this->outData[i] += val * this->inData[(size_t) bi2];
         }
-        else {
+        else if (wit && dstData) {
           // update using halo data
-          size_t bi2 = wit.computeBigIndex(inds);
+          size_t bi2 = wit->computeBigIndex(indOffset);
+            if (bi2 > 1000) {
+            std::cerr << "[" << this->rk << "] " <<
+                         " inds = " << inds[0] << ' ' << inds[1] << ' ' << inds[2] <<
+                         " indOffset = " << indOffset[0] << ' ' << indOffset[1] << ' ' << indOffset[2] <<
+            " bi2 = " << bi2 << '\n';
+            }
           this->outData[i] += val * dstData[bi2];
         }
 
+        // next cell
         this->mit.next();
       }
     }
