@@ -1,6 +1,7 @@
 
 add_executable(testMultiArrayIter testMultiArrayIter.cxx)
 add_executable(testCubeDecomp testCubeDecomp.cxx)
+add_executable(stencil2d stencil2d.cxx CmdLineArgParser.cpp)
 
 if (MPI_FOUND)
   add_executable(laplacian laplacian.cxx CmdLineArgParser.cpp)
