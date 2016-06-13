@@ -1,9 +1,13 @@
 
 add_executable(testMultiArrayIter testMultiArrayIter.cxx)
 add_executable(testCubeDecomp testCubeDecomp.cxx)
-add_executable(stencil2d stencil2d.cxx CmdLineArgParser.cpp)
 
 if (MPI_FOUND)
+  add_executable(testStencil2d testStencil2d.cxx CmdLineArgParser.cpp)
+  add_test(NAME testStencil2d 
+  	       COMMAND ${MPIEXEC} -n "${NUM_PROCS}" 
+  	            testStencil2d -numCells "${NUM_CELLS}")
+
   add_executable(laplacian laplacian.cxx CmdLineArgParser.cpp)
   add_test(NAME laplacian2D COMMAND ${MPIEXEC} -n "${NUM_PROCS}" 
   	                        laplacian -numDims 2 -numCells "${NUM_CELLS}")

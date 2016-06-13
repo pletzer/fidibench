@@ -47,6 +47,8 @@ public:
   void advect(double deltaTime) {
 
     std::vector<double> oldF(this->f);
+    const double* __restrict__ oldFPtr = &oldF[0];
+    double* __restrict__ fPtr = &this->f[0];
 
 #pragma omp parallel for
     for (int i = 0; i < (int) this->ntot; ++i) {
@@ -56,6 +58,7 @@ public:
       for (size_t j = 0; j < NDIMS; ++j) {
 
         int oldIndex = inds[j];
+        const double coeff = deltaTime * this->v[j] * this->upDirection[j] / this->deltas[j];
 
         // periodic BCs
         inds[j] += this->upDirection[j] + this->numCells[j];
@@ -63,7 +66,7 @@ public:
 
         size_t upI = this->getFlatIndex(inds);
 
-        this->f[i] -= deltaTime * this->v[j] * this->upDirection[j] * (oldF[upI] - oldF[i])/this->deltas[j];
+        fPtr[i] -= coeff * (oldFPtr[upI] - oldFPtr[i]);
 
         inds[j] = oldIndex;
       }
@@ -93,6 +96,7 @@ private:
   std::vector<size_t> numCells;
   size_t ntot;
 
+  inline
   std::vector<int> getIndexSet(size_t flatIndex) const {
     std::vector<int> res(NDIMS);
     for (size_t i = 0; i < NDIMS; ++i) {
