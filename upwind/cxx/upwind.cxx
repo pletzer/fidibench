@@ -170,11 +170,14 @@ int main(int argc, char** argv) {
   }
 
   Upwind<ndims> up(velocity, lengths, numCells);
+  if (doVtk) {
+    up.saveVTK("up0.vtk");
+  }
   for (int i = 0; i < numTimeSteps; ++i) {
     up.advect(dt);
  }
   std::cout << "check sum: " << up.checksum() << '\n';
   if (doVtk) {
-    up.saveVTK("up.vtk");
+    up.saveVTK("up1.vtk");
   }
 }

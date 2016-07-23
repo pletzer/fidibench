@@ -27,8 +27,15 @@ class Upwind:
         self.dimProd[i] =  self.dimProd[i + 1] * self.numCells[i + 1]
 
     self.f = numpy.zeros( (self.ntot,), numpy.float64 )
-    # initialize lower corner to one
-    self.f[0] = 1
+    # initialize some cells to one
+    for i in range(self.ntot):
+      ind = self.getIndexSet(i)
+      inside = True
+      for j in range(self.ndims):
+        if ind[j] < int(0.3 * self.numCells[j]) or ind[j] >= int(0.4 * self.numCells[j]):
+          inside = False 
+      if inside:
+        self.f[i] = 1.0
 
   def advect(self, deltaTime):
     oldF = copy.deepcopy(self.f)
@@ -104,8 +111,10 @@ def main():
     dt = min(courant * dx / velocity[j], dt)
 
   up = Upwind(velocity, lengths, numCells)
+  up.saveVTK('up0.vtk')
   for i in range(numTimeSteps):
     up.advect(dt)
+    up.saveVTK('up{}.vtk'.format(i + 1))
 
   print("check sum: ", up.checksum())
   if doVtk:
