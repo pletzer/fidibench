@@ -41,9 +41,9 @@ results = {
         'compiler': 'gnu-4.8.5',
         'num cores': 2, 
         'time s': {
-            1: float('nan'),
-            2: float('nan'),
-            4: float('nan'),
+            1: 33.9,
+            2: 24.1,
+            4: 23.1,
             8: float('nan'),
         },
     },
