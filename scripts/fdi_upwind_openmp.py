@@ -24,7 +24,7 @@ results = {
         'cpu': 'Intel Xeon',
         'clock GHz': 3.7,
         'compiler': 'gnu-4.8.5',
-        'num cores': 4, # to check
+        'num cores': 8, # to check
         'time s': {
             1: 18.7,
             2: 12.7,
@@ -33,6 +33,21 @@ results = {
             16: 4.90,
             32: 4.56,
             64: 4.35,
+        },
+    },
+    'pan-sb': {
+        'cpu': 'Intel Xeon',
+        'clock GHz': 3.7,
+        'compiler': 'gnu-4.8.2',
+        'num cores': 8, # to check
+        'time s': {
+            1: float('nan'),
+            2: float('nan'),
+            4: float('nan'),
+            8: float('nan'),
+            16: float('nan'),
+            32: float('nan'),
+            64: float('nan'),
         },
     },
     'niwa-1007838': {
@@ -64,8 +79,9 @@ fig, ax = plt.subplots()
 ax.scatter(clock, speed)
 for i in range(len(clock)):
     ax.annotate(cpu[i], (clock[i], speed[i]))
+plt.xlim((0, 4))
+plt.ylim((0, 0.08))
 plt.xlabel('Clock GHz')
 plt.ylabel('Speed 1/s')
-plt.title('Speed vs clock frequency')
-#plt.axes([0, 5, 0, 0.1])
+plt.title('Speed vs clock frequency (128 cells 100 steps)')
 plt.show()
