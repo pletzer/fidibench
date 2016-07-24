@@ -94,7 +94,7 @@ for name, data in results.items():
 
 import matplotlib.pyplot as plt
 fig, ax = plt.subplots()
-ax.scatter(clock, speed, color='r')
+ax.scatter(clock, speed, color='r', s=100)
 for i in range(len(clock)):
     ax.annotate(cpu[i], (clock[i], speed[i]))
 plt.xlim((0, 4))
