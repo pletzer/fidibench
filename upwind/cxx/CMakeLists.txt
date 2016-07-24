@@ -1,4 +1,6 @@
 configure_file(upwindCxx_fitzroy.ll.in upwindCxx_fitzroy.ll)
+configure_file(upwindCxx_pan.sl.in upwindCxx_pan.sl)
+
 if (HAVE_OPENMP)
 	add_definitions(-DHAVE_OPENMP)
 endif()
