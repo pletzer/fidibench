@@ -1,12 +1,30 @@
 #!/usr/bin/env python
 
+import matplotlib
 from matplotlib import pylab
+font = {'family' : 'normal',
+        'size'   : 16}
+
+matplotlib.rc('font', **font)
 
 # num cells = 128
 # num steps = 100
 # 1 thread
 
 results = {
+    'idefix': {
+        'cpu': 'Intel i7',
+        'clock GHz': 2.2,
+        'compiler': 'clang-7.3',
+        'num cores': 4,
+        'time s': { 
+            1: 35.6,
+            2: float('nan'),
+            4: float('nan'),
+            8: float('nan'),
+            16: float('nan'),
+        },
+    },
 	'abraracourcix': {
 		'cpu': 'Intel i7',
         'clock GHz': 2.2,
@@ -24,7 +42,7 @@ results = {
         'cpu': 'Intel Xeon',
         'clock GHz': 3.7,
         'compiler': 'gnu-4.8.5',
-        'num cores': 8, # to check
+        'num cores': 4, # to check
         'time s': {
             1: 18.7,
             2: 12.7,
@@ -76,7 +94,7 @@ for name, data in results.items():
 
 import matplotlib.pyplot as plt
 fig, ax = plt.subplots()
-ax.scatter(clock, speed)
+ax.scatter(clock, speed, color='r')
 for i in range(len(clock)):
     ax.annotate(cpu[i], (clock[i], speed[i]))
 plt.xlim((0, 4))
