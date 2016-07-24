@@ -1,12 +1,14 @@
 # FiDiBench
 
-FiDiBench is a finite difference suite of codes that can be used to benchmark 
-performance on HPC and other systems. The code examples are small enough to be well
-understood, typically averaging a few hundred lines of code, but also relevant to 
-scientific computing, which often involves nearest neighbour communication. 
+FiDiBench is a finite difference suite of codes that can be used to benchmark
+hardware performance on HPC and other systems. The code examples are small 
+enough to be well understood, typically averaging a few hundred lines of code,
+but also relevant to scientific computing, which often involves nearest 
+neighbour communication.
 
-FiDiBench can also be used to compare the execution speed obtained by implementing an 
-algorithm in different languages (eg C++ vs Python vs Julia).
+FiDiBench can also be used to compare the execution speed obtained by 
+implementing a given algorithm in different languages (eg C++ vs Python 
+vs Julia).
 
 ## Requirements
 
