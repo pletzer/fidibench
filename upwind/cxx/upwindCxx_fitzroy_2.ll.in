@@ -1,6 +1,6 @@
 # @ shell = /bin/bash
 #
-# @ job_name = upwindFortran
+# @ job_name = upwindCxx
 #
 # @ job_type = parallel
 #
@@ -15,10 +15,11 @@
 # @ network.MPI          = sn_all,not_shared,US
 # @ task_affinity        = core(1)
 # @ node                 = 1
-# @ total_tasks          = 1
+# @ tasks_per_node       = 1
+# @ parallel_threads     = 2
 # @ queue
 
-exe=@CMAKE_BINARY_DIR@/upwind/fortran/upwindFortran
+exe=@CMAKE_BINARY_DIR@/upwind/cxx/upwindCxx
 
 # On the compute nodes /home is /gpfs_external/filesets/nesi/home
 exe=`echo $exe | perl -ne "s#home#gpfs_external/filesets/nesi/home#;print;"`
