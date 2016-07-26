@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import matplotlib
+import numpy 
+
 from matplotlib import pylab
 font = {'family' : 'normal',
         'size'   : 16}
@@ -117,4 +119,26 @@ plt.ylim((0, 0.08))
 plt.xlabel('Clock GHz')
 plt.ylabel('Speed 1/s')
 plt.title('Speed vs clock frequency (128 cells 100 steps)')
+#plt.show()
+
+# how size affects the speed
+ncells = [64, 128, 256, 512]
+times_s = [2.32, 18.9, 150.2, 1191]
+
+fig, ax = plt.subplots()
+width = 0.2
+
+count = 0
+colors = ['g', 'b', 'r']
+for c in ('abraracourcix', 'pan-sb', 'niwa-1007520'):
+    nth = sorted(results[c]['time s'])
+    inds = [i + count*width for i in range(len(nth))]
+    speed = [1./results[c]['time s'][n] for n in nth]
+    r = ax.bar(inds, speed, width, color=colors[count])
+    count += 1
+ax.set_ylabel('Speed (1/s)')
+ax.set_title('OpenMP speedup')
+ax.set_xticks(inds)
+ax.set_xticklabels(['{}'.format(n) for n in nth])
 plt.show()
+
