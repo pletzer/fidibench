@@ -53,17 +53,32 @@ results = {
             64: 4.35,
         },
     },
-    'pan-sb': {
-        'cpu': 'Intel Xeon',
-        'clock GHz': 3.7,
-        'compiler': 'gnu-4.8.2',
-        'num cores': 8, # to check
+    'fitzroy': {
+        'cpu': 'Power6',
+        'clock GHz': 4.7,
+        'compiler': 'xlcpp-12.1.0.13',
+        'num cores': 32,
         'time s': {
-            1: float('nan'),
-            2: float('nan'),
+            1: 141.7,
+            2: 106.4,
             4: float('nan'),
             8: float('nan'),
             16: float('nan'),
+            32: float('nan'),
+            64: float('nan'),
+        },
+    },
+    'pan-sb': {
+        'cpu': 'Intel Xeon',
+        'clock GHz': 3.7,
+        'compiler': 'gnu-4.9.2',
+        'num cores': 8, # to check
+        'time s': {
+            1: 25.1,
+            2: 14.5,
+            4: 9.8,
+            8: 6.9,
+            16: 4.9,
             32: float('nan'),
             64: float('nan'),
         },
@@ -97,7 +112,7 @@ fig, ax = plt.subplots()
 ax.scatter(clock, speed, color='r', s=100)
 for i in range(len(clock)):
     ax.annotate(cpu[i], (clock[i], speed[i]))
-plt.xlim((0, 4))
+plt.xlim((0, 5))
 plt.ylim((0, 0.08))
 plt.xlabel('Clock GHz')
 plt.ylabel('Speed 1/s')
