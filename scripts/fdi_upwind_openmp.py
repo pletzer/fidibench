@@ -154,7 +154,7 @@ for c in platforms:
     count += 1
 
 # gpu speed
-gpu_time_s = 5.1
+gpu_time_s = 4.85
 ns = [1]
 ids = [i + count*width for i in range(len(ns))]
 speed = [1./gpu_time_s]
