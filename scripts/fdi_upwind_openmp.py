@@ -55,6 +55,21 @@ results = {
             64: 4.35,
         },
     },
+    'niwa-1007520 pgi': {
+        'cpu': 'Intel Xeon',
+        'clock GHz': 3.7,
+        'compiler': 'pgi16-3',
+        'num cores': 4, # to check
+        'time s': {
+            1: 23.203,
+            2: 15.149,
+            4: 10.159,
+            8: 6.619,
+            16: 7.752,
+            32: 12.52,
+            64: float('nan'),
+        },
+    },
     'fitzroy': {
         'cpu': 'Power6',
         'clock GHz': 4.7,
@@ -129,18 +144,26 @@ fig, ax = plt.subplots()
 width = 0.2
 
 count = 0
-colors = ['k', 'b', 'c']
-for c in ('abraracourcix', 'pan-sb', 'niwa-1007520'):
+colors = ['k', 'b', 'c', 'orange']
+platforms = ('abraracourcix', 'pan-sb', 'niwa-1007520', 'niwa-1007520 pgi')
+for c in platforms:
     nth = sorted(results[c]['time s'])
     inds = [i + count*width for i in range(len(nth))]
     speed = [1./results[c]['time s'][n] for n in nth]
     r = ax.bar(inds, speed, width, color=colors[count])
     count += 1
+
+# gpu speed
+gpu_time_s = 5.1
+ns = [1]
+ids = [i + count*width for i in range(len(ns))]
+speed = [1./gpu_time_s]
+r = ax.bar(ids, speed, width, color='r')
 ax.set_ylabel('Speed (1/s)')
 ax.set_xlabel('number of threads')
 ax.set_title('OpenMP speedup')
 ax.set_xticks(inds)
 ax.set_xticklabels(['{}'.format(n) for n in nth])
-ax.legend(('abraracourcix', 'pan-sb', 'niwa-1007520'), loc=2)
+ax.legend(list(platforms) + ['GPU'], loc=4)
 plt.show()
 
