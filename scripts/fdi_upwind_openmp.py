@@ -129,7 +129,7 @@ fig, ax = plt.subplots()
 width = 0.2
 
 count = 0
-colors = ['g', 'b', 'r']
+colors = ['k', 'b', 'c']
 for c in ('abraracourcix', 'pan-sb', 'niwa-1007520'):
     nth = sorted(results[c]['time s'])
     inds = [i + count*width for i in range(len(nth))]
@@ -141,5 +141,6 @@ ax.set_xlabel('number of threads')
 ax.set_title('OpenMP speedup')
 ax.set_xticks(inds)
 ax.set_xticklabels(['{}'.format(n) for n in nth])
+ax.legend(('abraracourcix', 'pan-sb', 'niwa-1007520'), loc=2)
 plt.show()
 
