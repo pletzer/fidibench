@@ -137,6 +137,7 @@ for c in ('abraracourcix', 'pan-sb', 'niwa-1007520'):
     r = ax.bar(inds, speed, width, color=colors[count])
     count += 1
 ax.set_ylabel('Speed (1/s)')
+ax.set_xlabel('number of threads')
 ax.set_title('OpenMP speedup')
 ax.set_xticks(inds)
 ax.set_xticklabels(['{}'.format(n) for n in nth])
