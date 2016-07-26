@@ -1,6 +1,10 @@
 configure_file(upwindCxx_fitzroy.ll.in upwindCxx_fitzroy.ll)
 configure_file(upwindCxx_pan_1.sl.in upwindCxx_pan_1.sl)
 configure_file(upwindCxx_pan_2.sl.in upwindCxx_pan_2.sl)
+configure_file(upwindCxx_pan_4.sl.in upwindCxx_pan_4.sl)
+configure_file(upwindCxx_pan_8.sl.in upwindCxx_pan_8.sl)
+configure_file(upwindCxx_pan_16.sl.in upwindCxx_pan_16.sl)
+configure_file(upwindCxx_pan_32.sl.in upwindCxx_pan_32.sl)
 
 if (HAVE_OPENMP)
 	add_definitions(-DHAVE_OPENMP)

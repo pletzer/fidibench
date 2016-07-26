@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#SBATCH -J upwindCxx_16
+#SBATCH -A nesi99999
+#SBATCH --time=00:10:00
+#SBATCH --mem-per-cpu=8G
+#SBATCH --cpus-per-task=16
+
+exe="@CMAKE_BINARY_DIR@/upwind/cxx/upwindCxx"
+time srun $exe 128 100
+
+
