@@ -15,7 +15,8 @@
 # @ network.MPI          = sn_all,not_shared,US
 # @ task_affinity        = core(1)
 # @ node                 = 1
-# @ total_tasks          = 1
+# @ tasks_per_node       = 1
+# @ parallel_threads     = 8
 # @ queue
 
 exe=@CMAKE_BINARY_DIR@/upwind/cxx/upwindCxx
