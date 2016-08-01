@@ -586,7 +586,6 @@ public:
     }
 
     int nLocal = (int) this->outData.size();
-    int n = (int) ntot;
 
     std::vector<double> recvBuffer;
     if (this->rk == 0) {
