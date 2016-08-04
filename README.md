@@ -13,8 +13,8 @@ vs Julia).
 Example 1: comparing execution speed of C++ vs Fortran (upwind 128 cells/100 time steps)
 ![alt tag](https://raw.githubusercontent.com/pletzer/fidibench/master/pictures/cxx_vs_fortran.png)
 
-Example 12: comparing OpenACC against OpenMP 
-![alt tag](https://raw.githubusercontent.com/pletzer/fidibench/master/pictures/cxx_vs_fortran.png)
+Example 2: comparing OpenACC against OpenMP 
+![alt tag](https://raw.githubusercontent.com/pletzer/fidibench/master/pictures/openacc_vs_openmp.png)
 
 
 ## Requirements
