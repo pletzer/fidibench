@@ -62,13 +62,13 @@ for p in platforms:
         nth = results[p][c].keys()
         nth.sort()
         inds = numpy.array(range(len(nth))) + count*width
-        speed = [1./results[p][c][n] for n in nth]
+        speed = [results['gcc']['c++'][1]/results[p][c][n] for n in nth]
         r = ax.bar(inds, speed, width, color=colors[count])
         count += 1
 
-ax.set_ylabel('Speed (1/s)')
-ax.set_xlabel('number of threads')
-ax.set_title('OpenMP speedup')
+ax.set_ylabel('speedup')
+ax.set_xlabel('number of OpenMP threads')
+ax.set_title('C++ vs Fortran')
 ax.set_xticks(inds)
 ax.set_xticklabels(['{}'.format(n) for n in nth])
 ax.legend(legs, loc=2)

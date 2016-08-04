@@ -144,12 +144,13 @@ fig, ax = plt.subplots()
 width = 0.2
 
 count = 0
-colors = ['k', 'b', 'c', 'orange']
-platforms = ('abraracourcix', 'pan-sb', 'niwa-1007520', 'niwa-1007520 pgi')
+colors = ['c', 'b', 'orange']
+#platforms = ('abraracourcix', 'pan-sb', 'niwa-1007520', 'niwa-1007520 pgi')
+platforms = ('niwa-1007520', 'niwa-1007520 pgi')
 for c in platforms:
     nth = sorted(results[c]['time s'])
     inds = [i + count*width for i in range(len(nth))]
-    speed = [1./results[c]['time s'][n] for n in nth]
+    speed = [results['niwa-1007520']['time s'][1]/results[c]['time s'][n] for n in nth]
     r = ax.bar(inds, speed, width, color=colors[count])
     count += 1
 
@@ -157,13 +158,14 @@ for c in platforms:
 gpu_time_s = 4.85
 ns = [1]
 ids = [i + count*width for i in range(len(ns))]
-speed = [1./gpu_time_s]
+speed = [results['niwa-1007520']['time s'][1]/gpu_time_s]
 r = ax.bar(ids, speed, width, color='r')
-ax.set_ylabel('Speed (1/s)')
-ax.set_xlabel('number of threads')
-ax.set_title('OpenMP speedup')
+ax.set_ylabel('Speedup')
+ax.set_xlabel('number of CPU threads')
+ax.set_title('OpenACC vs OpenMP')
 ax.set_xticks(inds)
 ax.set_xticklabels(['{}'.format(n) for n in nth])
-ax.legend(list(platforms) + ['GPU'], loc=4)
+#ax.legend(list(platforms) + ['GPU'], loc=4)
+ax.legend(['OpenMP gcc', 'OpenMP pgi', 'OpenACC pgi'], loc=4)
 plt.show()
 
