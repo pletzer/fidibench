@@ -54,8 +54,8 @@ class Upwind:
     self.coeff = self.v * self.upDirection / self.deltas
 
     # initializing the field
-    self.f = pnumpy.ghZeros( self.nsLocal, numpy.float64, numGhosts=1 )
-    self.fOld = pnumpy.ghZeros( self.nsLocal, numpy.float64, numGhosts=1 )
+    self.f = pnumpy.gdaZeros( self.nsLocal, numpy.float64, numGhosts=1 )
+    self.fOld = pnumpy.gdaZeros( self.nsLocal, numpy.float64, numGhosts=1 )
 
     # initialize lower corner to one
     if self.rk == 0:
@@ -87,13 +87,13 @@ class Upwind:
     self.f[:, 1:, :] -= deltaTime*self.coeff[1]*self.fOld[:, :-1, :]
     self.f[:, :, 1:] -= deltaTime*self.coeff[2]*self.fOld[:, :, :-1]
 
-    # fetch neighboring data. This is the only place where there is communication
+    # fetch neighboring data. This is where communication takes place
     self.f[:1, :, :] -= deltaTime*self.coeff[0]* \
-                        self.fOld.get(self.neighbRk[0], self.neighbSide[0])
+                        self.fOld.getData(self.neighbRk[0], self.neighbSide[0])
     self.f[:, :1, :] -= deltaTime*self.coeff[1]* \
-                        self.fOld.get(self.neighbRk[1], self.neighbSide[1])
+                        self.fOld.getData(self.neighbRk[1], self.neighbSide[1])
     self.f[:, :, :1] -= deltaTime*self.coeff[2]* \
-                        self.fOld.get(self.neighbRk[2], self.neighbSide[2])
+                        self.fOld.getData(self.neighbRk[2], self.neighbSide[2])
 
   def checksum(self):
     return self.f.reduce(operator.add, 0.0, rootPe=0)
@@ -129,8 +129,7 @@ def main():
   import sys
 
   if len(sys.argv) <= 1:
-    if up.rk == 0: 
-      print("must specify number of cells in each direction.")
+    print("must specify number of cells in each direction.")
     return sys.exit(1)
 
   ndims = 3
