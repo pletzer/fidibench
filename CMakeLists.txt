@@ -47,10 +47,10 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "AIX")
 
   # add optimization flags on AIX
   if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "XL")
-    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O3 -q64 -qextname=get_rstart_fname -qinfo=all -qxflag=oldtab -qfree=f90 -qnoescape -qintlog")
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O3 -qarch=pwr6 -qtune=pwr6 -q64 -qextname=get_rstart_fname -qinfo=all -qxflag=oldtab -qfree=f90 -qnoescape -qintlog")
   endif()
   if (${CMAKE_CXX_COMPILER_ID} STREQUAL "XL")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -q64 -qinfo=all")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -q64 -qarch=pwr6 -qtune=pwr6 -qinfo=all")
   endif()
   set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS}")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
