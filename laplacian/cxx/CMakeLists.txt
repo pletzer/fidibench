@@ -6,13 +6,13 @@ if (MPI_FOUND)
   add_executable(testStencil2d testStencil2d.cxx CmdLineArgParser.cpp)
   add_test(NAME testStencil2d 
   	       COMMAND ${MPIEXEC} -n "${NUM_PROCS}" 
-  	            testStencil2d -numCells "${NUM_CELLS}")
+  	            ./testStencil2d -numCells "${NUM_CELLS}")
 
   add_executable(laplacian laplacian.cxx CmdLineArgParser.cpp)
   add_test(NAME laplacian2D COMMAND ${MPIEXEC} -n "${NUM_PROCS}" 
-  	                        laplacian -numDims 2 -numCells "${NUM_CELLS}")
+  	                        ./laplacian -numDims 2 -numCells "${NUM_CELLS}")
   add_test(NAME laplacian3D COMMAND ${MPIEXEC} -n "${NUM_PROCS}"
-  	                        laplacian -numDims 3 -numCells "${NUM_CELLS}")
+  	                        ./laplacian -numDims 3 -numCells "${NUM_CELLS}")
 
   # we need a better test here
   set_tests_properties(laplacian2D laplacian3D
