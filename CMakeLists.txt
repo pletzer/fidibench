@@ -32,6 +32,7 @@ set(NUM_PROCS "8" CACHE STRING "Number of processes when running tests")
 
 # OpenACC
 option(OPENACC "Enable OpenACC support" OFF)
+option(INTEL_ANALYZER "Add compiler options for Intel Analyzer" OFF)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "AIX")
   # On Fitzroy AIX find_package(MPI) will fail 
@@ -88,6 +89,18 @@ else ()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -acc -Minfo=acc")
     set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -acc -Minfo=acc")
   endif () 
+
+  if (INTEL_ANALYZER AND "${CMAKE_COMPILER_ID}" STREQUAL "Intel") 
+     message(STATUS "You selected INTEL_ANALYZER and compiler is Intel")
+     message(STATUS "You may need to load the following modules:")
+     message(STATUS "ml intel/2017a")
+     message(STATUS "ml intel/2017a")
+     message(STATUS "ml itac/2017.2.028") 
+     message(STATUS "source itacvars.sh impi5")
+     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -tcollect $ENV{VT_ADD_LIBS}")
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -tcollect $ENV{VT_ADD_LIBS}")
+     set(CMAKE_Fortran_FLAGS "${CMAKE_CXX_FLAGS} -g -tcollect $ENV{VT_ADD_LIBS}")
+  endif()
 endif ()
 
 # enable profiling and tracing with TAU
