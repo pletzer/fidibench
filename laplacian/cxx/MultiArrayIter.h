@@ -87,7 +87,7 @@ public:
  * Get te current indices
  * @return indices
  */
-	std::vector<size_t> getIndices() const {
+	inline std::vector<size_t> getIndices() const {
 		std::vector<size_t> res(this->ndims);
 		for (size_t i = 0; i < this->ndims; ++i) {
 			res[i] = this->lo[i] + this->bigIndex / this->dimProd[i] % this->dims[i];

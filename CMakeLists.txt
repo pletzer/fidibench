@@ -33,6 +33,7 @@ set(NUM_PROCS "8" CACHE STRING "Number of processes when running tests")
 # OpenACC
 option(OPENACC "Enable OpenACC support" OFF)
 option(INTEL_ANALYZER "Add compiler options for Intel Analyzer" OFF)
+option(ALLINEA_MAP "Add compiler options for ARM Allinea map profiler" OFF)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "AIX")
   # On Fitzroy AIX find_package(MPI) will fail 
@@ -84,6 +85,14 @@ if (INTEL_ANALYZER)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -tcollect $ENV{VT_ADD_LIBS}")
    set(CMAKE_Fortran_FLAGS 
       "${CMAKE_CXX_FLAGS} -g -tcollect $ENV{VT_ADD_LIBS}")
+endif()
+
+if (ALLINEA_MAP)
+   message(STATUS "You selected ALLINEA_MAP")
+   message(STATUS "You may need to module load forge")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,@/nesi/transit/pletzera/fidibench/allinea-profiler.ld")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,@/nesi/transit/pletzera/fidibench/allinea-profiler.ld")
+   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wl,@/nesi/transit/pletzera/fidibench/allinea-profiler.ld")
 endif()
 
 if ((NOT OPENACC) AND OPENMP_FOUND)
