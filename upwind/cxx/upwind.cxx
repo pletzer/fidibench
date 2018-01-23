@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstring>
+#include "CmdLineArgParser.h"
 
 #ifdef HAVE_OPENMP
 #include <omp.h>
@@ -111,25 +112,20 @@ private:
   }
 };
 
+///////////////////////////////////////////////////////////////////////
 
 int main(int argc, char** argv) {
 
   const int ndims = 3;
 
-  if (argc < 2) {
-    std::cout << "must specify number of cells in each direction.\n";
-    return 1;
-  }
+  CmdLineArgParser args;
+  args.setPurpose("Purpose: benchmark finite difference operations.");
+  args.set("-numCells", 128, "Number of cells along each axis");
+  args.set("-numSteps", 10, "Number of time steps");
+  args.set("-vtk", false, "Write output to VTK file");
 
-  int numTimeSteps = 100;
-  if (argc > 2) {
-    numTimeSteps = atoi(argv[2]);
-  }
-
-  bool doVtk = false;
-  if (argc > 3 && strcmp(argv[3], "vtk") == 0) {
-    doVtk = true;
-  }
+  int numTimeSteps = args.get<int>("-numSteps");
+  bool doVtk = args.get<bool>("-vtk");
 
 #pragma omp parallel
   {
@@ -149,7 +145,7 @@ int main(int argc, char** argv) {
   }
 
   // same resolution in each direction
-  std::vector<size_t> numCells(ndims, atoi(argv[1]));
+  std::vector<size_t> numCells(ndims, args.get<int>("-numCells"));
   std::cout << "number of cells: ";
   for (size_t i = 0; i < numCells.size(); ++i) {
     std::cout << ' ' << numCells[i];
