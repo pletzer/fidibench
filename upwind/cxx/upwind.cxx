@@ -124,6 +124,8 @@ int main(int argc, char** argv) {
   args.set("-numSteps", 10, "Number of time steps");
   args.set("-vtk", false, "Write output to VTK file");
 
+  bool success = args.parse(argc, argv);
+
   int numTimeSteps = args.get<int>("-numSteps");
   bool doVtk = args.get<bool>("-vtk");
 

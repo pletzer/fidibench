@@ -6,6 +6,7 @@ foreach(i 1 2 4 8 16 32)
     configure_file(upwindCxx_pan_${i}.sl.in upwindCxx_pan_${i}.sl)
 endforeach(i)
 configure_file(upwindMpiCxx_pan_20.sl.in upwindMpiCxx_pan_20.sl)
+configure_file(upwindCxx_kupe_40.sl.in upwindCxx_kupe_40.sl)
 
 if (HAVE_OPENMP)
 	add_definitions(-DHAVE_OPENMP)
