@@ -225,7 +225,7 @@ contains
         integer :: i
         
         do i = 1, obj % ntot
-            write(*, '(a, i10, a, e20.14)') 'i = ', i, ' f = ',  obj % f(i)
+            write(*, '(a, i10, a, e20.17)') 'i = ', i, ' f = ',  obj % f(i)
         enddo
  
     end subroutine
