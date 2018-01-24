@@ -8,9 +8,11 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 exe="@CMAKE_BINARY_DIR@/upwind/cxx/upwindCxx"
-time srun --hint=nomultithread $exe -numCells 400 -numSteps 50
+time srun $exe -numCells 400 -numSteps 100
+#time srun --hint=nomultithread $exe -numCells 400 -numSteps 100
+
 
 

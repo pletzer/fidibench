@@ -4,21 +4,11 @@ project(fidibench)
 enable_language(Fortran)
 enable_testing()
 
-set(C_OPT_FLAGS "-O3" CACHE STRING "C compiler optimization flags")
-set(CXX_OPT_FLAGS "-O3" CACHE STRING "C++ compiler optimization flags")
-set(Fortran_OPT_FLAGS "-O3" CACHE STRING "Fortran compiler optimization flags")
+set(OPT_FLAGS "" CACHE STRING "compiler optimization flags")
 
-# make sure the default build is of Release type
-# use cmake -D CMAKE_BUILD_TYPE=Debug to create a debug version
-if (NOT CMAKE_BUILD_TYPE)
-  message(STATUS "Setting build type to 'Release' as none was specified")
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
-  # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_RELEASE} ${C_OPT_FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE} ${CXX_OPT_FLAGS}")
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS_RELEASE} ${Fortran_OPT_FLAGS}")
-endif()
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPT_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPT_FLAGS}")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OPT_FLAGS}")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(OpenMP)
