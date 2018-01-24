@@ -1,7 +1,8 @@
 #!/bin/bash
 
 #SBATCH -J upwindCxx_40
-#SBATCH --partition=Debug
+#SBATCH --partition=NeSI
+#SBATCH --account=nesi99999
 #SBATCH --time=00:10:00
 #SBATCH --cpus-per-task=40
 #SBATCH --ntasks=1
@@ -10,6 +11,6 @@
 OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 exe="@CMAKE_BINARY_DIR@/upwind/cxx/upwindCxx"
-time srun --hint=nomultithread $exe -numCells 400 -numSteps 100
+time srun --hint=nomultithread $exe -numCells 400 -numSteps 50
 
 
