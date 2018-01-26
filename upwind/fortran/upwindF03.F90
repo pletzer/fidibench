@@ -233,7 +233,7 @@ contains
         integer :: i
         
         do i = 1, this % ntot
-            write(*, '(a, i10, a, e20.14)') 'i = ', i, ' f = ',  this % f(i)
+            write(*, '(a, i10, a, e20.13)') 'i = ', i, ' f = ',  this % f(i)
         enddo
  
     end subroutine
