@@ -41,14 +41,16 @@ public:
         this->dimProd[i] =  this->dimProd[i + 1] * this->numCells[i + 1];
       }
     this->f.resize(this->ntot, 0.0);
+    this->oldF.resize(this->ntot, 0.0);
     // initialize lower corner to one
     this->f[0] = 1;
   }
 
   void advect(double deltaTime) {
 
-    std::vector<double> oldF(this->f);
-    const double* __restrict__ oldFPtr = &oldF[0];
+    // copy
+    this->oldF = this->f;
+    const double* __restrict__ oldFPtr = &this->oldF[0];
     double* __restrict__ fPtr = &this->f[0];
 
 #pragma omp parallel for
@@ -92,6 +94,7 @@ private:
   std::vector<double> lengths;
   std::vector<double> deltas;
   std::vector<double> f;
+  std::vector<double> oldF;
   std::vector<int> upDirection;
   std::vector<size_t> dimProd;
   std::vector<size_t> numCells;
