@@ -128,57 +128,71 @@ int main(int argc, char** argv) {
   args.set("-vtk", false, "Write output to VTK file");
 
   bool success = args.parse(argc, argv);
+  bool help = args.get<bool>("-h");
 
-  int numTimeSteps = args.get<int>("-numSteps");
-  bool doVtk = args.get<bool>("-vtk");
+  if (success && !help) {
+
+    int numTimeSteps = args.get<int>("-numSteps");
+    bool doVtk = args.get<bool>("-vtk");
 
 #pragma omp parallel
-  {
-    int numThreads = 1;
-    int maxNumThreads = 1;
-    int threadId = 0;
+    {
+      int numThreads = 1;
+      int maxNumThreads = 1;
+      int threadId = 0;
 #ifdef HAVE_OPENMP
-    numThreads = omp_get_num_threads();
-    maxNumThreads = omp_get_max_threads();
-    threadId = omp_get_thread_num();
-    if (threadId == 0)
-      std::cout << "Running with OpenMP enabled\n";
+      numThreads = omp_get_num_threads();
+      maxNumThreads = omp_get_max_threads();
+      threadId = omp_get_thread_num();
+      if (threadId == 0)
+        std::cout << "Running with OpenMP enabled\n";
 #endif
-    if (threadId == 0)
-      std::cout << "number of threads: " << 
+      if (threadId == 0)
+        std::cout << "number of threads: " << 
            numThreads << " max number of threads: " << maxNumThreads << '\n';
+    }
+
+    // same resolution in each direction
+    std::vector<size_t> numCells(ndims, args.get<int>("-numCells"));
+    std::cout << "number of cells: ";
+    for (size_t i = 0; i < numCells.size(); ++i) {
+      std::cout << ' ' << numCells[i];
+    }
+    std::cout << '\n';
+    std::cout << "number of time steps: " << numTimeSteps << '\n';
+
+    std::vector<double> velocity(numCells.size(), 1.0);
+    std::vector<double> lengths(numCells.size(), 1.0);
+
+    // compute dt 
+    double courant = 0.1;
+    double dt = std::numeric_limits<double>::max();
+    for (size_t j = 0; j < velocity.size(); ++j) {
+      double dx = lengths[j]/numCells[j];
+      double val = courant * dx / velocity[j];
+      dt = (val < dt? val: dt);
+    }
+
+    Upwind<ndims> up(velocity, lengths, numCells);
+    if (doVtk) {
+      up.saveVTK("up0.vtk");
+    }
+    for (int i = 0; i < numTimeSteps; ++i) {
+      up.advect(dt);
+    }
+    std::cout << "check sum: " << up.checksum() << '\n';
+    if (doVtk) {
+      up.saveVTK("up1.vtk");
+    }
+  }
+  else {
+    // error when parsing command line arguments
+    if (!success) {
+      std::cerr << "ERROR when parsing command line arguments\n";
+    }
+    args.help();
   }
 
-  // same resolution in each direction
-  std::vector<size_t> numCells(ndims, args.get<int>("-numCells"));
-  std::cout << "number of cells: ";
-  for (size_t i = 0; i < numCells.size(); ++i) {
-    std::cout << ' ' << numCells[i];
-  }
-  std::cout << '\n';
-  std::cout << "number of time steps: " << numTimeSteps << '\n';
 
-  std::vector<double> velocity(numCells.size(), 1.0);
-  std::vector<double> lengths(numCells.size(), 1.0);
-
-  // compute dt 
-  double courant = 0.1;
-  double dt = std::numeric_limits<double>::max();
-  for (size_t j = 0; j < velocity.size(); ++j) {
-    double dx = lengths[j]/numCells[j];
-    double val = courant * dx / velocity[j];
-    dt = (val < dt? val: dt);
-  }
-
-  Upwind<ndims> up(velocity, lengths, numCells);
-  if (doVtk) {
-    up.saveVTK("up0.vtk");
-  }
-  for (int i = 0; i < numTimeSteps; ++i) {
-    up.advect(dt);
- }
-  std::cout << "check sum: " << up.checksum() << '\n';
-  if (doVtk) {
-    up.saveVTK("up1.vtk");
-  }
+  return 0;
 }
