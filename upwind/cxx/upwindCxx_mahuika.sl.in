@@ -4,6 +4,7 @@
 #SBATCH --mem-per-cpu=4096
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
+#SBATCH --partition=bigmem
 #SBATCH --hint=nomultithread    # don't use hyperthreading
 
 module load PrgEnv-cray/1.0.4
