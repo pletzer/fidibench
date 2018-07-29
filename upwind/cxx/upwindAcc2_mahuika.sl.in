@@ -7,6 +7,6 @@
 #SBATCH --partition=gpu
 #SBATCH --hint=nomultithread    # don't use hyperthreading
 
-exe="@CMAKE_BINARY_DIR@/upwind/cxx/upwindAcci2Cxx"
+exe="@CMAKE_BINARY_DIR@/upwind/cxx/upwindAcc2Cxx"
 time srun $exe -numCells 512 -numSteps 10
 
