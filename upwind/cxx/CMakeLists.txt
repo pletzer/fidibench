@@ -27,10 +27,12 @@ add_executable(upwindCxx upwind.cxx
                ${CMAKE_SOURCE_DIR}/laplacian/cxx/CmdLineArgParser.cpp)
 target_link_libraries(upwindCxx "${EXTRA_LIBS}")
 
-add_executable(upwindAccCxx upwindAcc.cxx)
+add_executable(upwindAccCxx upwindAcc.cxx
+	      ${CMAKE_SOURCE_DIR}/laplacian/cxx/CmdLineArgParser.cpp)
 target_link_libraries(upwindAccCxx "${EXTRA_LIBS}")
 
-add_executable(upwindAcc2Cxx upwindAcc2.cxx)
+add_executable(upwindAcc2Cxx upwindAcc2.cxx
+	      ${CMAKE_SOURCE_DIR}/laplacian/cxx/CmdLineArgParser.cpp)
 target_link_libraries(upwindAcc2Cxx "${EXTRA_LIBS}")
 
 add_executable(upwindMpiCxx upwindMpi.cxx 
