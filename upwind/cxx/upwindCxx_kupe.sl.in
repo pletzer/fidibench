@@ -1,10 +1,9 @@
 #!/bin/bash
 
-#SBATCH -J upwindCxx_40
+#SBATCH -J upwindCxx
 #SBATCH --partition=NeSI
 #SBATCH --account=nesi99999
 #SBATCH --time=00:10:00
-#SBATCH --cpus-per-task=40
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
