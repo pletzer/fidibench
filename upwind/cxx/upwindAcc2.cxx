@@ -128,6 +128,18 @@ int main(int argc, char** argv) {
   args.set("-numSteps", 10, "Number of time steps");
   args.set("-vtk", false, "Write output to VTK file");
 
+  bool success = args.parse(argc, argv);
+  bool help = args.get<bool>("-h");
+
+  if (!success) {
+    std::cerr << "ERROR: wrong command line arguments\n";
+    args.help();
+    return 1;
+  } else if (help) {
+    args.help();
+    return 0;
+  }
+
   int numCellsXYZ = args.get<int>("-numCells");
   int numTimeSteps = args.get<int>("-numSteps");
   bool doVtk = args.get<bool>("-vtk");
