@@ -1,10 +1,3 @@
-# configure 1, 2, 4, .. thread submission scripts
-foreach(i 1 2 4 8 16 32 64)
-    configure_file(upwindCxx_fitzroy_${i}.ll.in upwindCxx_fitzroy_${i}.ll)
-endforeach(i)
-foreach(i 1 2 4 8 16 32)
-    configure_file(upwindCxx_pan_${i}.sl.in upwindCxx_pan_${i}.sl)
-endforeach(i)
 configure_file(upwindMpiCxx_pan_20.sl.in upwindMpiCxx_pan_20.sl)
 configure_file(upwindCxx_kupe.sl.in upwindCxx_kupe.sl)
 configure_file(upwindCxx_mahuika.sl.in upwindCxx_mahuika.sl)
