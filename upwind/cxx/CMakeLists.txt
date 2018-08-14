@@ -1,4 +1,5 @@
 configure_file(upwindMpiCxx_pan_20.sl.in upwindMpiCxx_pan_20.sl)
+configure_file(upwindMpiCxx_kupe.sl.in upwindMpiCxx_kupe.sl)
 configure_file(upwindCxx_kupe.sl.in upwindCxx_kupe.sl)
 configure_file(upwindCxx_mahuika.sl.in upwindCxx_mahuika.sl)
 configure_file(upwindAcc_mahuika.sl.in upwindAcc_mahuika.sl)
