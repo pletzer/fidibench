@@ -9,6 +9,7 @@
  */
 
 #include <vector>
+#include <cstring> // size_t
 
 #ifndef MULTI_ARRAY_ITER_H
 #define MULTI_ARRAY_ITER_H
@@ -28,9 +29,7 @@ public:
  * @param hi high end (one past last element) of the index set
  * @param rowMajor set this to true for row major indexing, false for column major indexing
  */
-	MultiArrayIter(const std::vector<size_t>& lo, const std::vector<size_t>& hi, bool rowMajor) {
-		this->build(lo, hi, rowMajor);
-	}
+	MultiArrayIter(const std::vector<size_t>& lo, const std::vector<size_t>& hi, bool rowMajor);
 
 /**
  * Build iterator
@@ -38,50 +37,12 @@ public:
  * @param hi high end (one past last element) of the index set
  * @param rowMajor set this to true for row major indexing, false for column major indexing
  */
-	void build(const std::vector<size_t>& lo, const std::vector<size_t>& hi, bool rowMajor) {
-
-		this->lo = lo;
-		this->hi = hi;
-		this->ndims = lo.size();
-
-		this->dims.resize(this->ndims);
-		for (size_t i = 0; i < this->ndims; ++i) {
-			this->dims[i] = hi[i] - lo[i];
-		}
-
-		this->rowMajor = rowMajor;
-
-		// total number of elements
-		this->ntot = 1;
-		for (size_t i = 0; i < this->ndims; ++i) {
-			this->ntot *= dims[i];
-		}
-
-		this->dimProd.resize(this->ndims);
-		if (rowMajor) {
-			this->dimProd[this->ndims - 1] = 1;
-			for (int i = (int) this->ndims - 2; i >= 0; --i) {
-				this->dimProd[i] = this->dimProd[i + 1] * this->dims[i + 1];
-			}
-		}
-		else {
-			this->dimProd[0] = 1;
-			for (size_t i = 1; i < this->ndims; ++i) {
-				this->dimProd[i] =  this->dimProd[i - 1] * this->dims[i - 1];
-			}
-		}
-
-		this->begin();
-
-	}
-
+	void build(const std::vector<size_t>& lo, const std::vector<size_t>& hi, bool rowMajor);
 /** 
  * Get the number of terms
  * @return number
  */
-	size_t getNumberOfTerms() const {
-		return this->ntot;
-	}
+	size_t getNumberOfTerms() const;
 
 /**
  * Get te current indices
@@ -98,55 +59,44 @@ public:
 /**
  * Set the iterator to the beginning
  */
-	void begin() {
-		this->bigIndex = 0;
-	}
+	void begin();
 
 /**
  * Increment the iterator
  */
-	void next() {
-		this->bigIndex++;
-	}
+	void next();
 
 /**
  * Move the iterator to the given big index
  * @param bi big (flat) index
  */
-	void move(size_t bi) {
-		this->bigIndex = bi;
-	}
+	void move(size_t bi);
 
 /** 
  * Get the low index set 
  * @return indices
  */
- 	const std::vector<size_t>& getLBegIndices() const {
- 		return this->lo;
- 	}
+ 	const std::vector<size_t>& getLBegIndices() const;
 
 /** 
  * Get the high index set 
  * @return indices
  */
- 	const std::vector<size_t>& getEndIndices() const {
- 		return this->hi;
- 	}
+ 	const std::vector<size_t>& getEndIndices() const;
 
 /**
  * Compute the big index gor the given index set
  * @param inds index set
  * @return big index
  */
-  template<class T>
-	T computeBigIndex(const std::vector<T>& inds) const {
-		//std::cerr << " >>> lo = " << lo[0] << ' ' << lo[1] << ' ' << lo[2] << '\n';
-		size_t bi = 0;
-		for (size_t i = 0; i < this->ndims; ++i) {
-			bi += this->dimProd[i] * (inds[i] - this->lo[i]);
-		}
-		return bi;
-	}
+    template<class T> T computeBigIndex(const std::vector<T>& inds) const {
+
+	    size_t bi = 0;
+	    for (size_t i = 0; i < this->ndims; ++i) {
+		     bi += this->dimProd[i] * (inds[i] - this->lo[i]);
+	    }
+	    return bi;
+    }
 
 private:
 

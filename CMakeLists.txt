@@ -135,5 +135,6 @@ message(STATUS "           flags: ${CMAKE_Fortran_FLAGS}")
 message(STATUS "==============================================================")
 
 add_subdirectory(scripts)
+add_subdirectory(cxx)
 add_subdirectory(laplacian)
 add_subdirectory(upwind)

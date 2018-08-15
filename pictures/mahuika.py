@@ -28,7 +28,6 @@ gnu61_kupe_times = [ 1*60+32.590, 3*60+13.742, 3*60+55.533, 6*60+56.419, 4*60+11
 cray_kupe_times = [  31.925, 51.051, 1*60+16.631, 2*60+40.138, 4*60+59.781, 8*60+27.299]
 
 
-"""
 pylab.figure(1)
 pylab.plot(nthreads_mahuika, intel_times, 'r-')
 pylab.plot(nthreads_mahuika, gnu_times, 'g-')
@@ -42,7 +41,6 @@ pylab.plot(nthreads_mahuika, gnu_times, 'ko', markerfacecolor='None')
 pylab.plot(nthreads_mahuika, cray_times, 'ko', markerfacecolor='None')
 
 pylab.show()
-"""
 
 pylab.figure(2)
 pylab.plot(nthreads_kupe, intel_kupe_times, 'r-')
