@@ -163,7 +163,7 @@ public:
       
   MPI_Get(dstData, n, MPI_DOUBLE, otherRank, 0, n, MPI_DOUBLE, win);
 
-  MPI_Win_fence(MPI_MODE_NOSUCCEED, win); 
+  MPI_Win_fence(MPI_MODE_NOSUCCEED, win);
 
   return dstData;
  }

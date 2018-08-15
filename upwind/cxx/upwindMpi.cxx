@@ -113,6 +113,14 @@ int main(int argc, char** argv) {
       // advect in time
       for (size_t i = 0; i < numSteps; ++i) {
         fltr.applyFilter();
+#define CHECK_NAN
+#ifdef CHECK_NAN
+        double inSum = fltr.computeCheckSum("input");
+        double outSum = fltr.computeCheckSum("output");
+        if (fltr.getRank() == 0) {
+        	std::cout << "iter " << i << " check sum  in/out = " << inSum << " / " << outSum << '\n';
+        }
+#endif
         fltr.copyOutToIn();
       }
       //fltr.printOutData();
