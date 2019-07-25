@@ -73,7 +73,7 @@ type Upwind
         # Build the index set
         this.inds = zeros(Integer, (this.ntot, this.ndims))
         for j = 1:ndims
-            this.inds[:, j] = mod(div(collect(0:this.ntot - 1), this.dimProd[j]), this.numCells[j])
+            this.inds[:, j] = mod.(div.(collect(0:this.ntot - 1), this.dimProd[j]), this.numCells[j])
         end
 
         return this
@@ -92,7 +92,7 @@ function advect!(this::Upwind, deltaTime::Float64)
 
     for j = 1:this.ndims
 
-        indsUp[:, j] = mod(this.inds[:, j] + this.upDirection[j], this.numCells[j])
+        indsUp[:, j] = mod.(this.inds[:, j] + this.upDirection[j], this.numCells[j])
 
         # compute flat indices corresponding to the offset index sets
         flatIndsUp = this.dimProd'indsUp' + 1 #dot(indsUp, this.dimProd) + 1
