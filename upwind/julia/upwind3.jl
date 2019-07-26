@@ -4,9 +4,10 @@
 # Original code from Christopher Blanton (cjb47@psu.edu)
 # Modified by Alex Pletzer (alexander@gokliya.net)
 
+using LinearAlgebra
 include("saveVTK.jl")
 
-struct Upwind
+mutable struct Upwind
     # Number of space dimensions
     ndims::Int
 
@@ -35,6 +36,8 @@ struct Upwind
     f::Array
     # Index set
     inds::Array
+    # Array of ones
+    eins::Array
 
     function Upwind(ndims::Int, velocity::Array, lengths::Array, numCells::Array)
         """
@@ -75,6 +78,8 @@ struct Upwind
             this.inds[:, j] = mod.(div.(collect(0:this.ntot - 1), this.dimProd[j]), this.numCells[j])
         end
 
+        this.eins = ones(this.ntot)
+
         return this
     end
 end
@@ -91,10 +96,11 @@ function advect!(this::Upwind, deltaTime::Float64)
 
     for j = 1:this.ndims
 
-        indsUp[:, j] = mod.(this.inds[:, j] + this.upDirection[j], this.numCells[j])
+        indsUp[:, j] = mod.(this.inds[:, j] + this.upDirection[j]*this.eins, this.numCells[j])
 
         # compute flat indices corresponding to the offset index sets
-        flatIndsUp = this.dimProd'indsUp' + 1 #dot(indsUp, this.dimProd) + 1
+
+        flatIndsUp = this.dimProd'indsUp' .+ 1
 
         # update
         c = deltaTime * this.velocity[j] * this.upDirection[j] / this.deltas[j]

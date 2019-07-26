@@ -36,8 +36,6 @@ mutable struct Upwind
     dimProd::Array
     # Field
     f::Array
-    # Array of ones
-    eins::Array
 
     function Upwind(ndims::Int, velocity::Array, lengths::Array, numCells::Array)
         """
@@ -65,8 +63,6 @@ mutable struct Upwind
         for i = 2:ndims
             this.dimProd[i] = this.dimProd[i-1] * this.numCells[i-1]
         end
-
-        this.eins = ones(Integer, ndims::Integer)
 
         # 
         # Set the initial field
@@ -107,7 +103,7 @@ function getFlatIndex(this::Upwind, inds::Array)
     @param inds index set, eg [i, j, k]
     @return integer index of field array
     """
-    return dot(this.dimProd, inds - this.eins) + 1
+    return dot(this.dimProd, inds .- 1) + 1
 end
   
 function getIndexSet(this::Upwind, flatIndex::Integer)
