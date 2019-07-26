@@ -4,10 +4,12 @@
 # Original code from Christopher Blanton (cjb47@psu.edu)
 # Modified by Alex Pletzer (alexander@gokliya.net)
 
-include("saveVTK.jl")
-import saveVTK
+using LinearAlgebra 
 
-type Upwind
+include("saveVTK.jl")
+
+mutable struct Upwind
+
     # Number of space dimensions
     ndims::Int
 
@@ -34,6 +36,8 @@ type Upwind
     dimProd::Array
     # Field
     f::Array
+    # Array of ones
+    eins::Array
 
     function Upwind(ndims::Int, velocity::Array, lengths::Array, numCells::Array)
         """
@@ -57,10 +61,12 @@ type Upwind
             this.deltas[i] = lengths[i]/numCells[i]
             this.ntot *= numCells[i]
         end
-        this.dimProd = ones(Integer,ndims::Integer)
+        this.dimProd = ones(Integer, ndims::Integer)
         for i = 2:ndims
             this.dimProd[i] = this.dimProd[i-1] * this.numCells[i-1]
         end
+
+        this.eins = ones(Integer, ndims::Integer)
 
         # 
         # Set the initial field
@@ -101,7 +107,7 @@ function getFlatIndex(this::Upwind, inds::Array)
     @param inds index set, eg [i, j, k]
     @return integer index of field array
     """
-    return dot(this.dimProd, inds - 1) + 1
+    return dot(this.dimProd, inds - this.eins) + 1
 end
   
 function getIndexSet(this::Upwind, flatIndex::Integer)
@@ -111,7 +117,7 @@ function getIndexSet(this::Upwind, flatIndex::Integer)
     @param flatIndex flat index 
     @return index set, eg [i, j, k]
     """
-    res = zeros(Integer,this.ndims)
+    res = zeros(Integer, this.ndims)
     for i = 1:this.ndims
         res[i] = mod(div((flatIndex - 1), this.dimProd[i]), this.numCells[i]) + 1
     end
@@ -162,10 +168,9 @@ lengths   = ones(Float64, ndims)
 # Compute time step
 courant = 0.1
 dt = Inf
-dx = 0.0
 for i = 1:ndims
     dx = lengths[i]/float(numCells[i])
-    dt = min((courant*dx)/velocity[i], dt)
+    global dt = min((courant*dx)/velocity[i], dt)
 end
 
 # Create Upwind instance

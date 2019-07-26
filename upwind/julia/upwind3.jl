@@ -5,9 +5,8 @@
 # Modified by Alex Pletzer (alexander@gokliya.net)
 
 include("saveVTK.jl")
-import saveVTK
 
-type Upwind
+struct Upwind
     # Number of space dimensions
     ndims::Int
 
@@ -176,14 +175,13 @@ lengths   = ones(Float64, ndims)
 # Compute time step
 courant = 0.1
 dt = Inf
-dx = 0.0
 for i = 1:ndims
     dx = lengths[i]/float(numCells[i])
-    dt = min((courant*dx)/velocity[i], dt)
+    global dt = min((courant*dx)/velocity[i], dt)
 end
 
 # Create Upwind instance
-up = Upwind(ndims,velocity,lengths,numCells)
+up = Upwind(ndims, velocity, lengths, numCells)
 
 # Advect
 for i = 1:numTimeSteps

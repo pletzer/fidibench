@@ -1,7 +1,4 @@
-module saveVTK
 using Printf
-
-export rectilinear
 
 function rectilinear(fname::AbstractString,
                      xAxis::Array, yAxis::Array, zAxis::Array,
@@ -63,4 +60,3 @@ function rectilinear(fname::AbstractString,
 
 end
 
-end
