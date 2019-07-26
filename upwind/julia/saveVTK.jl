@@ -1,9 +1,10 @@
 module saveVTK
+using Printf
 
 export rectilinear
 
 function rectilinear(fname::AbstractString,
-                     xAxis::LinSpace, yAxis::LinSpace, zAxis::LinSpace,
+                     xAxis::Array, yAxis::Array, zAxis::Array,
                      data::Array)
     """
     Save data on rectilinear grid in VTK file
