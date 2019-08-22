@@ -44,8 +44,8 @@ data = {
 		},
 	'mahuika-gnu': {
 		'nthreads': [36, 18, 9, 4, 2, 1],
-		'seconds-old' : [45, 180, 236, 361, 447, 807],
-		'seconds-new' : [18, 32, 58, 124, 242, 483],
+		'seconds-old' : [ 22, 63, 84, 132, 197, 177,], # [45, 180, 236, 361, 447, 807],
+		'seconds-new' : [ 6.1, 9.5, 17.3, 35.2, 68.6, 134], # [18, 32, 58, 124, 242, 483],
 		'color': 'b',
 		'style': '--'
 		},
@@ -78,4 +78,5 @@ data = {
 
 plotOld(keys=['mahuika-' + p for p in ('cray', 'intel', 'gnu')])
 plotOld(keys=['maui-' + p for p in ('cray', 'intel', 'gnu')])
+
 
