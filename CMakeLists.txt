@@ -56,6 +56,11 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "AIX")
 
 endif()
 
+if (NOT DEFINED "${CMAKE_BUILD_TYPE}")
+    set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+    message(STATUS "Build type is ${CMAKE_BUILD_TYPE}")
+endif()
+
 message(STATUS "Looking for MPI")
 find_package(MPI)
 if (MPI_FOUND)
