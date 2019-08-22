@@ -53,10 +53,12 @@ public:
     const double* __restrict__ oldFPtr = &this->oldF[0];
     double* __restrict__ fPtr = &this->f[0];
 
-#pragma omp parallel for
+    int inds[NDIMS];
+
+#pragma omp parallel for private(inds)
     for (int i = 0; i < (int) this->ntot; ++i) {
 
-      std::vector<int> inds = this->getIndexSet(i);
+      this->getIndexSet(i, &inds[0]);
 
       for (size_t j = 0; j < NDIMS; ++j) {
 
@@ -101,17 +103,15 @@ private:
   size_t ntot;
 
   inline
-  std::vector<int> getIndexSet(size_t flatIndex) const {
-    std::vector<int> res(NDIMS);
+  void getIndexSet(size_t flatIndex, int inds[]) const {
     for (size_t i = 0; i < NDIMS; ++i) {
-      res[i] = flatIndex / this->dimProd[i] % this->numCells[i];
+      inds[i] = flatIndex / this->dimProd[i] % this->numCells[i];
     }
-    return res;
   }
 
   inline 
-  size_t getFlatIndex(const std::vector<int>& inds) const {
-    return std::inner_product(this->dimProd.begin(), this->dimProd.end(), inds.begin(), 0);
+  size_t getFlatIndex(const int inds[]) const {
+    return std::inner_product(this->dimProd.begin(), this->dimProd.end(), &inds[0], 0);
   }
 };
 
