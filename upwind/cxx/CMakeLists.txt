@@ -23,6 +23,9 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 add_executable(upwindCxx upwind.cxx)
 target_link_libraries(upwindCxx fidibench "${EXTRA_LIBS}")
 
+add_executable(upwindOMP5Cxx upwindOMP5.cxx)
+target_link_libraries(upwindOMP5Cxx fidibench "${EXTRA_LIBS}")
+
 add_executable(upwindAccCxx upwindAcc.cxx)
 target_link_libraries(upwindAccCxx fidibench "${EXTRA_LIBS}")
 
