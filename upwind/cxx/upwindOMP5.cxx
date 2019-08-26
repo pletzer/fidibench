@@ -60,9 +60,10 @@ public:
     int* numCellsPtr = &this->numCells.front();
     int ntot = this->ntot;
 
-#pragma omp target map(to: ntot) map(to: numCellsPtr[NDIMS]) map(to: dimProdPtr[NDIMS]) \
-                   map(to: upDirectionPtr[NDIMS]) map(to: coeffPtr[NDIMS]) map(to: deltaTime) \
-                   map(to: fOldPtr[ntot]) map(tofrom: fPtr[ntot])
+#pragma omp target map(to: ntot, deltaTime, \
+numCellsPtr[0:NDIMS], dimProdPtr[0:NDIMS], \
+upDirectionPtr[0:NDIMS], coeffPtr[0:NDIMS], fOldPtr[0:ntot]) \
+map(tofrom: fPtr[0:ntot])
     {
 
     #pragma omp teams distribute parallel for
