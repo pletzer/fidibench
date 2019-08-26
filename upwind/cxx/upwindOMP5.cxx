@@ -1,5 +1,4 @@
 #include <vector>
-#include <array>
 #include <functional>
 #include <algorithm>
 #include <numeric>
@@ -11,17 +10,13 @@
 #include <cstring>
 #include "CmdLineArgParser.h"
 
-#ifdef HAVE_OPENMP
-#include <omp.h>
-#endif
-
 template <size_t NDIMS>
 class Upwind {
 public:
   // ctor
   Upwind(const std::vector<double>& velocity, 
          const std::vector<double>& lengths, 
-         const std::vector<size_t>& numCells) {
+         const std::vector<int>& numCells) {
 
     this->numCells = numCells;
     this->deltas.resize(NDIMS);
@@ -42,43 +37,59 @@ public:
         this->dimProd[i] =  this->dimProd[i + 1] * this->numCells[i + 1];
       }
     this->f.resize(this->ntot, 0.0);
-    this->oldF.resize(this->ntot, 0.0);
     // initialize lower corner to one
     this->f[0] = 1;
+
+    this->coeff.resize(NDIMS);
+    for (size_t j = 0; j < NDIMS; ++j) {
+      this->coeff[j] = this->v[j] * this->upDirection[j] / this->deltas[j];
+    }
   }
 
   void advect(double deltaTime) {
 
     // copy
-    this->oldF = this->f;
-    const double* __restrict__ oldFPtr = &this->oldF[0];
-    double* __restrict__ fPtr = &this->f[0];
+    std::vector<double> oldF(this->f);
 
-#pragma omp target teams distribute parallel for
-    for (int i = 0; i < (int) this->ntot; ++i) {
+    // OpenACC works with primitive arrays
+    double* fPtr = &this->f.front();
+    double* fOldPtr = &oldF.front();
+    double* coeffPtr = &this->coeff.front();
+    int* upDirectionPtr = &this->upDirection.front();
+    int* dimProdPtr = &this->dimProd.front();
+    int* numCellsPtr = &this->numCells.front();
+    int ntot = this->ntot;
 
-      std::array<int, NDIMS> inds = this->getIndexSet(i);
+#pragma omp target map(to: ntot) map(to: numCellsPtr[NDIMS]) map(to: dimProdPtr[NDIMS]) \
+                   map(to: upDirectionPtr[NDIMS]) map(to: coeffPtr[NDIMS]) map(to: deltaTime) \
+                   map(to: fOldPtr[ntot]) map(tofrom: fPtr[ntot])
+    {
 
-      for (size_t j = 0; j < NDIMS; ++j) {
+    #pragma omp teams distribute parallel for
+    for (int i = 0; i < ntot; ++i) {
 
-        int oldIndex = inds[j];
-        const double coeff = deltaTime * this->v[j] * this->upDirection[j] / this->deltas[j];
 
-        // periodic BCs
-        inds[j] += this->upDirection[j] + this->numCells[j];
-        inds[j] %= this->numCells[j];
+      int inds[NDIMS];
+      int upI;
 
-        size_t upI = this->getFlatIndex(&inds[0]);
+#include "compute_index_set.h"
 
-        fPtr[i] -= coeff * (oldFPtr[upI] - oldFPtr[i]);
+#include "compute_flat_index_offset_x.h"
+fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upI] - fOldPtr[i]);
 
-        inds[j] = oldIndex;
-      }
+#include "compute_flat_index_offset_y.h"
+fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
+
+#include "compute_flat_index_offset_z.h"
+fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
+
+
+    } // parallel loop
     }
+
   }
 
 #include "saveVTK.h"
-
 
   double checksum() const {
     return std::accumulate(this->f.begin(), this->f.end(), 0.0, std::plus<double>());
@@ -91,37 +102,21 @@ public:
   }
 
 private:
+  std::vector<double> f;
   std::vector<double> v;
   std::vector<double> lengths;
   std::vector<double> deltas;
-  std::vector<double> f;
-  std::vector<double> oldF;
+  std::vector<double> coeff;
   std::vector<int> upDirection;
-  std::vector<size_t> dimProd;
-  std::vector<size_t> numCells;
-  size_t ntot;
-
-  inline
-  std::array<int, NDIMS> getIndexSet(size_t flatIndex) const {
-    std::array<int, NDIMS> res;
-    for (size_t i = 0; i < NDIMS; ++i) {
-      res[i] = flatIndex / this->dimProd[i] % this->numCells[i];
-    }
-    return res;
-  }
-
-  inline 
-  size_t getFlatIndex(const int inds[]) const {
-    return std::inner_product(this->dimProd.begin(), this->dimProd.end(), &inds[0], 0);
-  }
+  std::vector<int> dimProd;
+  std::vector<int> numCells;
+  int ntot;
 };
 
-///////////////////////////////////////////////////////////////////////
 
 int main(int argc, char** argv) {
 
   const int ndims = 3;
-
   CmdLineArgParser args;
   args.setPurpose("Purpose: benchmark finite difference operations.");
   args.set("-numCells", 128, "Number of cells along each axis");
@@ -131,69 +126,47 @@ int main(int argc, char** argv) {
   bool success = args.parse(argc, argv);
   bool help = args.get<bool>("-h");
 
-  if (success && !help) {
-
-    int numTimeSteps = args.get<int>("-numSteps");
-    bool doVtk = args.get<bool>("-vtk");
-
-#pragma omp parallel
-    {
-      int numThreads = 1;
-      int maxNumThreads = 1;
-      int threadId = 0;
-#ifdef HAVE_OPENMP
-      numThreads = omp_get_num_threads();
-      maxNumThreads = omp_get_max_threads();
-      threadId = omp_get_thread_num();
-      if (threadId == 0)
-        std::cout << "Running with OpenMP enabled\n";
-#endif
-      if (threadId == 0)
-        std::cout << "number of threads: " << 
-           numThreads << " max number of threads: " << maxNumThreads << '\n';
-    }
-
-    // same resolution in each direction
-    std::vector<size_t> numCells(ndims, args.get<int>("-numCells"));
-    std::cout << "number of cells: ";
-    for (size_t i = 0; i < numCells.size(); ++i) {
-      std::cout << ' ' << numCells[i];
-    }
-    std::cout << '\n';
-    std::cout << "number of time steps: " << numTimeSteps << '\n';
-
-    std::vector<double> velocity(numCells.size(), 1.0);
-    std::vector<double> lengths(numCells.size(), 1.0);
-
-    // compute dt 
-    double courant = 0.1;
-    double dt = std::numeric_limits<double>::max();
-    for (size_t j = 0; j < velocity.size(); ++j) {
-      double dx = lengths[j]/numCells[j];
-      double val = courant * dx / velocity[j];
-      dt = (val < dt? val: dt);
-    }
-
-    Upwind<ndims> up(velocity, lengths, numCells);
-    if (doVtk) {
-      up.saveVTK("up0.vtk");
-    }
-    for (int i = 0; i < numTimeSteps; ++i) {
-      up.advect(dt);
-    }
-    std::cout << "check sum: " << up.checksum() << '\n';
-    if (doVtk) {
-      up.saveVTK("up1.vtk");
-    }
-  }
-  else {
-    // error when parsing command line arguments
-    if (!success) {
-      std::cerr << "ERROR when parsing command line arguments\n";
-    }
+  if (!success) {
+    std::cerr << "ERROR: wrong command line arguments\n";
     args.help();
+    return 1;
+  } else if (help) {
+    args.help();
+    return 0;
   }
 
+  int numCellsXYZ = args.get<int>("-numCells");
+  int numTimeSteps = args.get<int>("-numSteps");
+  bool doVtk = args.get<bool>("-vtk");
 
-  return 0;
+  // same resolution in each direction
+  std::vector<int> numCells(ndims, numCellsXYZ);
+  std::cout << "number of cells: ";
+  for (size_t i = 0; i < numCells.size(); ++i) {
+    std::cout << ' ' << numCells[i];
+  }
+  std::cout << '\n';
+  std::cout << "number of time steps: " << numTimeSteps << '\n';
+
+  std::vector<double> velocity(numCells.size(), 1.0);
+  std::vector<double> lengths(numCells.size(), 1.0);
+
+  // compute dt 
+  double courant = 0.1;
+  double dt = std::numeric_limits<double>::max();
+  for (size_t j = 0; j < velocity.size(); ++j) {
+    double dx = lengths[j]/numCells[j];
+    double val = courant * dx / velocity[j];
+    dt = (val < dt? val: dt);
+  }
+
+  Upwind<ndims> up(velocity, lengths, numCells);
+  //up.saveVTK("up0.vtk");
+  for (int i = 0; i < numTimeSteps; ++i) {
+    up.advect(dt);
+  }
+  std::cout << "check sum: " << up.checksum() << '\n';
+  if (doVtk) {
+    up.saveVTK("up.vtk");
+  }
 }
