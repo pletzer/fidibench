@@ -12,6 +12,25 @@ set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OPT_FLAGS}")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(OpenMP)
+# Cmake needs help with clang 
+if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    # get the installation directory of LIBOMP
+    execute_process (
+        COMMAND bash -c "brew --prefix libomp"
+        OUTPUT_VARIABLE LIBOMP_DIR
+    )
+    string(REGEX REPLACE "\n$" "" LIBOMP_DIR "${LIBOMP_DIR}")
+    set(LIBOMP_INCDIR "${LIBOMP_DIR}/include")
+    set(LIBOMP_LIBDIR "${LIBOMP_DIR}/lib")
+    if (OpenMP_C_FLAGS STREQUAL "NOTFOUND")
+        set(OpenMP_C_FLAGS "-I${LIBOMP_INCDIR} -L${LIBOMP_LIBDIR} -Xpreprocessor -fopenmp -lomp")
+        message(STATUS "clang detected and OpenMP_C_FLAGS set to ${OpenMP_C_FLAGS}")
+    endif()
+    if (OpenMP_CXX_FLAGS STREQUAL "NOTFOUND")
+        set(OpenMP_CXX_FLAGS "-I${LIBOMP_INCDIR} -L${LIBOMP_LIBDIR} -Xpreprocessor -fopenmp -lomp")
+        message(STATUS "clang++ detected OpenMP_CXX_FLAGS set to ${OpenMP_CXX_FLAGS}")
+    endif()
+endif()
 find_package(PythonExecutable)
 find_package(JuliaExecutable)
 
