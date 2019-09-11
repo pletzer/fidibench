@@ -59,6 +59,7 @@ public:
     int* numCellsPtr = &this->numCells.front();
     int ntot = this->ntot;
     int upI;
+    int i;
 
 #pragma acc data \
   copy(fPtr[ntot]) \
@@ -66,14 +67,15 @@ public:
   copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS],	\
   upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime)
    {
+   int i;
 
 #pragma acc parallel loop
-    for (int i = 0; i < ntot; ++i) {
+    for (i = 0; i < ntot; ++i) {
       fOldPtr[i] = fPtr[i];
     }
 
 #pragma acc parallel loop
-    for (int i = 0; i < ntot; ++i) {
+    for (i = 0; i < ntot; ++i) {
 
       int inds[NDIMS];
 

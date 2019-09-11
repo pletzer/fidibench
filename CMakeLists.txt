@@ -24,6 +24,7 @@ set(NUM_PROCS "8" CACHE STRING "Number of processes when running tests")
 
 # OpenACC
 option(OPENACC "Enable OpenACC support" OFF)
+option(OPENMP_OFFLOAD "Enable OpenMP offloading to GPU support" OFF)
 option(INTEL_ANALYZER "Add compiler options for Intel Analyzer" OFF)
 
 message(STATUS "System: ${CMAKE_SYSTEM_NAME}")
@@ -105,7 +106,7 @@ if ((NOT OPENACC) AND OPENMP_FOUND)
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_C_FLAGS}")
 else ()
   # OpenACC is incompatible with OpenMP, either one or the other or none
-  if (OPENACC)
+  if (OPENACC AND CMAKE_COMPILER_ID STREQUAL "PGI")
     message(STATUS "OpenACC enabled")
     # These are the PGI openACC flags -- need to find out what the 
     # corresponding options are for the CRAY, gcc, ... compilers 
