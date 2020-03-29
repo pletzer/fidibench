@@ -19,10 +19,10 @@ Example 2: comparing OpenACC against OpenMP
 
 ## Requirements
 
-* CMake 2.8 or later
+* CMake 3.1 or later
 * Message Passing Interface, MPI (optional)
 * OpenMP (optional)
-* C/C++ compiler (optional)
+* C/C++ compiler supporting the C++11 standard (optional)
 * Python 2.7 with numpy (optional)
 * Julia 0.45 or later (optional)
 
