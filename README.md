@@ -10,10 +10,14 @@ FiDiBench can also be used to compare the execution speed obtained by
 implementing a given algorithm in different languages (eg C++ vs Python 
 vs Julia).
 
-Example 1: comparing execution speed of C++ vs Fortran (upwind 128 cells/100 time steps)
+Example 1: comparing C++ compilers (upwind 512 cells, 10 time steps). Note the effect vectorization 
+when applying -O3 with the GNU compiler. 
+![alt tag](https://raw.githubusercontent.com/pletzer/fidibench/master/pictures/mahuika.png)
+
+Example 2: comparing execution speed of C++ vs Fortran (upwind 128 cells/100 time steps)
 ![alt tag](https://raw.githubusercontent.com/pletzer/fidibench/master/pictures/cxx_vs_fortran.png)
 
-Example 2: comparing OpenACC against OpenMP 
+Example 3: comparing OpenACC against OpenMP 
 ![alt tag](https://raw.githubusercontent.com/pletzer/fidibench/master/pictures/openacc_vs_openmp.png)
 
 
