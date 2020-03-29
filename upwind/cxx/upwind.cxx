@@ -1,4 +1,5 @@
 #include <vector>
+#include <array>
 #include <functional>
 #include <algorithm>
 #include <numeric>
@@ -56,7 +57,7 @@ public:
 #pragma omp parallel for
     for (int i = 0; i < (int) this->ntot; ++i) {
 
-      std::vector<int> inds = this->getIndexSet(i);
+      std::array<int, NDIMS> inds = this->getIndexSet(i);
 
       for (size_t j = 0; j < NDIMS; ++j) {
 
@@ -67,7 +68,7 @@ public:
         inds[j] += this->upDirection[j] + this->numCells[j];
         inds[j] %= this->numCells[j];
 
-        size_t upI = this->getFlatIndex(inds);
+        size_t upI = this->getFlatIndex(&inds[0]);
 
         fPtr[i] -= coeff * (oldFPtr[upI] - oldFPtr[i]);
 
@@ -101,8 +102,8 @@ private:
   size_t ntot;
 
   inline
-  std::vector<int> getIndexSet(size_t flatIndex) const {
-    std::vector<int> res(NDIMS);
+  std::array<int, NDIMS> getIndexSet(size_t flatIndex) const {
+    std::array<int, NDIMS> res;
     for (size_t i = 0; i < NDIMS; ++i) {
       res[i] = flatIndex / this->dimProd[i] % this->numCells[i];
     }
@@ -110,8 +111,8 @@ private:
   }
 
   inline 
-  size_t getFlatIndex(const std::vector<int>& inds) const {
-    return std::inner_product(this->dimProd.begin(), this->dimProd.end(), inds.begin(), 0);
+  size_t getFlatIndex(const int inds[]) const {
+    return std::inner_product(this->dimProd.begin(), this->dimProd.end(), &inds[0], 0);
   }
 };
 

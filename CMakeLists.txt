@@ -1,8 +1,10 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.1)
 project(fidibench)
 
 enable_language(Fortran)
 enable_testing()
+
+set(CMAKE_CXX_STANDARD 11)
 
 set(OPT_FLAGS "" CACHE STRING "compiler optimization flags")
 
@@ -42,8 +44,8 @@ set(NUM_PROCS "8" CACHE STRING "Number of processes when running tests")
 # OpenACC
 option(OPENACC "Enable OpenACC support" OFF)
 option(INTEL_ANALYZER "Add compiler options for Intel Analyzer" OFF)
-option(ALLINEA_MAP "Add compiler options for ARM Allinea map profiler" OFF)
 
+message(STATUS "System: ${CMAKE_SYSTEM_NAME}")
 if (${CMAKE_SYSTEM_NAME} STREQUAL "AIX")
   # On Fitzroy AIX find_package(MPI) will fail 
   # unless one sets MPI_CXX_INCLUDE_PATH and 
@@ -80,6 +82,19 @@ if (NOT DEFINED "${CMAKE_BUILD_TYPE}")
     message(STATUS "Build type is ${CMAKE_BUILD_TYPE}")
 endif()
 
+message(STATUS "Fortran compiler Id: ${CMAKE_Fortran_COMPILER_ID}")
+message(STATUS "C compiler Id      : ${CMAKE_C_COMPILER_ID}")
+message(STATUS "C++ compiler Id    : ${CMAKE_CXX_COMPILER_ID}")
+if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Cray")
+  set(MPI_Fortran_COMPILER "ftn")
+endif()
+if (${CMAKE_C_COMPILER_ID} STREQUAL "Cray")
+  set(MPI_C_COMPILER "cc")
+endif()
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Cray")
+  set(MPI_CXX_COMPILER "CC")
+endif()
+
 message(STATUS "Looking for MPI")
 find_package(MPI)
 if (MPI_FOUND)
@@ -99,14 +114,6 @@ if (INTEL_ANALYZER)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -tcollect $ENV{VT_ADD_LIBS}")
    set(CMAKE_Fortran_FLAGS 
       "${CMAKE_CXX_FLAGS} -g -tcollect $ENV{VT_ADD_LIBS}")
-endif()
-
-if (ALLINEA_MAP)
-   message(STATUS "You selected ALLINEA_MAP")
-   message(STATUS "You may need to module load forge")
-   set(CMAKE_C_FLAGS "-g ${CMAKE_C_FLAGS} -Wl,@/nesi/transit/pletzera/fidibench/allinea-profiler.ld")
-   set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS} -Wl,@/nesi/transit/pletzera/fidibench/allinea-profiler.ld")
-   set(CMAKE_Fortran_FLAGS "-g ${CMAKE_Fortran_FLAGS} -Wl,@/nesi/transit/pletzera/fidibench/allinea-profiler.ld")
 endif()
 
 if ((NOT OPENACC) AND OPENMP_FOUND)
