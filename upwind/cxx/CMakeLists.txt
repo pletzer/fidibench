@@ -29,8 +29,10 @@ target_link_libraries(upwindAccCxx fidibench "${EXTRA_LIBS}")
 add_executable(upwindAcc2Cxx upwindAcc2.cxx)
 target_link_libraries(upwindAcc2Cxx  fidibench "${EXTRA_LIBS}")
 
-add_executable(upwindMpiCxx upwindMpi.cxx)
-target_link_libraries(upwindMpiCxx fidibench "${EXTRA_LIBS}")
+if(MPI_CXX_FOUND)
+  add_executable(upwindMpiCxx upwindMpi.cxx)
+  target_link_libraries(upwindMpiCxx fidibench "${EXTRA_LIBS}")
+endif()
 
 add_test(NAME upwindCxx1
          COMMAND upwindCxx
