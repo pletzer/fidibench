@@ -6,7 +6,7 @@ set(LIB_FILES
 )
 
 if(MPI_CXX_FOUND)
-  set(LIB_FILES Filter.cpp)
+  set(LIB_FILES ${LIB_FILES} Filter.cpp)
 endif()
 
 add_library(fidibench ${LIB_FILES})
