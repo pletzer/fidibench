@@ -39,7 +39,7 @@ find_package(JuliaExecutable)
 # Use cmake -D NUM_CELLS=# and -D NUM_TIME_STEPS=# to change default values
 set(NUM_CELLS "32" CACHE STRING "Number of cells along each direction when running tests")
 set(NUM_TIME_STEPS "10" CACHE STRING "Number of time steps when running tests")
-set(NUM_PROCS "8" CACHE STRING "Number of processes when running tests")
+set(NUM_PROCS "4" CACHE STRING "Number of processes when running tests")
 
 # OpenACC
 option(OPENACC "Enable OpenACC support" OFF)
