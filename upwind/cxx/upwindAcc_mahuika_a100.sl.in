@@ -1,0 +1,14 @@
+#!/bin/bash
+#SBATCH --job-name=upwindAcc_a100
+#SBATCH --time=01:00:00
+#SBATCH --mem-per-cpu=4096
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --qos=testing
+#SBATCH --gres=gpu:A100
+#SBATCH --hint=nomultithread    # don't use hyperthreading
+#SBATCH --output=upwindAcc_a100-%j.out
+
+exe="@CMAKE_BINARY_DIR@/upwind/cxx/upwindAccCxx"
+time srun $exe -numCells 1024 -numSteps 10
+
