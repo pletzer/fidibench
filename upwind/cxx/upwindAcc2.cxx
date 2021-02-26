@@ -48,7 +48,7 @@ public:
     }
   }
 
-  void advect(double deltaTime) {
+  void advect(int numTimeSteps, double deltaTime) {
 
     // OpenACC works with primitive arrays
     double* fPtr = &this->f.front();
@@ -60,35 +60,36 @@ public:
     int ntot = this->ntot;
     int upI;
 
-#pragma acc data \
-  copy(fPtr[ntot]) \
-  create(fOldPtr[ntot]) \
-  copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS],	\
-  upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime)
-   {
+    #pragma acc data copy(fPtr[ntot]) create(fOldPtr[ntot]) copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS], upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime)
+    {
 
-#pragma acc parallel loop
-    for (int i = 0; i < ntot; ++i) {
-      fOldPtr[i] = fPtr[i];
-    }
+        for (int i = 0; i < numTimeSteps; ++i) {
 
-#pragma acc parallel loop
-    for (int i = 0; i < ntot; ++i) {
+            #pragma acc parallel loop
+            for (int i = 0; i < ntot; ++i) {
+                fOldPtr[i] = fPtr[i];
+            }
 
-      int inds[NDIMS];
+            #pragma acc parallel loop
+            for (int i = 0; i < ntot; ++i) {
 
-#include "compute_index_set.h"
+                int inds[NDIMS];
 
-#include "compute_flat_index_offset_x.h"
-fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upI] - fOldPtr[i]);
+                #include "compute_index_set.h"
 
-#include "compute_flat_index_offset_y.h"
-fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
+                #include "compute_flat_index_offset_x.h"
+                fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upI] - fOldPtr[i]);
 
-#include "compute_flat_index_offset_z.h"
-fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
+                #include "compute_flat_index_offset_y.h"
+                fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
 
-     } // acc parallel loop
+                #include "compute_flat_index_offset_z.h"
+                fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
+
+            } // acc parallel loop
+
+        } // time steps
+
     } // acc data
 
   }
@@ -166,10 +167,8 @@ int main(int argc, char** argv) {
   }
 
   Upwind<ndims> up(velocity, lengths, numCells);
-  //up.saveVTK("up0.vtk");
-  for (int i = 0; i < numTimeSteps; ++i) {
-    up.advect(dt);
-  }
+  up.advect(numTimeSteps, dt);
+
   std::cout << "check sum: " << up.checksum() << '\n';
   if (doVtk) {
     up.saveVTK("up.vtk");
