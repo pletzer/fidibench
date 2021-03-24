@@ -23,9 +23,21 @@ set(NUM_CELLS "32" CACHE STRING "Number of cells along each direction when runni
 set(NUM_TIME_STEPS "10" CACHE STRING "Number of time steps when running tests")
 set(NUM_PROCS "4" CACHE STRING "Number of processes when running tests")
 
-# OpenACC
 option(OPENACC "Enable OpenACC support" OFF)
+option(OPENMP_OFFLOAD "Enable OpenMP offloading to GPU support" OFF)
+option(ROCM "Enable ROCm, offloading to MI100 using OpenMPI 4.5" OFF)
 option(INTEL_ANALYZER "Add compiler options for Intel Analyzer" OFF)
+
+set(ROCM_COMPILER_PATH "/opt/rocm/llvm/bin" CACHE STRING "Path to the ROCm compilers (only used ith ROCM is set)")
+if (${ROCM}) 
+  list(APPEND CMAKE_PREFIX_INSTALL /opt/rocm/hip /opt/rocm)
+  set(CMAKE_CXX_COMPILER "${ROCM_COMPILER_PATH}/clang++")
+  set(CMAKE_C_COMPILER "${ROCM_COMPILER_PATH}/clang")
+  set(CMAKE_Fortran_COMPILER "${ROCM_COMPILER_PATH}/flang")
+  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx908")
+  find_package(hip)
+  message(STATUS "Will add the hip library to OpenMP 4.5 targets")
+endif()
 
 message(STATUS "System: ${CMAKE_SYSTEM_NAME}")
 if (${CMAKE_SYSTEM_NAME} STREQUAL "AIX")
