@@ -34,6 +34,7 @@ if (${ROCM})
   set(CMAKE_CXX_COMPILER "${ROCM_COMPILER_PATH}/clang++")
   set(CMAKE_C_COMPILER "${ROCM_COMPILER_PATH}/clang")
   set(CMAKE_Fortran_COMPILER "${ROCM_COMPILER_PATH}/flang")
+  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx908")
   find_package(hip)
   message(STATUS "Will add the hip library to OpenMP 4.5 targets")
 endif()
@@ -117,7 +118,7 @@ if ((NOT OPENACC) AND OPENMP_FOUND)
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_C_FLAGS}")
 else ()
   # OpenACC is incompatible with OpenMP, either one or the other or none
-  if (OPENACC AND CMAKE_COMPILER_ID STREQUAL "PGI")
+  if (OPENACC)
     message(STATUS "OpenACC enabled")
     # These are the PGI openACC flags -- need to find out what the 
     # corresponding options are for the CRAY, gcc, ... compilers 

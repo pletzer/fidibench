@@ -25,28 +25,28 @@ public:
     this->lengths = lengths;
     this->ntot = 1;
     for (size_t j = 0; j < NDIMS; ++j) {
-      this->upDirection[j] = -1;
-      if (velocity[j] < 0.) this->upDirection[j] = +1;
-      this->deltas[j] = lengths[j] / numCells[j];
-      this->ntot *= numCells[j];
+        this->upDirection[j] = -1;
+        if (velocity[j] < 0.) this->upDirection[j] = +1;
+        this->deltas[j] = lengths[j] / numCells[j];
+        this->ntot *= numCells[j];
     }
     this->dimProd.resize(NDIMS);
     this->dimProd[NDIMS - 1] = 1;
     for (int i = (int) NDIMS - 2; i >= 0; --i) {
         // last index varies fastest
         this->dimProd[i] =  this->dimProd[i + 1] * this->numCells[i + 1];
-      }
+    }
     this->f.resize(this->ntot, 0.0);
     // initialize lower corner to one
     this->f[0] = 1;
 
     this->coeff.resize(NDIMS);
     for (size_t j = 0; j < NDIMS; ++j) {
-      this->coeff[j] = this->v[j] * this->upDirection[j] / this->deltas[j];
+        this->coeff[j] = this->v[j] * this->upDirection[j] / this->deltas[j];
     }
-  }
+}
 
-  void advect(double deltaTime) {
+void advect(double deltaTime) {
 
     // copy
     std::vector<double> oldF(this->f);
@@ -60,35 +60,40 @@ public:
     int* numCellsPtr = &this->numCells.front();
     int ntot = this->ntot;
 
-#pragma omp target map(to: ntot, deltaTime, \
+#pragma omp target data map(to: ntot, deltaTime, \
 numCellsPtr[0:NDIMS], dimProdPtr[0:NDIMS], \
 upDirectionPtr[0:NDIMS], coeffPtr[0:NDIMS], fOldPtr[0:ntot]) \
 map(tofrom: fPtr[0:ntot])
     {
 
-    #pragma omp teams distribute parallel for
-    for (int i = 0; i < ntot; ++i) {
+        #pragma omp target teams distribute parallel for
+        for (int i = 0; i < ntot; ++i) {
+            fOldPtr[i] = fPtr[i];
+        }
 
 
-      int inds[NDIMS];
-      int upI;
-
-#include "compute_index_set.h"
-
-#include "compute_flat_index_offset_x.h"
-fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upI] - fOldPtr[i]);
-
-#include "compute_flat_index_offset_y.h"
-fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
-
-#include "compute_flat_index_offset_z.h"
-fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
+        #pragma omp target teams distribute parallel for
+        for (int i = 0; i < ntot; ++i) {
 
 
-    } // parallel loop
+            int inds[NDIMS];
+            int upI;
+
+            #include "compute_index_set.h"
+
+            #include "compute_flat_index_offset_x.h"
+            fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upI] - fOldPtr[i]);
+
+            #include "compute_flat_index_offset_y.h"
+            fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
+
+            #include "compute_flat_index_offset_z.h"
+            fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
+
+        } // parallel loop
     }
 
-  }
+}
 
 #include "saveVTK.h"
 
