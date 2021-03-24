@@ -46,7 +46,7 @@ public:
     }
 }
 
-void advect(double deltaTime) {
+void advect(int numTimeSteps, double deltaTime) {
 
     // copy
     std::vector<double> oldF(this->f);
@@ -60,37 +60,40 @@ void advect(double deltaTime) {
     int* numCellsPtr = &this->numCells.front();
     int ntot = this->ntot;
 
-#pragma omp target data map(to: ntot, deltaTime, \
+#pragma omp target data map(to: numTimeSteps, ntot, deltaTime, \
 numCellsPtr[0:NDIMS], dimProdPtr[0:NDIMS], \
 upDirectionPtr[0:NDIMS], coeffPtr[0:NDIMS], fOldPtr[0:ntot]) \
 map(tofrom: fPtr[0:ntot])
     {
+	
+	for (int istep = 0; istep < numTimeSteps; ++istep) {
 
-        #pragma omp target teams distribute parallel for
-        for (int i = 0; i < ntot; ++i) {
-            fOldPtr[i] = fPtr[i];
-        }
+            #pragma omp target teams distribute parallel for
+            for (int i = 0; i < ntot; ++i) {
+                fOldPtr[i] = fPtr[i];
+            }
+
+            #pragma omp target teams distribute parallel for
+            for (int i = 0; i < ntot; ++i) {
 
 
-        #pragma omp target teams distribute parallel for
-        for (int i = 0; i < ntot; ++i) {
+                int inds[NDIMS];
+                int upI;
 
+                #include "compute_index_set.h"
 
-            int inds[NDIMS];
-            int upI;
+                #include "compute_flat_index_offset_x.h"
+                fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upI] - fOldPtr[i]);
 
-            #include "compute_index_set.h"
+                #include "compute_flat_index_offset_y.h"
+                fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
 
-            #include "compute_flat_index_offset_x.h"
-            fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upI] - fOldPtr[i]);
+                #include "compute_flat_index_offset_z.h"
+                fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
 
-            #include "compute_flat_index_offset_y.h"
-            fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
+            } // parallel loop
 
-            #include "compute_flat_index_offset_z.h"
-            fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
-
-        } // parallel loop
+	} // time step
     }
 
 }
@@ -101,7 +104,17 @@ map(tofrom: fPtr[0:ntot])
     return std::accumulate(this->f.begin(), this->f.end(), 0.0, std::plus<double>());
   }
 
-  void print() const {
+  double std() const {
+    double mean = this->checksum()/static_cast<double>(this->ntot);
+    double res = 0;
+    for (auto i = 0; i < this->f.size(); ++i) {
+      double d = this->f[i] - mean;
+      res += d*d;
+    }
+    return sqrt(res /static_cast<double>(this->ntot));
+  }
+
+void print() const {
     for (size_t i = 0; i < this->f.size(); ++i) {
       std::cout << i << " " << this->f[i] << '\n';
     }
@@ -128,6 +141,7 @@ int main(int argc, char** argv) {
   args.set("-numCells", 128, "Number of cells along each axis");
   args.set("-numSteps", 10, "Number of time steps");
   args.set("-vtk", false, "Write output to VTK file");
+  args.set("-std", false, "Print out spread of solution");
 
   bool success = args.parse(argc, argv);
   bool help = args.get<bool>("-h");
@@ -144,6 +158,7 @@ int main(int argc, char** argv) {
   int numCellsXYZ = args.get<int>("-numCells");
   int numTimeSteps = args.get<int>("-numSteps");
   bool doVtk = args.get<bool>("-vtk");
+  bool doStd = args.get<bool>("-std");
 
   // same resolution in each direction
   std::vector<int> numCells(ndims, numCellsXYZ);
@@ -168,10 +183,12 @@ int main(int argc, char** argv) {
 
   Upwind<ndims> up(velocity, lengths, numCells);
   //up.saveVTK("up0.vtk");
-  for (int i = 0; i < numTimeSteps; ++i) {
-    up.advect(dt);
-  }
+  up.advect(numTimeSteps, dt);
+  
   std::cout << "check sum: " << up.checksum() << '\n';
+  if (doStd) {
+    std::cout << "std      : " << up.std() << '\n';
+  }
   if (doVtk) {
     up.saveVTK("up.vtk");
   }

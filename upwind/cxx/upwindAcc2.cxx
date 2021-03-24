@@ -63,7 +63,7 @@ public:
     #pragma acc data copy(fPtr[ntot]) create(fOldPtr[ntot]) copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS], upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime)
     {
 
-        for (int i = 0; i < numTimeSteps; ++i) {
+        for (int istep = 0; istep < numTimeSteps; ++istep) {
 
             #pragma acc parallel loop
             for (int i = 0; i < ntot; ++i) {
@@ -108,7 +108,7 @@ public:
   		double d = this->f[i] - mean;
   		res += d*d;
   	}
-  	return sqrt(res /static_cast<double>(this->ntot) );
+  	return sqrt(res /static_cast<double>(this->ntot));
   }
 
   void print() const {
