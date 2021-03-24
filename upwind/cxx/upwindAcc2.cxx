@@ -100,6 +100,16 @@ public:
     return std::accumulate(this->f.begin(), this->f.end(), 0.0, std::plus<double>());
   }
 
+  double std() const {
+  	double mean = this->checksum()/static_cast<double>(this->ntot);
+  	double res = 0;
+  	for (auto i = 0; i < this->f.size(); ++i) {
+  		double d = this->f[i] - mean;
+  		res += d*d;
+  	}
+  	return std::sqrt(res /static_cast<double>(this->ntot) );
+  }
+
   void print() const {
     for (size_t i = 0; i < this->f.size(); ++i) {
       std::cout << i << " " << this->f[i] << '\n';
@@ -170,6 +180,7 @@ int main(int argc, char** argv) {
   up.advect(numTimeSteps, dt);
 
   std::cout << "check sum: " << up.checksum() << '\n';
+  std::cout << "std      : " << up.std() << '\n';
   if (doVtk) {
     up.saveVTK("up.vtk");
   }
