@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstring>
+#include <cmath>
 #include "CmdLineArgParser.h"
 
 #ifdef HAVE_OPENMP
@@ -84,6 +85,16 @@ public:
     return std::accumulate(this->f.begin(), this->f.end(), 0.0, std::plus<double>());
   }
 
+  double std() const {
+    double mean = this->checksum()/static_cast<double>(this->ntot);
+    double res = 0;
+    for (auto i = 0; i < this->f.size(); ++i) {
+      double d = this->f[i] - mean;
+      res += d*d;
+    }
+    return sqrt(res /static_cast<double>(this->ntot));
+  }
+
   void print() const {
     for (size_t i = 0; i < this->f.size(); ++i) {
       std::cout << i << " " << this->f[i] << '\n';
@@ -127,6 +138,7 @@ int main(int argc, char** argv) {
   args.set("-numCells", 128, "Number of cells along each axis");
   args.set("-numSteps", 10, "Number of time steps");
   args.set("-vtk", false, "Write output to VTK file");
+  args.set("-std", false, "Print out spread of solution");
 
   bool success = args.parse(argc, argv);
   bool help = args.get<bool>("-h");
@@ -135,6 +147,7 @@ int main(int argc, char** argv) {
 
     int numTimeSteps = args.get<int>("-numSteps");
     bool doVtk = args.get<bool>("-vtk");
+    bool doStd = args.get<bool>("-std");
 
 #pragma omp parallel
     {
@@ -182,6 +195,9 @@ int main(int argc, char** argv) {
       up.advect(dt);
     }
     std::cout << "check sum: " << up.checksum() << '\n';
+    if (doStd) {
+      std::cout << "std      : " << up.std() << '\n';
+    }
     if (doVtk) {
       up.saveVTK("up1.vtk");
     }

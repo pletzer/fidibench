@@ -60,7 +60,7 @@ public:
     int* numCellsPtr = &this->numCells.front();
     int ntot = this->ntot;
 
-    #pragma acc data copy(fPtr[ntot]) create(fOldPtr[ntot]) copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS], upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime)
+    #pragma acc data copy(fPtr[ntot]) create(fOldPtr[ntot]) copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS], upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime, ntot)
     {
 
         for (int istep = 0; istep < numTimeSteps; ++istep) {

@@ -60,10 +60,8 @@ void advect(int numTimeSteps, double deltaTime) {
     int* numCellsPtr = &this->numCells.front();
     int ntot = this->ntot;
 
-#pragma omp target data map(to: numTimeSteps, ntot, deltaTime, \
-numCellsPtr[0:NDIMS], dimProdPtr[0:NDIMS], \
-upDirectionPtr[0:NDIMS], coeffPtr[0:NDIMS], fOldPtr[0:ntot]) \
-map(tofrom: fPtr[0:ntot])
+#pragma omp target data map(to: numCellsPtr[0:NDIMS], dimProdPtr[0:NDIMS], upDirectionPtr[0:NDIMS], coeffPtr[0:NDIMS], deltaTime, ntot) \
+    map(alloc:fOldPtr[0:ntot]) map(tofrom: fPtr[0:ntot])
     {
 	
 	for (int istep = 0; istep < numTimeSteps; ++istep) {
