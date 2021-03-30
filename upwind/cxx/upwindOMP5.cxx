@@ -60,18 +60,19 @@ void advect(int numTimeSteps, double deltaTime) {
     int* numCellsPtr = &this->numCells.front();
     int ntot = this->ntot;
 
-#pragma omp target data map(to: numCellsPtr[0:NDIMS], dimProdPtr[0:NDIMS], upDirectionPtr[0:NDIMS], coeffPtr[0:NDIMS], deltaTime, ntot) \
-    map(alloc:fOldPtr[0:ntot]) map(tofrom: fPtr[0:ntot])
+    #pragma omp target data map(to: numCellsPtr[0:NDIMS], dimProdPtr[0:NDIMS], upDirectionPtr[0:NDIMS], coeffPtr[0:NDIMS], deltaTime, ntot) \
+            map(alloc:fOldPtr[0:ntot]) map(tofrom: fPtr[0:ntot])
     {
 	
-	for (int istep = 0; istep < numTimeSteps; ++istep) {
+       #pragma omp target teams distribute
+	   for (int istep = 0; istep < numTimeSteps; ++istep) {
 
-            #pragma omp target teams distribute parallel for
+            #pragma omp parallel for
             for (int i = 0; i < ntot; ++i) {
                 fOldPtr[i] = fPtr[i];
             }
 
-            #pragma omp target teams distribute parallel for
+            #pragma omp parallel for
             for (int i = 0; i < ntot; ++i) {
 
 
@@ -91,7 +92,7 @@ void advect(int numTimeSteps, double deltaTime) {
 
             } // parallel loop
 
-	} // time step
+	   } // time step
     }
 
 }

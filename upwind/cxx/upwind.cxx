@@ -48,32 +48,39 @@ public:
     this->f[0] = 1;
   }
 
-  void advect(double deltaTime) {
+  void advect(int numTimeSteps, double deltaTime) {
 
-    // copy
-    this->oldF = this->f;
-    const double* __restrict__ oldFPtr = &this->oldF[0];
+    double* __restrict__ oldFPtr = &this->oldF[0];
     double* __restrict__ fPtr = &this->f[0];
 
-#pragma omp parallel for
-    for (int i = 0; i < (int) this->ntot; ++i) {
+#pragma omp parallel
+    for (int istep = 0; istep < numTimeSteps; ++istep) {
 
-      std::array<int, NDIMS> inds = this->getIndexSet(i);
+      #pragma omp for
+      for (int i = 0; i < (int) this->ntot; ++i) {
+        oldFPtr[i] = fPtr[i];
+      }
+        
+      #pragma omp for
+      for (int i = 0; i < (int) this->ntot; ++i) {
 
-      for (size_t j = 0; j < NDIMS; ++j) {
+        std::array<int, NDIMS> inds = this->getIndexSet(i);
 
-        int oldIndex = inds[j];
-        const double coeff = deltaTime * this->v[j] * this->upDirection[j] / this->deltas[j];
+        for (size_t j = 0; j < NDIMS; ++j) {
 
-        // periodic BCs
-        inds[j] += this->upDirection[j] + this->numCells[j];
-        inds[j] %= this->numCells[j];
+          int oldIndex = inds[j];
+          const double coeff = deltaTime * this->v[j] * this->upDirection[j] / this->deltas[j];
 
-        size_t upI = this->getFlatIndex(&inds[0]);
+          // periodic BCs
+          inds[j] += this->upDirection[j] + this->numCells[j];
+          inds[j] %= this->numCells[j];
 
-        fPtr[i] -= coeff * (oldFPtr[upI] - oldFPtr[i]);
+          size_t upI = this->getFlatIndex(&inds[0]);
 
-        inds[j] = oldIndex;
+          fPtr[i] -= coeff * (oldFPtr[upI] - oldFPtr[i]);
+
+          inds[j] = oldIndex;
+        }
       }
     }
   }
@@ -191,9 +198,7 @@ int main(int argc, char** argv) {
     if (doVtk) {
       up.saveVTK("up0.vtk");
     }
-    for (int i = 0; i < numTimeSteps; ++i) {
-      up.advect(dt);
-    }
+    up.advect(numTimeSteps, dt);
     std::cout << "check sum: " << up.checksum() << '\n';
     if (doStd) {
       std::cout << "std      : " << up.std() << '\n';
