@@ -63,9 +63,9 @@ contains
         
         allocate(this % upDirection(this % ndims))
         allocate(this % deltas(this % ndims))
-	    allocate(this % v(this % ndims))
-	    allocate(this % lengths(this % ndims))
-	    allocate(this % numCells(this % ndims))
+        allocate(this % v(this % ndims))
+        allocate(this % lengths(this % ndims))
+        allocate(this % numCells(this % ndims))
         allocate(this % dimProd(this % ndims))
         
         this % v = velocity

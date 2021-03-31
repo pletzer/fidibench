@@ -13,7 +13,6 @@ endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/cxx/)
 
-set(EXTRA_LIBS "")
 if (INTEL_ANALYZER)
   set(EXTRA_LIBS "${EXTRA_LIBS} $ENV{VT_ADD_LIBS}") 
   string(STRIP "${EXTRA_LIBS}" EXTRA_LIBS)
@@ -22,7 +21,10 @@ endif()
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 add_executable(upwindCxx upwind.cxx)
-target_link_libraries(upwindCxx fidibench "${EXTRA_LIBS}")
+target_link_libraries(upwindCxx PUBLIC fidibench "${EXTRA_LIBS}" OpenMP::OpenMP_CXX)
+
+add_executable(upwindOMPTasksCxx upwindOMPTasks.cxx)
+target_link_libraries(upwindOMPTasksCxx PUBLIC fidibench "${EXTRA_LIBS}" OpenMP::OpenMP_CXX)
 
 add_executable(upwindAccCxx upwindAcc.cxx)
 target_link_libraries(upwindAccCxx fidibench "${EXTRA_LIBS}")

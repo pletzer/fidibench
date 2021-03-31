@@ -54,9 +54,9 @@ contains
         
         allocate(obj % upDirection(obj % ndims))
         allocate(obj % deltas(obj % ndims))
-	allocate(obj % v(obj % ndims))
-	allocate(obj % lengths(obj % ndims))
-	allocate(obj % numCells(obj % ndims))
+        allocate(obj % v(obj % ndims))
+        allocate(obj % lengths(obj % ndims))
+        allocate(obj % numCells(obj % ndims))
         allocate(obj % dimProd(obj % ndims))
         
         obj % v = velocity
