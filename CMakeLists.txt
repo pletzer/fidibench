@@ -42,43 +42,13 @@ if (${ROCM})
   message(STATUS "Will add the hip library to OpenMP 4.5 targets")
 endif()
 
-message(STATUS "System: ${CMAKE_SYSTEM_NAME}")
-if (${CMAKE_SYSTEM_NAME} STREQUAL "AIX")
-  # On Fitzroy AIX find_package(MPI) will fail 
-  # unless one sets MPI_CXX_INCLUDE_PATH and 
-  # MPI_CXX_LIBRARIES
-  set(POE "/usr/lpp/ppe.poe")
-  if(EXISTS "${POE}/include" AND EXISTS "${POE}/lib")
-    set(MPI_INCLUDE_PATH "${POE}/include")
-      set(MPI_LIBRARIES "${POE}/lib/libmpi_r.a;${POE}/lib/libvtd_r.a")
-      set(MPI_C_INCLUDE_PATH "${MPI_INCLUDE_PATH}")
-      set(MPI_C_LIBRARIES "${MPI_LIBRARIES}")
-      set(MPI_CXX_INCLUDE_PATH "${MPI_INCLUDE_PATH}")
-      set(MPI_CXX_LIBRARIES "${MPI_LIBRARIES}")
-      # have not tested that part...
-      set(MPI_Fortran_INCLUDE_PATH "${MPI_INCLUDE_PATH}")
-      set(MPI_Fortran_LIBRARIES "${MPI_LIBRARIES}")
-      message(STATUS "Setting MPI_CXX_INCLUDE_PATH=${MPI_CXX_INCLUDE_PATH}")
-      message(STATUS "Setting MPI_CXX_LIBRARIES=${MPI_CXX_LIBRARIES}")
-  endif()
-
-  # add optimization flags on AIX
-  if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "XL")
-    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O3 -qarch=pwr6 -qtune=pwr6 -q64 -qextname=get_rstart_fname -qinfo=all -qxflag=oldtab -qfree=f90 -qnoescape -qintlog")
-  endif()
-  if (${CMAKE_CXX_COMPILER_ID} STREQUAL "XL")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -q64 -qarch=pwr6 -qtune=pwr6 -qinfo=all")
-  endif()
-  set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS}")
-  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-
-endif()
 
 if (NOT DEFINED "${CMAKE_BUILD_TYPE}")
     set(CMAKE_BUILD_TYPE "RelWithDebInfo")
     message(STATUS "Build type is ${CMAKE_BUILD_TYPE}")
 endif()
 
+message(STATUS "System: ${CMAKE_SYSTEM_NAME}")
 message(STATUS "Fortran compiler Id: ${CMAKE_Fortran_COMPILER_ID}")
 message(STATUS "C compiler Id      : ${CMAKE_C_COMPILER_ID}")
 message(STATUS "C++ compiler Id    : ${CMAKE_CXX_COMPILER_ID}")
@@ -118,7 +88,7 @@ if ((NOT OPENACC) AND OPENMP_FOUND)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   # There is no OpenMP fortran specific flag, fall back onto C flags
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_C_FLAGS}")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
 else ()
   # OpenACC is incompatible with OpenMP, either one or the other or none
   if (OPENACC)
