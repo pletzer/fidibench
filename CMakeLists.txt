@@ -12,9 +12,10 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPT_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPT_FLAGS}")
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OPT_FLAGS}")
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(OpenMP)
-# Cmake needs help with clang 
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+# CMake needs help with clang 
 find_package(PythonExecutable)
 find_package(JuliaExecutable)
 
@@ -22,6 +23,8 @@ find_package(JuliaExecutable)
 set(NUM_CELLS "32" CACHE STRING "Number of cells along each direction when running tests")
 set(NUM_TIME_STEPS "10" CACHE STRING "Number of time steps when running tests")
 set(NUM_PROCS "4" CACHE STRING "Number of processes when running tests")
+
+set(EXTRA_LIBS "" CACHE STRING "Extra libraries to link against")
 
 option(OPENACC "Enable OpenACC support" OFF)
 option(OPENMP_OFFLOAD "Enable OpenMP offloading to GPU support" OFF)
