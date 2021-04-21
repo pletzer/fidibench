@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstring>
+#include <cmath>
 #include "CmdLineArgParser.h"
 
 template <size_t NDIMS>
