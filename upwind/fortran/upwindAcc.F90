@@ -109,28 +109,39 @@ contains
     ! @param deltaTime time step
     subroutine upwind_advect(obj, deltaTime)
    
-        !$ACC ROUTINE 
-
         type(upwind_type) :: obj
         real(r8), value :: deltaTime
 
-        integer :: i, j, oldIndex, upI
+        integer :: i, j, oldIndex, upI, ndims, ntot
         integer :: inds(obj % ndims)
+
+        integer, dimension(obj % ndims) :: numCells, dimProd
+        real(r8), dimension(obj % ndims) :: upDirection, deltas, v
+
+
+        ntot = obj % ntot
+        ndims = obj % ndims
+        numCells = obj %  numCells
+        dimProd = obj % dimProd
+        upDirection = obj % upDirection
+        deltas = obj % deltas
+        v = obj % v
         
         ! copy the field
-        do i = 1, obj % ntot
+        do i = 1, ntot
             obj % fOld(i) = obj % f(i)
         enddo
 
         ! iterate over the cells
         !$OMP PARALLEL DO PRIVATE(i, j, inds, oldIndex, upI)
-        !!$ACC LOOP 
-        do i = 1, obj % ntot
+!$ACC PARALLEL LOOP COPYIN(ntot, ndims, numCells(ndims), dimProd(ndims), deltas(ndims), v(ndims), deltaTime) &
+!$ACC COPYIN(obj%fOld) COPYOUT(obj%f) CREATE(inds(ndims, oldIndex))
+        do i = 1, ntot
 
             ! compute the index set of this cell
-            call upwind_getIndexSet(obj, i, inds)
+            call upwind_getIndexSet(ndims, numCells, dimProd, i, inds)
 
-            do j = 1, obj % ndims
+            do j = 1, ndims
                 
                 ! cache the cell index
                 oldIndex = inds(j)
@@ -139,20 +150,20 @@ contains
                 inds(j) = inds(j) + obj % upDirection(j)
                 
                 ! apply periodic BCs
-                inds(j) = modulo(inds(j) + obj % numCells(j) - 1, obj % numCells(j)) + 1
+                inds(j) = modulo(inds(j) + numCells(j) - 1, numCells(j)) + 1
                   
                 ! compute the new flat index 
-                upI = upwind_getFlatIndex(obj, inds)
+                upI = upwind_getFlatIndex(ndims, dimProd, inds)
                     
                 ! update the field
                 obj % f(i) = obj % f(i) - &
-              &   deltaTime*obj % v(j)*obj % upDirection(j)*(obj % fOld(upI) - obj % fOld(i))/obj % deltas(j)
+              &   deltaTime*v(j)*upDirection(j)*(obj%fOld(upI) - obj%fOld(i))/deltas(j)
                     
                 ! reset the index
                 inds(j) = oldIndex
            enddo
         enddo
-        !!$ACC END LOOP
+!$ACC END PARALLEL LOOP
         !$OMP END PARALLEL DO
 
     end subroutine
@@ -236,25 +247,29 @@ contains
  
     end subroutine
 
-    subroutine upwind_getIndexSet(obj, flatIndex, res)
+    subroutine upwind_getIndexSet(ndims, numCells, dimProd, flatIndex, res)
         !$ACC ROUTINE
-        type(upwind_type) :: obj
-        integer, value :: flatIndex
+        integer, intent(in) :: numCells(:), dimProd(:)
+        integer, value :: ndims, flatIndex
         integer, intent(out) :: res(:)
     
         integer :: i
-        do i = 1, obj % ndims
-            res(i) = mod((flatIndex - 1)/obj % dimProd(i), obj % numCells(i)) + 1
+        do i = 1, ndims
+            res(i) = mod((flatIndex - 1)/dimProd(i), numCells(i)) + 1
         enddo
     end subroutine
     
-    function upwind_getFlatIndex(obj, inds) result(res)
+    function upwind_getFlatIndex(ndims, dimProd, inds) result(res)
         !$ACC ROUTINE
-        type(upwind_type) :: obj
+        integer, value :: ndims
+        integer, intent(in) :: dimProd(:)
         integer, intent(in) :: inds(:)
-        integer :: res
+        integer :: res, i
         
-        res = dot_product(obj % dimProd, inds - 1) + 1
+        res = 1
+        do i = 1, ndims
+            res = res + dimProd(i)*(inds(i) - 1)
+        enddo
         
     end function upwind_getFlatIndex
 
@@ -360,14 +375,10 @@ program main
     
     ! call upwind_saveVTK(up, 'up0.vtk')
 
-!$ACC PARALLEL
-
     ! advance 
     do i = 1, numTimeSteps
         call upwind_advect(up, dt)
     enddo
-
-!$ACC END PARALLEL
 
     ! call upwind_print(up)
     write(*,'(a, f15.9)') 'check sum: ', sum(up % f)
