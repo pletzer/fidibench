@@ -7,6 +7,7 @@ else()
 endif()
 
 add_executable(upwindFortran upwind.F90)
+add_executable(upwindFortranAcc upwindAcc.F90)
 add_executable(upwindF03 upwindF03.F90)
 add_executable(upwindF08 upwindF08.f90)
 
