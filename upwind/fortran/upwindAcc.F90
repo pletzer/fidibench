@@ -27,7 +27,7 @@ module upwind_mod
         real(r8), allocatable :: lengths(:)
         
         ! field as a flat array
-        real(r8), allocatable :: f(:)
+        real(r8), allocatable :: f(:), fOld(:)
         
         ! product of the dimensions, used to switch back and forth 
         ! between the flat index and the multi-index representations
@@ -80,6 +80,7 @@ contains
         enddo
         
         allocate(obj % f(obj % ntot))
+        allocate(obj % fOld(obj % ntot))
         
         ! initialize the field, zero everywhere except for the 
         ! low corner cell where the field is one
@@ -100,6 +101,7 @@ contains
         deallocate(obj % deltas)
         deallocate(obj % dimProd)
         deallocate(obj % f)
+        deallocate(obj % fOld)
         
     end subroutine
     
@@ -112,17 +114,17 @@ contains
         type(upwind_type) :: obj
         real(r8), value :: deltaTime
 
-        real(r8), allocatable :: oldF(:)
         integer :: i, j, oldIndex, upI
         integer :: inds(obj % ndims)
         
-        ! allocate and copy the field
-        allocate(oldF(obj % ntot))
-        oldF = obj % f
+        ! copy the field
+        do i = 1, obj % ntot
+            obj % fOld(i) = obj % f(i)
+        enddo
 
         ! iterate over the cells
         !$OMP PARALLEL DO PRIVATE(i, j, inds, oldIndex, upI)
-        !$ACC LOOP 
+        !!$ACC LOOP 
         do i = 1, obj % ntot
 
             ! compute the index set of this cell
@@ -144,13 +146,13 @@ contains
                     
                 ! update the field
                 obj % f(i) = obj % f(i) - &
-              &   deltaTime*obj % v(j)*obj % upDirection(j)*(oldF(upI) - oldF(i))/obj % deltas(j)
+              &   deltaTime*obj % v(j)*obj % upDirection(j)*(obj % fOld(upI) - obj % fOld(i))/obj % deltas(j)
                     
                 ! reset the index
                 inds(j) = oldIndex
            enddo
         enddo
-        !$ACC END LOOP
+        !!$ACC END LOOP
         !$OMP END PARALLEL DO
 
     end subroutine
@@ -237,7 +239,7 @@ contains
     subroutine upwind_getIndexSet(obj, flatIndex, res)
         !$ACC ROUTINE
         type(upwind_type) :: obj
-        integer, intent(in) :: flatIndex
+        integer, value :: flatIndex
         integer, intent(out) :: res(:)
     
         integer :: i
