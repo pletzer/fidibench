@@ -107,35 +107,25 @@ contains
     
     ! Advance by one time step
     ! @param deltaTime time step
-    subroutine upwind_advect(obj, deltaTime)
+    subroutine upwind_advect(ndims, numCells, dimProd, deltas, v, upDirection, deltaTime, fOld, f)
    
-        type(upwind_type) :: obj
+        integer, value :: ndims
+        integer, intent(in) :: numCells(:), dimProd(:)
+        real(r8), intent(in) :: deltas(:), v(:)
+        integer, intent(in) :: upDirection(:)
         real(r8), value :: deltaTime
+        real(r8), intent(in) :: fOld(:)
+        real(r8), intent(out) :: f(:)
 
-        integer :: i, j, oldIndex, upI, ndims, ntot
-        integer :: inds(obj % ndims)
+        integer :: i, j, oldIndex, upI, ntot
+        integer :: inds(ndims)
 
-        integer, dimension(obj % ndims) :: numCells, dimProd
-        real(r8), dimension(obj % ndims) :: upDirection, deltas, v
-
-
-        ntot = obj % ntot
-        ndims = obj % ndims
-        numCells = obj %  numCells
-        dimProd = obj % dimProd
-        upDirection = obj % upDirection
-        deltas = obj % deltas
-        v = obj % v
+        ntot = size(fOld)
         
-        ! copy the field
-        do i = 1, ntot
-            obj % fOld(i) = obj % f(i)
-        enddo
-
         ! iterate over the cells
         !$OMP PARALLEL DO PRIVATE(i, j, inds, oldIndex, upI)
 !$ACC PARALLEL LOOP COPYIN(ntot, ndims, numCells(ndims), dimProd(ndims), deltas(ndims), v(ndims), deltaTime) &
-!$ACC COPYIN(obj%fOld) COPYOUT(obj%f) CREATE(inds(ndims, oldIndex))
+!$ACC COPYIN(fOld(ntot)) COPYOUT(f(ntot)) CREATE(inds(ndims), oldIndex)
         do i = 1, ntot
 
             ! compute the index set of this cell
@@ -147,7 +137,7 @@ contains
                 oldIndex = inds(j)
                 
                 ! increment the cell index
-                inds(j) = inds(j) + obj % upDirection(j)
+                inds(j) = inds(j) + upDirection(j)
                 
                 ! apply periodic BCs
                 inds(j) = modulo(inds(j) + numCells(j) - 1, numCells(j)) + 1
@@ -156,8 +146,8 @@ contains
                 upI = upwind_getFlatIndex(ndims, dimProd, inds)
                     
                 ! update the field
-                obj % f(i) = obj % f(i) - &
-              &   deltaTime*v(j)*upDirection(j)*(obj%fOld(upI) - obj%fOld(i))/deltas(j)
+                f(i) = fOld(i) - &
+              &   deltaTime*v(j)*upDirection(j)*(fOld(upI) - fOld(i))/deltas(j)
                     
                 ! reset the index
                 inds(j) = oldIndex
@@ -372,15 +362,13 @@ program main
 
     ! instantiate up
     call upwind_new(up, velocity, lengths, numCells)
-    
-    ! call upwind_saveVTK(up, 'up0.vtk')
 
     ! advance 
     do i = 1, numTimeSteps
-        call upwind_advect(up, dt)
+        up%fOld = up%f
+        call upwind_advect(up%ndims, up%numCells, up%dimProd, up%deltas, up%v, up%upDirection, dt, up%fOld, up%f)
     enddo
 
-    ! call upwind_print(up)
     write(*,'(a, f15.9)') 'check sum: ', sum(up % f)
 
     if (doVtk) then 
