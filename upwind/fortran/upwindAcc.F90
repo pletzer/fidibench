@@ -119,13 +119,14 @@ contains
 
         integer :: i, j, oldIndex, upI, ntot
         integer :: inds(ndims)
+        real(r8) :: coeffs(ndims)
 
         ntot = size(fOld)
+        coeffs = deltaTime*v*upDirection/deltas
         
         ! iterate over the cells
         !$OMP PARALLEL DO PRIVATE(i, j, inds, oldIndex, upI)
-!$ACC PARALLEL LOOP COPYIN(ntot, ndims, numCells(ndims), dimProd(ndims), deltas(ndims), v(ndims), deltaTime) &
-!$ACC COPYIN(fOld(ntot)) COPYOUT(f(ntot)) CREATE(inds(ndims), oldIndex)
+!$ACC PARALLEL LOOP
         do i = 1, ntot
 
             ! compute the index set of this cell
@@ -146,12 +147,11 @@ contains
                 upI = upwind_getFlatIndex(ndims, dimProd, inds)
                     
                 ! update the field
-                f(i) = fOld(i) - &
-              &   deltaTime*v(j)*upDirection(j)*(fOld(upI) - fOld(i))/deltas(j)
+                f(i) = f(i) - coeffs(j)*(fOld(upI) - fOld(i))
                     
                 ! reset the index
                 inds(j) = oldIndex
-           enddo
+            enddo
         enddo
 !$ACC END PARALLEL LOOP
         !$OMP END PARALLEL DO
