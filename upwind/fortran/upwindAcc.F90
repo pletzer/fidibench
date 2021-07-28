@@ -114,48 +114,68 @@ contains
         real(r8), intent(in) :: deltas(:), v(:)
         integer, intent(in) :: upDirection(:)
         real(r8), value :: deltaTime
-        real(r8), intent(in) :: fOld(:)
-        real(r8), intent(out) :: f(:)
+        real(r8), intent(out) :: fOld(:)
+        real(r8), intent(inout) :: f(:)
 
-        integer :: i, j, oldIndex, upI, ntot
-        integer :: inds(ndims)
-        real(r8) :: coeffs(ndims)
+        integer :: i, j, upI, ntot
+        integer :: inds(ndims), indsUp(ndims)
+        real(r8) :: coeffs(ndims), sumTerms
 
         ntot = size(fOld)
-        coeffs = deltaTime*v*upDirection/deltas
-        
-        ! iterate over the cells
-        !$OMP PARALLEL DO PRIVATE(i, j, inds, oldIndex, upI)
-!$ACC PARALLEL LOOP
+
+        do j = 1, ndims
+            coeffs(j) = deltaTime*v(j)*upDirection(j)/deltas(j)
+        enddo
+
+!$ACC DATA COPY(f), PRESENT_OR_CREATE(fOld, inds, indsUp), PRESENT_OR_COPYIN(dimProd, upDirection, numCells, coeffs)
+        !$ACC KERNELS
+        do i = 1, ntot
+            fOld(i) = f(i)
+        enddo
+        !$ACC END KERNELS
+
+        !$ACC KERNELS
         do i = 1, ntot
 
-            ! compute the index set of this cell
-            call upwind_getIndexSet(ndims, numCells, dimProd, i, inds)
+            ! call upwind_getIndexSet(ndims, numCells, dimProd, i, inds)
+            inds(1) = mod((i - 1)/dimProd(1), numCells(1)) + 1
+            inds(2) = mod((i - 1)/dimProd(2), numCells(2)) + 1
+            inds(3) = mod((i - 1)/dimProd(3), numCells(3)) + 1
 
-            do j = 1, ndims
-                
-                ! cache the cell index
-                oldIndex = inds(j)
-                
-                ! increment the cell index
-                inds(j) = inds(j) + upDirection(j)
-                
-                ! apply periodic BCs
-                inds(j) = modulo(inds(j) + numCells(j) - 1, numCells(j)) + 1
-                  
-                ! compute the new flat index 
-                upI = upwind_getFlatIndex(ndims, dimProd, inds)
-                    
-                ! update the field
-                f(i) = f(i) - coeffs(j)*(fOld(upI) - fOld(i))
-                    
-                ! reset the index
-                inds(j) = oldIndex
-            enddo
+            indsUp(1) = inds(1)
+            indsUp(2) = inds(2)
+            indsUp(3) = inds(3)
+            sumTerms = 0
+
+            j = 1
+            indsUp(j) = mod(inds(j) + upDirection(j) + numCells(j) - 1, numCells(j)) + 1
+            ! upI = upwind_getFlatIndex(ndims, dimProd, indsUp)
+            upI = dimProd(1)*(indsUp(1) - 1) + dimProd(2)*(indsUp(2) - 1) + dimProd(3)*(indsUp(3) - 1)
+            sumTerms = sumTerms - coeffs(j)*(fOld(upI) - fOld(i))
+            indsUp(j) = inds(j)
+
+            j = 2
+            indsUp(j) = mod(inds(j) + upDirection(j) + numCells(j) - 1, numCells(j)) + 1
+            ! upI = upwind_getFlatIndex(ndims, dimProd, indsUp)
+            upI = dimProd(1)*(indsUp(1) - 1) + dimProd(2)*(indsUp(2) - 1) + dimProd(3)*(indsUp(3) - 1)
+            sumTerms = sumTerms - coeffs(j)*(fOld(upI) - fOld(i))
+            indsUp(j) = inds(j)
+
+            j = 3
+            indsUp(j) = mod(inds(j) + upDirection(j) + numCells(j) - 1, numCells(j)) + 1
+            ! upI = upwind_getFlatIndex(ndims, dimProd, indsUp)
+            upI = dimProd(1)*(indsUp(1) - 1) + dimProd(2)*(indsUp(2) - 1) + dimProd(3)*(indsUp(3) - 1)
+            sumTerms = sumTerms - coeffs(j)*(fOld(upI) - fOld(i))
+            indsUp(j) = inds(j)
+
+            f(i) = f(i) - sumTerms
+            ! print *,'i=', i, ' f(i)=', f(i), ' sumTerms=', sumTerms
+
         enddo
-!$ACC END PARALLEL LOOP
-        !$OMP END PARALLEL DO
+        !$ACC END KERNELS
 
+!$ACC END DATA
+        
     end subroutine
 
     subroutine upwind_saveVTK(obj, filename)
@@ -365,8 +385,8 @@ program main
 
     ! advance 
     do i = 1, numTimeSteps
-        up%fOld = up%f
-        call upwind_advect(up%ndims, up%numCells, up%dimProd, up%deltas, up%v, up%upDirection, dt, up%fOld, up%f)
+        call upwind_advect(up%ndims, up%numCells, up%dimProd, up%deltas, up%v, up%upDirection, dt, &
+             & up%fOld, up%f)
     enddo
 
     write(*,'(a, f15.9)') 'check sum: ', sum(up % f)
