@@ -17,8 +17,8 @@ when applying -O3 with the GNU compiler.
 Example 2: comparing of C++ vs Fortran (upwind 512 cells/10 time steps)
 ![alt tag](https://raw.githubusercontent.com/pletzer/fidibench/master/pictures/fortran_vs_c++.png)
 
-Example 3: comparing OpenACC against OpenMP 
-![alt tag](https://raw.githubusercontent.com/pletzer/fidibench/master/pictures/openacc_vs_openmp.png)
+Example 3: comparing OpenACC against running on a single CPU 
+![alt tag](https://raw.githubusercontent.com/pletzer/fidibench/master/pictures/fidibench_openacc.png)
 
 
 ## Requirements
