@@ -90,7 +90,7 @@ if ((NOT OPENACC) AND OPENMP_FOUND)
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
 else ()
   # OpenACC is incompatible with OpenMP, either one or the other or none
-  if (OPENACC  AND ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI"))
+  if (OPENACC  AND ("${CMAKE_CXX_COMPILER_ID}" MATCHES "^NVHPC|PGI"))
     message(STATUS "OpenACC enabled")
     # These are the PGI openACC flags -- need to find out what the 
     # corresponding options are for the CRAY, gcc, ... compilers 

@@ -26,8 +26,9 @@ Example 3: comparing offloading the upwind advection of a bubble onto a GPU (NVI
 * CMake 3.1 or later
 * Message Passing Interface, MPI (optional)
 * OpenMP (optional)
+* OpenACC (optional)
 * C/C++ compiler supporting the C++11 standard (optional)
-* Python 2.7 with numpy (optional)
+* Python 3 with numpy (optional)
 * Julia 0.45 or later (optional)
 
 ## Build instructions
