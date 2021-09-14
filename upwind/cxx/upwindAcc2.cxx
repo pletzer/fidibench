@@ -63,33 +63,33 @@ public:
     #pragma acc data copy(fPtr[ntot]) create(fOldPtr[ntot]) copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS], upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime, ntot)
     {
 
-        for (int istep = 0; istep < numTimeSteps; ++istep) {
+      for (int istep = 0; istep < numTimeSteps; ++istep) {
 
-            #pragma acc parallel loop
-            for (int i = 0; i < ntot; ++i) {
-                fOldPtr[i] = fPtr[i];
-            }
+          #pragma acc parallel loop
+          for (int i = 0; i < ntot; ++i) {
+              fOldPtr[i] = fPtr[i];
+          }
 
-            #pragma acc parallel loop
-            for (int i = 0; i < ntot; ++i) {
+          #pragma acc parallel loop
+          for (int i = 0; i < ntot; ++i) {
 
-                int inds[NDIMS];
-    			int upI;
+            int inds[NDIMS];
+            int upI;
 
-                #include "compute_index_set.h"
+            #include "compute_index_set.h"
 
-                #include "compute_flat_index_offset_x.h"
-                fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upI] - fOldPtr[i]);
+            #include "compute_flat_index_offset_x.h"
+            fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upI] - fOldPtr[i]);
 
-                #include "compute_flat_index_offset_y.h"
-                fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
+            #include "compute_flat_index_offset_y.h"
+            fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
 
-                #include "compute_flat_index_offset_z.h"
-                fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
+            #include "compute_flat_index_offset_z.h"
+            fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
 
-            } // acc parallel loop
+          } // acc parallel loop
 
-        } // time steps
+      } // time steps
 
     } // acc data
 
@@ -102,13 +102,13 @@ public:
   }
 
   double std() const {
-  	double mean = this->checksum()/static_cast<double>(this->ntot);
-  	double res = 0;
-  	for (auto i = 0; i < this->f.size(); ++i) {
-  		double d = this->f[i] - mean;
-  		res += d*d;
-  	}
-  	return sqrt(res /static_cast<double>(this->ntot));
+    double mean = this->checksum()/static_cast<double>(this->ntot);
+    double res = 0;
+    for (auto i = 0; i < this->f.size(); ++i) {
+      double d = this->f[i] - mean;
+      res += d*d;
+    }
+    return sqrt(res /static_cast<double>(this->ntot));
   }
 
   void print() const {
@@ -184,7 +184,7 @@ int main(int argc, char** argv) {
 
   std::cout << "check sum: " << up.checksum() << '\n';
   if (doStd) {
-  	std::cout << "std      : " << up.std() << '\n';
+    std::cout << "std      : " << up.std() << '\n';
   }
   if (doVtk) {
     up.saveVTK("up.vtk");
