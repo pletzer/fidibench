@@ -65,7 +65,7 @@ public:
 #pragma acc parallel loop \
   copy(fPtr[ntot]) \
   copyin(fOldPtr[ntot]) \
-  copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS],	\
+  present_or_copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS],	\
   upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime) \
   private(inds[NDIMS], upI)
     for (int i = 0; i < ntot; ++i) {
