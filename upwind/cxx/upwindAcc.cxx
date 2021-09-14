@@ -60,26 +60,31 @@ public:
     int* numCellsPtr = &this->numCells.front();
     int ntot = this->ntot;
     int upI;
+    int inds[NDIMS];
 
 #pragma acc parallel loop \
   copy(fPtr[ntot]) \
   copyin(fOldPtr[ntot]) \
   copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS],	\
-  upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime)
+  upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime) \
+  private(inds[NDIMS], upI)
     for (int i = 0; i < ntot; ++i) {
 
-      int inds[NDIMS];
 
-#include "compute_index_set.h"
+      // compute inds
+      #include "compute_index_set.h"
 
-#include "compute_flat_index_offset_x.h"
-fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upI] - fOldPtr[i]);
+      // compute upI in the up x direction
+      #include "compute_flat_index_offset_x.h"
+      fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upI] - fOldPtr[i]);
 
-#include "compute_flat_index_offset_y.h"
-fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
+      // compute upI in the up y direction
+      #include "compute_flat_index_offset_y.h"
+      fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
 
-#include "compute_flat_index_offset_z.h"
-fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
+      // compute upI in the up z direction
+      #include "compute_flat_index_offset_z.h"
+      fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
 
      } // acc parallel loop
   }

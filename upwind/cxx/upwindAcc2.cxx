@@ -59,6 +59,7 @@ public:
     int* dimProdPtr = &this->dimProd.front();
     int* numCellsPtr = &this->numCells.front();
     int ntot = this->ntot;
+    int inds[NDIMS];
 
     #pragma acc data copy(fPtr[ntot]) create(fOldPtr[ntot]) copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS], upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime, ntot)
     {
@@ -70,12 +71,13 @@ public:
               fOldPtr[i] = fPtr[i];
           }
 
-          #pragma acc parallel loop
+          #pragma acc parallel loop private(inds)
           for (int i = 0; i < ntot; ++i) {
-
-            int inds[NDIMS];
+            
+            // private
             int upI;
 
+            // fill in inds
             #include "compute_index_set.h"
 
             #include "compute_flat_index_offset_x.h"
