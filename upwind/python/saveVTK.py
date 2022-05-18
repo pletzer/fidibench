@@ -14,52 +14,52 @@ def rectilinear(fname, xAxis, yAxis, zAxis, data):
   ndims = len(numCells)
 
   f = open(fname, 'w')
-  print >> f, "# vtk DataFile Version 2.0"
-  print >> f, "upwind"
-  print >> f, "ASCII"
-  print >> f, "DATASET RECTILINEAR_GRID"
-  print >> f, "DIMENSIONS",
+  print("# vtk DataFile Version 2.0", file=f)
+  print("upwind", file=f)
+  print("ASCII", file=f)
+  print("DATASET RECTILINEAR_GRID", file=f)
+  print("DIMENSIONS", end=' ', file=f)
   # in VTK the first dimension varies fastest so need 
   # to invert the order of the dimensions
   if ndims > 2:
-    print >> f, ' %d' % (numCells[2] + 1),
+    print(' %d' % (numCells[2] + 1), end=' ', file=f)
   else:
-    print >> f, " 1",
+    print(" 1", end=' ', file=f)
   if ndims > 1:
-    print >> f, ' %d' % (numCells[1] + 1),
+    print(' %d' % (numCells[1] + 1), end=' ', file=f)
   else:
-    print >> f, " 1",
-  print >> f, ' %d' % (numCells[0] + 1),
-  print >> f, "\nX_COORDINATES ",
+    print(" 1", end=' ', file=f)
+  print(' %d' % (numCells[0] + 1), end=' ', file=f)
+  print("\nX_COORDINATES ", end=' ', file=f)
   if ndims > 2:
-    print >> f, numCells[2] + 1,  " double"
+    print(numCells[2] + 1,  " double", file=f)
     for i in range(numCells[2] + 1):
-      print >> f, ' %f' % xAxis[i], 
+      print(' %f' % xAxis[i], end=' ', file=f) 
   else:
-    print >> f, "1 double"
-    print >> f, "0.0",
-  print >> f, "\nY_COORDINATES ",
+    print("1 double", file=f)
+    print("0.0", end=' ', file=f)
+  print("\nY_COORDINATES ", end=' ', file=f)
   if ndims > 1:
-    print >> f, numCells[1] + 1,  " double"
+    print(numCells[1] + 1,  " double", file=f)
     for i in range(numCells[1] + 1): 
-      print >> f, ' %f' % yAxis[i], 
+      print(' %f' % yAxis[i], end=' ', file=f) 
   else:
-    print >> f, "1 double"
-    print >> f, "0.0",
-  print >> f, "\nZ_COORDINATES ",
-  print >> f, numCells[0] + 1, " double"
+    print("1 double", file=f)
+    print("0.0", end=' ', file=f)
+  print("\nZ_COORDINATES ", end=' ', file=f)
+  print(numCells[0] + 1, " double", file=f)
   for i in range(numCells[0] + 1):
-    print >> f, ' %f' % zAxis[i],
+    print(' %f' % zAxis[i], end=' ', file=f)
 
   flatData = data.flat
   ntot = len(flatData)
 
-  print >> f, "\nCELL_DATA %d" % ntot
-  print >> f, "SCALARS f double 1"
-  print >> f, "LOOKUP_TABLE default"
+  print("\nCELL_DATA %d" % ntot, file=f)
+  print("SCALARS f double 1", file=f)
+  print("LOOKUP_TABLE default", file=f)
     
   for i in range(len(flatData)):
-    print >> f, flatData[i],
+    print(flatData[i], end=' ', file=f)
     if (i + 1) % 10 == 0:
-        print >> f
+        print(file=f)
   f.close()
