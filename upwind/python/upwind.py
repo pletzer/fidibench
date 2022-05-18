@@ -8,7 +8,7 @@ class Upwind:
     self.numCells = numCells
     self.ndims = len(velocity)
     self.deltas = numpy.zeros( (self.ndims,), numpy.float64 )
-    self.upDirection = numpy.zeros( (self.ndims,), numpy.int )
+    self.upDirection = numpy.zeros( (self.ndims,), int )
     self.v = velocity
     self.lengths = lengths
     self.ntot = 1
@@ -18,7 +18,7 @@ class Upwind:
       self.deltas[j] = lengths[j] / numCells[j]
       self.ntot *= numCells[j]
 
-    self.dimProd = numpy.ones( (self.ndims,), numpy.int )
+    self.dimProd = numpy.ones( (self.ndims,), int )
     for i in range(self.ndims - 2, -1, -1):
         # last index varies fastest
         self.dimProd[i] =  self.dimProd[i + 1] * self.numCells[i + 1]
@@ -68,7 +68,7 @@ class Upwind:
       print(i, ' ', self.f[i])
 
   def getIndexSet(self, flatIndex):
-    res = numpy.zeros( (self.ndims,), numpy.int )
+    res = numpy.zeros( (self.ndims,), int )
     for i in range(self.ndims):
       res[i] = flatIndex / self.dimProd[i] % self.numCells[i]
     return res
