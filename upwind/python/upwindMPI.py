@@ -1,11 +1,10 @@
-#!/usr/bin/env python
 
 """
 Upwind discretization of advection equation
 @author Alexander Pletzer
 """
 
-import pnumpy
+import mpinum
 import numpy
 import sys
 from mpi4py import MPI
@@ -21,7 +20,7 @@ class Upwind:
     self.sz = MPI.COMM_WORLD.Get_size()
 
     # decomposition
-    self.dc = pnumpy.CubeDecomp(self.sz, numCells)
+    self.dc = mpinum.CubeDecomp(self.sz, numCells)
     if not self.dc.getDecomp():
       print('*** No uniform decomposition could be found for {0} processes'.format(self.sz))
       print('*** Please adjust the number of cells {0}'.format(numCells))
@@ -39,7 +38,7 @@ class Upwind:
 
     self.ndims = len(velocity)
     self.deltas = numpy.zeros( (self.ndims,), numpy.float64 )
-    self.upDirection = numpy.zeros( (self.ndims,), numpy.int )
+    self.upDirection = numpy.zeros( (self.ndims,), int )
     self.v = velocity
     self.lengths = lengths
 
@@ -54,8 +53,8 @@ class Upwind:
     self.coeff = self.v * self.upDirection / self.deltas
 
     # initializing the field
-    self.f = pnumpy.gdaZeros( self.nsLocal, numpy.float64, numGhosts=1 )
-    self.fOld = pnumpy.gdaZeros( self.nsLocal, numpy.float64, numGhosts=1 )
+    self.f = mpinum.gdaZeros( self.nsLocal, numpy.float64, numGhosts=1 )
+    self.fOld = mpinum.gdaZeros( self.nsLocal, numpy.float64, numGhosts=1 )
 
     # initialize lower corner to one
     if self.rk == 0:
