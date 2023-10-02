@@ -1,9 +1,5 @@
 FROM gcc:latest
 
-WORKDIR /app
-
-COPY . .
-
 RUN apt update
 RUN apt -y install cmake/stable
 
@@ -14,9 +10,8 @@ RUN git clone https://github.com/pletzer/fidibench
 RUN cd fidibench && \
     mkdir build && \
     cd build && \
-    cmake -D CMAKE_INSTALL_PREFIX=/usr/local .. && \
+    cmake .. && \
     cmake --build . && \
-    cmake --install .
+    cmake --install . --prefix /usr/local/fidibench
 
-ENV PATH="/usr/local/bin:./:${PATH}"
-
+#CMD ["ls", "upwind"]

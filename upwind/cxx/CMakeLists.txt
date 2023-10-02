@@ -21,6 +21,7 @@ endif()
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 add_executable(upwindCxx upwind.cxx)
+install(TARGETS upwindCxx)
 target_link_libraries(upwindCxx PUBLIC fidibench "${EXTRA_LIBS}" OpenMP::OpenMP_CXX)
 
 add_executable(upwindOMPTasksCxx upwindOMPTasks.cxx)
