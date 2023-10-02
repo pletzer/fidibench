@@ -44,6 +44,7 @@ endif()
 
 if(MPI_CXX_FOUND)
   add_executable(upwindMpiCxx upwindMpi.cxx)
+  install(TARGETS upwindMpiCxx)
   target_link_libraries(upwindMpiCxx fidibench "${EXTRA_LIBS}")
 endif()
 
