@@ -1,0 +1,11 @@
+BootStrap: docker
+From: gcc:latest
+%post
+    apt -y update
+    apt -y install cmake/stable
+    ln -s /usr/local/bin/gfortran /usr/bin/gfortran
+    apt -y install mpich/stable
+    git clone https://github.com/pletzer/fidibench
+    cd fidibench && mkdir build && cd build && cmake ..
+    cmake --build .
+    cmake --install . --prefix /usr/local/fidibench

@@ -14,4 +14,3 @@ RUN cd fidibench && \
     cmake --build . && \
     cmake --install . --prefix /usr/local/fidibench
 
-#CMD ["ls", "upwind"]
