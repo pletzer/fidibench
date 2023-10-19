@@ -29,8 +29,9 @@ double initialCondition(const std::vector<size_t>& inds) {
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc, char** argv) {
 
-
-  MPI_Init(&argc, &argv);
+  int request = MPI_THREAD_FUNNELED;
+  int provided;
+  MPI_Init_thread(&argc, &argv, request, &provided);
 
   int rk;
   MPI_Comm_rank(MPI_COMM_WORLD, &rk);
