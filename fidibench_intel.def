@@ -2,7 +2,8 @@ Bootstrap: docker
 From: intel/oneapi-hpckit:devel-ubuntu22.04
 %post
     git clone https://github.com/pletzer/fidibench
-    cd fidibench && mkdir build && cd build && MPI_CXX=mpiicc CXX=mpiicc FC=mpiifort MPI_FC=mpiifort cmake ..
+    cd fidibench
+    mkdir build && cd build && MPI_CXX=mpiicc CXX=mpiicc FC=mpiifort MPI_FC=mpiifort cmake ..
     cmake --build .
     mkdir -p /software/fidibench
     cmake --install . --prefix /software/fidibench
