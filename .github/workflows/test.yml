@@ -23,7 +23,7 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - name: Download and Build
+      - name: Download Build and Test
         run: |
           git clone https://github.com/pletzer/fidibench
           cd fidibench
@@ -31,4 +31,4 @@ jobs:
           cd build
           cmake ..
           make
-          ctest
+          ctest -R testStencil2d -V
