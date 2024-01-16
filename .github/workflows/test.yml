@@ -27,13 +27,6 @@ jobs:
 
       - name: Download Build and Test
         run: |
-          git clone https://github.com/pletzer/fidibench
-          cd fidibench
-          export OMPI_MCA_rmaps_base_oversubscribe="yes"
-          mkdir build
-          cd build
-          cmake ..
-          make
           python3 -mvenv .venv
           source .venv/bin/activate
           pip3 install numpy
@@ -42,4 +35,11 @@ jobs:
           wget https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.1-linux-x86_64.tar.gz
           tar xf julia-1.8.1-linux-x86_64.tar.gz
           export PATH="$PATH:${PWD}/julia-1.8.1/bin"
+          git clone https://github.com/pletzer/fidibench
+          cd fidibench
+          export OMPI_MCA_rmaps_base_oversubscribe="yes"
+          mkdir build
+          cd build
+          cmake ..
+          make
           ctest -R upwindPython -V 
