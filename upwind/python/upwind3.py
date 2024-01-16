@@ -11,12 +11,12 @@ class Upwind:
     self.numCells = numCells
     self.ndims = len(velocity)
     self.deltas = numpy.zeros( (self.ndims,), numpy.float64 )
-    self.upDirection = numpy.zeros( (self.ndims,), numpy.int )
+    self.upDirection = numpy.zeros( (self.ndims,), numpy.int32 )
     self.v = velocity
     self.lengths = lengths
     self.ntot = 1
-    self.offsetMat = numpy.identity(self.ndims, numpy.int)
-    self.numCellsExt = numpy.outer(self.numCells, numpy.ones((self.ndims,), numpy.int))
+    self.offsetMat = numpy.identity(self.ndims, numpy.int32)
+    self.numCellsExt = numpy.outer(self.numCells, numpy.ones((self.ndims,), numpy.int32))
     for j in range(self.ndims):
       self.upDirection[j] = -1
       if velocity[j] < 0.: self.upDirection[j] = +1
@@ -24,7 +24,7 @@ class Upwind:
       self.offsetMat[j, j] = self.upDirection[j]
       self.ntot *= numCells[j]
 
-    self.dimProd = numpy.ones( (self.ndims,), numpy.int )
+    self.dimProd = numpy.ones( (self.ndims,), numpy.int32 )
     for i in range(self.ndims - 2, -1, -1):
         # last index varies fastest
         self.dimProd[i] =  self.dimProd[i + 1] * self.numCells[i + 1]
@@ -37,7 +37,7 @@ class Upwind:
     self.f[0] = 1
 
     # array of index sets for each cell
-    self.inds = numpy.zeros( (self.ndims, self.ntot), numpy.int )
+    self.inds = numpy.zeros( (self.ndims, self.ntot), numpy.int32 )
     for j in range(self.ndims):
       self.inds[j, :] = numpy.arange(self.ntot)
       self.inds[j, :] //= self.dimProd[j]
