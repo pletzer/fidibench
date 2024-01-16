@@ -20,6 +20,9 @@ jobs:
           sudo apt install -y build-essential
           sudo apt install -y cmake
           sudo apt install -y openmpi-bin openmpi-common libopenmpi-dev
+          sudo apt install python3
+          sudo pip install numpy
+          sudo pip install mpi4py
 
       - uses: actions/checkout@v4
 
