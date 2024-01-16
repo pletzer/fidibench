@@ -38,7 +38,7 @@ jobs:
           source .venv/bin/activate
           pip3 install numpy
           pip3 install mpi4py
-          pip3 install mpinum>=1.4.3
+          pip3 install mpinum
           wget https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.1-linux-x86_64.tar.gz
           tar xf julia-1.8.1-linux-x86_64.tar.gz
           export PATH="$PATH:${PWD}/julia-1.8.1/bin"
