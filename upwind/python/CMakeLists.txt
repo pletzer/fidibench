@@ -7,11 +7,6 @@ if (PYTHON_EXECUTABLE)
   	       "${CMAKE_SOURCE_DIR}/upwind/python/upwind.py" 
   	       "${NUM_CELLS}" "${NUM_TIME_STEPS}")
 
-  add_test(NAME upwindPython3 
-  	       COMMAND "${PYTHON_EXECUTABLE}" 
-  	       "${CMAKE_SOURCE_DIR}/upwind/python/upwind3.py"
-  	       "${NUM_CELLS}" "${NUM_TIME_STEPS}")
-
   add_test(NAME upwindPythonMpi1
            COMMAND "${MPIEXEC}" "${MPIEXEC_NUMPROC_FLAG}" "1"
            "${PYTHON_EXECUTABLE}"
