@@ -27,6 +27,7 @@ jobs:
         run: |
           git clone https://github.com/pletzer/fidibench
           cd fidibench
+          export OMPI_MCA_rmaps_base_oversubscribe="yes"
           mkdir build
           cd build
           cmake ..
