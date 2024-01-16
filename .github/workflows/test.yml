@@ -36,9 +36,9 @@ jobs:
           make
           python3 -mvenv .venv
           source .venv/bin/activate
-          pip install numpy
-          pip install mpi4py
+          pip3 install numpy
+          pip3 install mpi4py
           wget https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.1-linux-x86_64.tar.gz
           tar xf julia-1.8.1-linux-x86_64.tar.gz
           export PATH="$PATH:${PWD}/julia-1.8.1/bin"
-          ctest
+          ctest -R upwindPython -V 
