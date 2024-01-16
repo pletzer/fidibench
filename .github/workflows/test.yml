@@ -32,4 +32,4 @@ jobs:
           cd build
           cmake ..
           make
-          ctest -R testStencil2d -V
+          ctest
