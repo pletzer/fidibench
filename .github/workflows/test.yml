@@ -25,7 +25,7 @@ jobs:
 
       - name: Download and Build
         run: |
-          sudo git clone https://github.com/pletzer/fidibench
+          git clone https://github.com/pletzer/fidibench
           cd fidibench
           mkdir build
           cd build
