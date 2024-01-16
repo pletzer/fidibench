@@ -21,8 +21,7 @@ jobs:
           sudo apt install -y cmake
           sudo apt install -y openmpi-bin openmpi-common libopenmpi-dev
           sudo apt install python3
-          sudo pip install numpy
-          sudo pip install mpi4py
+          sudo apt install julia
 
       - uses: actions/checkout@v4
 
@@ -35,4 +34,8 @@ jobs:
           cd build
           cmake ..
           make
+          python3 -mvenv .venv
+          source .venv/bin/activate
+          pip install numpy
+          pip install mpi4py
           ctest
