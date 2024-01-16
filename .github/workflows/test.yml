@@ -21,7 +21,7 @@ jobs:
           sudo apt install -y cmake
           sudo apt install -y openmpi-bin openmpi-common libopenmpi-dev
           sudo apt install python3
-          sudo apt install julia
+          sudo apt install wget
 
       - uses: actions/checkout@v4
 
@@ -38,4 +38,7 @@ jobs:
           source .venv/bin/activate
           pip install numpy
           pip install mpi4py
+          wget https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.1-linux-x86_64.tar.gz
+          tar xf julia-1.8.1-linux-x86_64.tar.gz
+          export PATH="$PATH:${PWD}/julia-1.8.1/bin"
           ctest
