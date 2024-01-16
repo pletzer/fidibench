@@ -13,53 +13,50 @@ def rectilinear(fname, xAxis, yAxis, zAxis, data):
   numCells = data.shape
   ndims = len(numCells)
 
-  f = open(fname, 'w')
-  print >> f, "# vtk DataFile Version 2.0"
-  print >> f, "upwind"
-  print >> f, "ASCII"
-  print >> f, "DATASET RECTILINEAR_GRID"
-  print >> f, "DIMENSIONS",
-  # in VTK the first dimension varies fastest so need 
-  # to invert the order of the dimensions
-  if ndims > 2:
-    print >> f, ' %d' % (numCells[2] + 1),
-  else:
-    print >> f, " 1",
-  if ndims > 1:
-    print >> f, ' %d' % (numCells[1] + 1),
-  else:
-    print >> f, " 1",
-  print >> f, ' %d' % (numCells[0] + 1),
-  print >> f, "\nX_COORDINATES ",
-  if ndims > 2:
-    print >> f, numCells[2] + 1,  " double"
-    for i in range(numCells[2] + 1):
-      print >> f, ' %f' % xAxis[i], 
-  else:
-    print >> f, "1 double"
-    print >> f, "0.0",
-  print >> f, "\nY_COORDINATES ",
-  if ndims > 1:
-    print >> f, numCells[1] + 1,  " double"
-    for i in range(numCells[1] + 1): 
-      print >> f, ' %f' % yAxis[i], 
-  else:
-    print >> f, "1 double"
-    print >> f, "0.0",
-  print >> f, "\nZ_COORDINATES ",
-  print >> f, numCells[0] + 1, " double"
-  for i in range(numCells[0] + 1):
-    print >> f, ' %f' % zAxis[i],
+  with open(fname, 'w') as f:
+    f.write("# vtk DataFile Version 2.0\n")
+    f.write("upwind\n")
+    f.write("ASCII\n")
+    f.write("DATASET RECTILINEAR_GRID\n")
+    f.write("DIMENSIONS")
+    # in VTK the first dimension varies fastest so need 
+    # to invert the order of the dimensions
+    if ndims > 2:
+      f.write(f' {numCells[2] + 1}')
+    else:
+      f.write(" 1")
+    if ndims > 1:
+      f.write(f' {numCells[1] + 1}')
+    else:
+      f.write(" 1")
+    f.write(f' {numCells[0] + 1}')
+    f.write("\nX_COORDINATES ")
+    if ndims > 2:
+      f.write(f"{numCells[2] + 1} double")
+      for i in range(numCells[2] + 1):
+        f.write(f' {xAxis[i]}')
+    else:
+      f.write("1 double 0.0")
+    f.write( "\nY_COORDINATES ")
+    if ndims > 1:
+      f.write(f"{numCells[1] + 1} double")
+      for i in range(numCells[1] + 1): 
+        f.write(f' {yAxis[i]}') 
+    else:
+      f.write("1 double 0.0")
+    f.write("\nZ_COORDINATES ")
+    f.write(f"{numCells[0] + 1} double")
+    for i in range(numCells[0] + 1):
+      f.write(f' {zAxis[i]}')
 
-  flatData = data.flat
-  ntot = len(flatData)
+    flatData = data.flat
+    ntot = len(flatData)
 
-  print >> f, "\nCELL_DATA %d" % ntot
-  print >> f, "SCALARS f double 1"
-  print >> f, "LOOKUP_TABLE default"
-    
-  for i in range(len(flatData)):
-    print >> f, flatData[i],
-    if (i + 1) % 10 == 0:
-        print >> f
-  f.close()
+    f.write(f"\nCELL_DATA {ntot}\n")
+    f.write("SCALARS f double 1\n")
+    f.write("LOOKUP_TABLE default\n")
+      
+    for i in range(len(flatData)):
+      f.write(f'{flatData[i]}')
+      if (i + 1) % 10 == 0:
+          f.write('\n')
