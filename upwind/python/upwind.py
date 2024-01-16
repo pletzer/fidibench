@@ -11,45 +11,60 @@ class Upwind:
     self.numCells = numCells
     self.ndims = len(velocity)
     self.deltas = numpy.zeros( (self.ndims,), numpy.float64 )
-    self.upDirection = numpy.zeros( (self.ndims,), numpy.int )
+    self.upDirection = numpy.zeros( (self.ndims,), numpy.int32 )
     self.v = velocity
     self.lengths = lengths
     self.ntot = 1
+    self.offsetMat = numpy.identity(self.ndims, numpy.int32)
+    self.numCellsExt = numpy.outer(self.numCells, numpy.ones((self.ndims,), numpy.int32))
     for j in range(self.ndims):
       self.upDirection[j] = -1
       if velocity[j] < 0.: self.upDirection[j] = +1
       self.deltas[j] = lengths[j] / numCells[j]
+      self.offsetMat[j, j] = self.upDirection[j]
       self.ntot *= numCells[j]
 
-    self.dimProd = numpy.ones( (self.ndims,), numpy.int )
+    self.dimProd = numpy.ones( (self.ndims,), numpy.int32 )
     for i in range(self.ndims - 2, -1, -1):
         # last index varies fastest
         self.dimProd[i] =  self.dimProd[i + 1] * self.numCells[i + 1]
 
+    self.coeff = self.v * self.upDirection / self.deltas
+
+    # initializing the field
     self.f = numpy.zeros( (self.ntot,), numpy.float64 )
-    # initialize some cells to one
-    for i in range(self.ntot):
-      ind = self.getIndexSet(i)
-      inside = True
-      for j in range(self.ndims):
-        if ind[j] < int(0.3 * self.numCells[j]) or ind[j] >= int(0.4 * self.numCells[j]):
-          inside = False 
-      if inside:
-        self.f[i] = 1.0
+    # initialize lower corner to one
+    self.f[0] = 1
+
+    # array of index sets for each cell
+    self.inds = numpy.zeros( (self.ndims, self.ntot), numpy.int32 )
+    for j in range(self.ndims):
+      self.inds[j, :] = numpy.arange(self.ntot)
+      self.inds[j, :] //= self.dimProd[j]
+      self.inds[j, :] %= self.numCells[j]
 
   def advect(self, deltaTime):
-    oldF = copy.deepcopy(self.f)
-    for i in range(self.ntot): 
-      inds = self.getIndexSet(i)
-      for j in range(self.ndims):
-        oldIndex = inds[j]
-        # periodic BCs
-        inds[j] += self.upDirection[j] + self.numCells[j]
-        inds[j] %= self.numCells[j]
 
-        upI = self.getFlatIndex(inds)
-        self.f[i] -= deltaTime * self.v[j] * self.upDirection[j] * (oldF[upI] - oldF[i])/self.deltas[j]
-        inds[j] = oldIndex
+    # copy 
+    oldF = self.f.copy()
+
+    indsUp = self.inds.copy()
+
+    # update the field in each spatial direction
+    for j in range(self.ndims):
+
+      # apply offset
+      indsUp[j, :] += self.upDirection[j]
+      indsUp[j, :] %= self.numCells[j]
+
+      # compute flat indices corresponding to the offset index sets
+      flatIndsUp = numpy.dot(self.dimProd, indsUp)
+
+      # update
+      self.f -= (deltaTime * self.coeff[j]) * (oldF[flatIndsUp] - oldF)
+
+      # reset
+      indsUp[j, :] = self.inds[j, :]
 
   def saveVTK(self, fname):
     xAxis = [0.0]
@@ -69,15 +84,6 @@ class Upwind:
   def printOut(self):
     for i in range(len(self.f)):
       print(i, ' ', self.f[i])
-
-  def getIndexSet(self, flatIndex):
-    res = numpy.zeros( (self.ndims,), numpy.int )
-    for i in range(self.ndims):
-      res[i] = flatIndex / self.dimProd[i] % self.numCells[i]
-    return res
-
-  def getFlatIndex(self, inds):
-    return numpy.dot(self.dimProd, inds)
 
 #################################################################################################
 def main():
@@ -111,10 +117,8 @@ def main():
     dt = min(courant * dx / velocity[j], dt)
 
   up = Upwind(velocity, lengths, numCells)
-  up.saveVTK('up0.vtk')
   for i in range(numTimeSteps):
     up.advect(dt)
-    up.saveVTK('up{}.vtk'.format(i + 1))
 
   print("check sum: ", up.checksum())
   if doVtk:

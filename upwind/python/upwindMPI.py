@@ -39,7 +39,7 @@ class Upwind:
 
     self.ndims = len(velocity)
     self.deltas = numpy.zeros( (self.ndims,), numpy.float64 )
-    self.upDirection = numpy.zeros( (self.ndims,), numpy.int )
+    self.upDirection = numpy.zeros( (self.ndims,), numpy.int32 )
     self.v = velocity
     self.lengths = lengths
 
