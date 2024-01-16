@@ -10,7 +10,7 @@ FiDiBench can also be used to compare the execution speed obtained by
 implementing a given algorithm in different languages (eg C++ vs Python 
 vs Julia).
 
-![tests_status](https://github.com/github/fidibench/actions/workflows/test.yml/badge.svg)
+![Test status](https://github.com/pletzer/fidibench/actions/workflows/test.yml/badge.svg)
 
 Example 1: comparing C++ compilers (upwind 512 cells, 10 time steps). Note the effect vectorization 
 when applying -O3 with the GNU compiler. 
