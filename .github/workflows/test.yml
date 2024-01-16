@@ -1,0 +1,32 @@
+name: Build and Test
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  build-run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    name: Build
+    steps:
+
+      - name: Install Dependencies
+        run: |
+          sudo apt update -y
+          sudo apt install -y build-essential
+          sudo apt install -y cmake
+          sudo apt install -y openmpi-bin openmpi-common libopenmpi-dev
+
+      - uses: actions/checkout@v4
+
+      - name: Download and Build
+        run: |
+          sudo git clone https://github.com/pletzer/fidibench
+          cd fidibench
+          mkdir build
+          cd build
+          cmake ..
