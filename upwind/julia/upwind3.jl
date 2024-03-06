@@ -150,53 +150,57 @@ function save2VTK(this::Upwind, fname::AbstractString)
 
 end
 
+function  main(args)
+
+    ndims = 3
+
+    # Parse command line arguments
+    if length(args) < 1
+        println("Must specify number of cells in each direction.")
+        println("Usage: ", basename(Base.source_path()), " numCells [numTimeSteps]")
+        exit(1)
+    end
+    ncells = parse(Int, args[1])
+
+    numTimeSteps = 100
+    if length(args) > 1
+        numTimeSteps = parse(Int, args[2])
+    end
+
+    # Same resolution in each direction.
+    numCells = [ncells,ncells,ncells]
+    println("number of cells: ", numCells)
+    println("number of time steps: ", numTimeSteps)
+
+
+    # Initalizing vector velocity and lengths
+    velocity = ones(Float64, ndims)
+    lengths   = ones(Float64, ndims)
+
+    # Create Upwind instance
+    up = Upwind(ndims, velocity, lengths, numCells)
+
+    # Compute time step
+    courant = 0.1
+    dt = Inf
+    for i = 1:ndims
+        dx = lengths[i]/float(numCells[i])
+        dt = min((courant*dx)/velocity[i], dt)
+    end
+
+    # Advect
+    for i = 1:numTimeSteps
+       advect!(up, dt)
+    end 
+
+    # Do the checksum
+    println("check sum: ", sum(up.f))
+
+    if length(args) > 2 && args[3] == "vtk"
+       save2VTK(up, "upwind.vtk")
+    end
+
+end
+
 # Beginning of main program
-
-ndims = 3
-
-# Parse command line arguments
-if length(ARGS) < 1
-    println("Must specify number of cells in each direction.")
-    println("Usage: ", basename(Base.source_path()), " numCells [numTimeSteps]")
-    exit(1)
-end
-ncells = parse(Int, ARGS[1])
-
-numTimeSteps = 100
-if length(ARGS) > 1
-    numTimeSteps = parse(Int, ARGS[2])
-end
-
-# Same resolution in each direction.
-numCells = [ncells,ncells,ncells]
-println("number of cells: ", numCells)
-println("number of time steps: ", numTimeSteps)
-
-
-# Initalizing vector velocity and lengths
-velocity = ones(Float64, ndims)
-lengths   = ones(Float64, ndims)
-
-
-# Compute time step
-courant = 0.1
-dt = Inf
-for i = 1:ndims
-    dx = lengths[i]/float(numCells[i])
-    global dt = min((courant*dx)/velocity[i], dt)
-end
-
-# Create Upwind instance
-up = Upwind(ndims, velocity, lengths, numCells)
-
-# Advect
-for i = 1:numTimeSteps
-   advect!(up, dt)
-end 
-
-# Do the checksum
-println("check sum: ", sum(up.f))
-
-if length(ARGS) > 2 && ARGS[3] == "vtk"
-   save2VTK(up, "upwind.vtk")
-end
+main(ARGS)
