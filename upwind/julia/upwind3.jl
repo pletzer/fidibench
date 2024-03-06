@@ -150,22 +150,9 @@ function save2VTK(this::Upwind, fname::AbstractString)
 
 end
 
-function  main(args)
+function  main(ncells, numTimeSteps, savevtk)
 
     ndims = 3
-
-    # Parse command line arguments
-    if length(args) < 1
-        println("Must specify number of cells in each direction.")
-        println("Usage: ", basename(Base.source_path()), " numCells [numTimeSteps]")
-        exit(1)
-    end
-    ncells = parse(Int, args[1])
-
-    numTimeSteps = 100
-    if length(args) > 1
-        numTimeSteps = parse(Int, args[2])
-    end
 
     # Same resolution in each direction.
     numCells = [ncells,ncells,ncells]
@@ -196,11 +183,34 @@ function  main(args)
     # Do the checksum
     println("check sum: ", sum(up.f))
 
-    if length(args) > 2 && args[3] == "vtk"
+    if savevtk
        save2VTK(up, "upwind.vtk")
     end
 
 end
 
 # Beginning of main program
-main(ARGS)
+###########################
+
+ncells = 128
+numTimeSteps = 10
+
+# Parse command line arguments
+if length(ARGS) < 1
+    println("Must specify number of cells in each direction.")
+    println("Usage: ", basename(Base.source_path()), " numCells [numTimeSteps]")
+    exit(1)
+end
+ncells = parse(Int, ARGS[1])
+
+numTimeSteps = 100
+if length(ARGS) > 1
+    numTimeSteps = parse(Int, ARGS[2])
+end
+
+savevtk = false
+if length(ARGS) > 2 && ARGS[3] == "vtk"
+    savevtk = true
+end
+
+main(ncells, numTimeSteps, savevtk)
