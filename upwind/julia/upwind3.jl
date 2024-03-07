@@ -4,10 +4,12 @@
 # Original code from Christopher Blanton (cjb47@psu.edu)
 # Modified by Alex Pletzer (alexander@gokliya.net)
 
+
 using LinearAlgebra
 include("saveVTK.jl")
 
 mutable struct Upwind
+
     # Number of space dimensions
     ndims::Int
 
@@ -26,16 +28,22 @@ mutable struct Upwind
 
     # Grid size along each direction
     deltas::Array
+
     # Direction of upwind
     upDirection::Array
+
     # Total number of cells
     ntot::Int
+
     # Product of the dimensions, used to go from flat index to index set
     dimProd::Array
+
     # Field
     f::Array
+
     # Index set
     inds::Array
+
     # Array of ones
     eins::Array
 
@@ -90,21 +98,22 @@ function advect!(this::Upwind, deltaTime::Float64)
     @param this instance
     @param deltaTime time increment
     """
-    oldF = deepcopy(this.f)
+    oldF = copy(this.f)
 
-    indsUp = deepcopy(this.inds)
+    indsUp = copy(this.inds)
+
+    c = deltaTime * this.velocity .* this.upDirection ./ this.deltas
 
     for j = 1:this.ndims
 
         indsUp[:, j] = mod.(this.inds[:, j] + this.upDirection[j]*this.eins, this.numCells[j])
 
-        # compute flat indices corresponding to the offset index sets
-
-        flatIndsUp = this.dimProd'indsUp' .+ 1
+        # compute the flat indices corresponding to the offset index sets
+        flatIndsUp = *(indsUp, this.dimProd) .+ 1
 
         # update
-        c = deltaTime * this.velocity[j] * this.upDirection[j] / this.deltas[j]
-        this.f -= c * (oldF[flatIndsUp'] - oldF)
+        this.f -= c[j] * oldF[flatIndsUp]
+        this.f += c[j] * oldF
 
         # reset
         indsUp[:, j] = this.inds[:, j]
@@ -125,12 +134,12 @@ end
   
 function getIndexSet(this::Upwind, flatIndex::Integer)
     """
-    Get the index set of a falt index
+    Get the index set of a flat index
     @param this instance
     @param flatIndex flat index 
     @return index set, eg [i, j, k]
     """
-    res = zeros(Integer,this.ndims)
+    res = zeros(Integer, this.ndims)
     for i = 1:this.ndims
         res[i] = mod(div((flatIndex - 1), this.dimProd[i]), this.numCells[i]) + 1
     end
@@ -193,23 +202,18 @@ end
 ###########################
 
 ncells = 128
-numTimeSteps = 10
+numTimeSteps = 2
 
 # Parse command line arguments
-if length(ARGS) < 1
-    println("Must specify number of cells in each direction.")
-    println("Usage: ", basename(Base.source_path()), " numCells [numTimeSteps]")
-    exit(1)
-end
-ncells = parse(Int, ARGS[1])
-
-numTimeSteps = 100
-if length(ARGS) > 1
-    numTimeSteps = parse(Int, ARGS[2])
+if length(ARGS) >= 1
+    ncells = parse(Int, ARGS[1])
+    if length(ARGS) >= 2
+        numTimeSteps = parse(Int, ARGS[2])
+    end
 end
 
 savevtk = false
-if length(ARGS) > 2 && ARGS[3] == "vtk"
+if length(ARGS) >= 3 && ARGS[3] == "vtk"
     savevtk = true
 end
 
