@@ -19,6 +19,7 @@ print(status_files)
 init_times = []
 exit_times = []
 exec_times = []
+ncells = []
 job_ids = []
 job_names = []
 for sf in status_files:
@@ -26,10 +27,11 @@ for sf in status_files:
   init_time = float('inf')
   exit_time = float('inf')
   job_id = -1
-  name = ''
-  m = re.search(r'(upwind\w+)_(\d+)\_', sf)
+  name = 'xxx'
+  m = re.search(r'(upwind[^\_]+)\_ncells(\d+)', sf)
   if m:
     name = m.group(1)
+    nc = int(m.group(2))
   for line in open(sf).readlines():
     m = re.match(r'CYLC_JOB_ID=(\d+)', line)
     if m:
@@ -47,17 +49,19 @@ for sf in status_files:
   exit_times.append(exit_time)
   job_ids.append(job_id)
   job_names.append(name)
+  ncells.append(nc)
   try:
     exec_times.append( (exit_time - init_time).seconds )
   except:
     exec_times.append(-1)
 
-df = pd.DataFrame({'job_id': job_ids, 'exec_time': exec_times, 'job_name': job_names})
+df = pd.DataFrame({'job_id': job_ids, 'exec_time': exec_times,
+                   'job_name': job_names, 'ncells': ncells})
 df.to_csv(f'{case}.csv')
 
 print(df)
 
-sn.barplot(data=df, x='job_id', y='exec_time', hue='job_name')
+sn.barplot(data=df, x='ncells', y='exec_time', hue='job_name')
 #plt.tight_layout()
 plt.savefig(f'{case}.png', bbox_inches="tight")
 

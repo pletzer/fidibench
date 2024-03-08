@@ -1,6 +1,6 @@
 [task parameters]
 # run multiple instances
-    ncells = 128, 256, 512
+    ncells = 64, 128, 256, 512
     m = 0..4
 [scheduling] # Define the tasks and when they should run
   [[graph]]
@@ -14,10 +14,11 @@
     [[[directives]]] # Default SLURM options for the tasks below
        --account = nesi99999 # CHANGE
        --hint = nomultithread
-       --mem = 40GB
+       --mem = 20GB
        --time = 01:00:00
        --cpus-per-task = 1
        --partition = milan
+       --ntasks = 1
     [[[environment]]]
       TOP_DIR="/nesi/nobackup/pletzera/fidibench" # CHANGE
       NSTEPS="10"
@@ -30,11 +31,7 @@
       time ./upwindCxx -numCells $CYLC_TASK_PARAM_ncells -numSteps $NSTEPS
     """
     [[[directives]]]
-      --ntasks = 1
       --time = 00:10:00
-      --mem = 1GB
-    [[[environment]]]
-      N1 = "11"
   [[upwindJulia<ncells,m>]]
     script = """
       module purge
@@ -45,7 +42,7 @@
       time julia upwind3.jl $CYLC_TASK_PARAM_ncells $NSTEPS
     """
     [[[directives]]]
-      --ntasks = 1
+      --mem = 40GB
   [[analyse]]
     platform = localhost
     script = """
