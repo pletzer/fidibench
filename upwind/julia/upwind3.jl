@@ -112,38 +112,13 @@ function advect!(this::Upwind, deltaTime::Float64)
         flatIndsUp = *(indsUp, this.dimProd) .+ 1
 
         # update
-        this.f -= c[j] * oldF[flatIndsUp]
-        this.f += c[j] * oldF
+        this.f -= c[j] * (oldF[flatIndsUp] - oldF)
 
         # reset
         indsUp[:, j] = this.inds[:, j]
 
     end
 
-end
-
-function getFlatIndex(this::Upwind, inds::Array)
-    """
-    Get the flat index from an index set
-    @param this instance
-    @param inds index set, eg [i, j, k]
-    @return integer index of field array
-    """
-    return dot(this.dimProd, inds - 1) + 1
-end
-  
-function getIndexSet(this::Upwind, flatIndex::Integer)
-    """
-    Get the index set of a flat index
-    @param this instance
-    @param flatIndex flat index 
-    @return index set, eg [i, j, k]
-    """
-    res = zeros(Integer, this.ndims)
-    for i = 1:this.ndims
-        res[i] = mod(div((flatIndex - 1), this.dimProd[i]), this.numCells[i]) + 1
-    end
-    return res
 end
 
 function save2VTK(this::Upwind, fname::AbstractString)
