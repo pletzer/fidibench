@@ -1,0 +1,57 @@
+[task parameters]
+# run multiple instances
+    ncells = 128, 256, 512
+    m = 0..4
+[scheduling] # Define the tasks and when they should run
+  [[graph]]
+    R1 = """ # run this graph once
+    upwindJulia<ncells, m> & upwindCxx<ncells, m> => analyse
+    """
+[runtime] # Define what each task should run
+  [[root]] # Default settings inherited by all tasks
+    platform = mahuika-slurm # Run "cylc conf" to see platforms. 
+    execution retry delays = 1*PT10S # retry
+    [[[directives]]] # Default SLURM options for the tasks below
+       --account = nesi99999 # CHANGE
+       --hint = nomultithread
+       --mem = 40GB
+       --time = 01:00:00
+       --cpus-per-task = 1
+       --partition = milan
+    [[[environment]]]
+      TOP_DIR="/nesi/nobackup/pletzera/fidibench" # CHANGE
+      NSTEPS="10"
+  [[upwindCxx<ncells,m>]]
+    script = """
+      module purge
+      module load intel
+      cd $TOP_DIR/build-intel/upwind/cxx
+      pwd
+      time ./upwindCxx -numCells $CYLC_TASK_PARAM_ncells -numSteps $NSTEPS
+    """
+    [[[directives]]]
+      --ntasks = 1
+      --time = 00:10:00
+      --mem = 1GB
+    [[[environment]]]
+      N1 = "11"
+  [[upwindJulia<ncells,m>]]
+    script = """
+      module purge
+      module load Julia
+      module load R
+      cd $TOP_DIR/upwind/julia
+      pwd
+      time julia upwind3.jl $CYLC_TASK_PARAM_ncells $NSTEPS
+    """
+    [[[directives]]]
+      --ntasks = 1
+  [[analyse]]
+    platform = localhost
+    script = """
+        # create plot
+        module load Python
+        cd $TOP_DIR/cylc-src/julia_vs_cxx
+        python analyse.py
+    """
+
