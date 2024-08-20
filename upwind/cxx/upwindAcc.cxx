@@ -59,33 +59,44 @@ public:
     int* dimProdPtr = &this->dimProd.front();
     int* numCellsPtr = &this->numCells.front();
     int ntot = this->ntot;
-    int upI;
     int inds[NDIMS];
 
+    /*
 #pragma acc parallel loop \
   copy(fPtr[ntot]) \
   copyin(fOldPtr[ntot]) \
   present_or_copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS],	\
   upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime) \
   private(inds[NDIMS], upI)
+  */
+
+#pragma acc parallel loop \
+        copyin(numCellsPtr[:3],upDirectionPtr[:3],coeffPtr[:3]) \
+        private(inds[:3]) \
+        copy(fPtr[:ntot]) \
+        copyin(fOldPtr[:ntot],dimProdPtr[:3], deltaTime)
     for (int i = 0; i < ntot; ++i) {
 
+      inds[0] = (i / dimProdPtr[0]) % numCellsPtr[0];
+      inds[1] = (i / dimProdPtr[1]) % numCellsPtr[1];
+      inds[2] = (i / dimProdPtr[2]) % numCellsPtr[2];
 
-      // compute inds
-      #include "compute_index_set.h"
+      int upIx = dimProdPtr[0] * ((inds[0] + upDirectionPtr[0] + numCellsPtr[0]) % numCellsPtr[0]);
+      upIx += dimProdPtr[1] * inds[1];
+      upIx += dimProdPtr[2] * inds[2];
 
-      // compute upI in the up x direction
-      #include "compute_flat_index_offset_x.h"
-      fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upI] - fOldPtr[i]);
+      int upIy = dimProdPtr[0] * inds[0];
+      upIy += dimProdPtr[1] * ((inds[1] + upDirectionPtr[1] + numCellsPtr[1]) % numCellsPtr[1]);
+      upIy += dimProdPtr[2] * inds[2];
 
-      // compute upI in the up y direction
-      #include "compute_flat_index_offset_y.h"
-      fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upI] - fOldPtr[i]);
+      int upIz = dimProdPtr[0] * inds[0];
+      upIz += dimProdPtr[1] * inds[1];
+      upIz += dimProdPtr[2] * ((inds[2] + upDirectionPtr[2] + numCellsPtr[2]) % numCellsPtr[2]);
 
-      // compute upI in the up z direction
-      #include "compute_flat_index_offset_z.h"
-      fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upI] - fOldPtr[i]);
-
+      fPtr[i] -= deltaTime * coeffPtr[0] * (fOldPtr[upIx] - fOldPtr[i]);
+      fPtr[i] -= deltaTime * coeffPtr[1] * (fOldPtr[upIy] - fOldPtr[i]);
+      fPtr[i] -= deltaTime * coeffPtr[2] * (fOldPtr[upIz] - fOldPtr[i]);
+       
      } // acc parallel loop
   }
 

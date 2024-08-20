@@ -61,8 +61,8 @@ df.to_csv(f'{case}.csv')
 
 print(df)
 
-sn.barplot(data=df, x='ncells', y='exec_time', hue='job_name')
-#plt.tight_layout()
+g = sn.barplot(data=df, x='ncells', y='exec_time', hue='job_name')
+g.set_yscale("log")
 plt.savefig(f'{case}.png', bbox_inches="tight")
 
 

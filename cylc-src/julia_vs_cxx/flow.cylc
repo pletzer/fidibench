@@ -1,6 +1,6 @@
 [task parameters]
 # run multiple instances
-    ncells = 64, 128, 256, 512
+    ncells = 64, 128, 256
     m = 0..4
 [scheduling] # Define the tasks and when they should run
   [[graph]]

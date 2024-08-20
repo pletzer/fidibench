@@ -96,7 +96,7 @@ else ()
     # corresponding options are for the CRAY, gcc, ... compilers 
     # (if they exist)
     #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -acc -Minfo=acc")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -acc -Minfo=acc")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -acc -Minfo=acc -Mlarge_arrays")
     #set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -acc -Minfo=acc")
   endif () 
 endif ()
