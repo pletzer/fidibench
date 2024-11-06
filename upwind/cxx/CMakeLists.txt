@@ -19,19 +19,22 @@ if (INTEL_ANALYZER)
   message(STATUS "Extra libraries are ${EXTRA_LIBS}")
 endif()
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+add_executable(upwindAccCxx upwindAcc.cxx)
+target_link_libraries(upwindAccCxx fidibench "${EXTRA_LIBS}")
+
+add_executable(upwindAcc2Cxx upwindAcc2.cxx)
+target_link_libraries(upwindAcc2Cxx  fidibench "${EXTRA_LIBS}")
+
+if (OPENMP) 
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif ()
+
 add_executable(upwindCxx upwind.cxx)
 install(TARGETS upwindCxx)
 target_link_libraries(upwindCxx PUBLIC fidibench "${EXTRA_LIBS}" OpenMP::OpenMP_CXX)
 
 add_executable(upwindOMPTasksCxx upwindOMPTasks.cxx)
 target_link_libraries(upwindOMPTasksCxx PUBLIC fidibench "${EXTRA_LIBS}" OpenMP::OpenMP_CXX)
-
-add_executable(upwindAccCxx upwindAcc.cxx)
-target_link_libraries(upwindAccCxx fidibench "${EXTRA_LIBS}")
-
-add_executable(upwindAcc2Cxx upwindAcc2.cxx)
-target_link_libraries(upwindAcc2Cxx  fidibench "${EXTRA_LIBS}")
 
 if (OPENMP_OFFLOAD OR ROCM)
   add_executable(upwindOMP5Cxx upwindOMP5.cxx)

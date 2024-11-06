@@ -6,6 +6,12 @@ enable_testing()
 
 set(CMAKE_CXX_STANDARD 11)
 
+option(OPENACC "Enable OpenACC support" OFF)
+option(OPENMP "Enable OpenMP support" ON)
+option(OPENMP_OFFLOAD "Enable OpenMP offloading to GPU support" OFF)
+option(ROCM "Enable ROCm, offloading to MI100 using OpenMPI 4.5" OFF)
+option(INTEL_ANALYZER "Add compiler options for Intel Analyzer" OFF)
+
 set(OPT_FLAGS "" CACHE STRING "compiler optimization flags")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPT_FLAGS}")
@@ -26,12 +32,7 @@ set(NUM_PROCS "4" CACHE STRING "Number of processes when running tests")
 
 set(EXTRA_LIBS "" CACHE STRING "Extra libraries to link against")
 
-option(OPENACC "Enable OpenACC support" OFF)
-option(OPENMP_OFFLOAD "Enable OpenMP offloading to GPU support" OFF)
-option(ROCM "Enable ROCm, offloading to MI100 using OpenMPI 4.5" OFF)
-option(INTEL_ANALYZER "Add compiler options for Intel Analyzer" OFF)
-
-set(ROCM_COMPILER_PATH "/opt/rocm/llvm/bin" CACHE STRING "Path to the ROCm compilers (only used ith ROCM is set)")
+set(ROCM_COMPILER_PATH "/opt/rocm/llvm/bin" CACHE STRING "Path to the ROCm compilers (only used if ROCM is set)")
 if (${ROCM}) 
   list(APPEND CMAKE_PREFIX_INSTALL /opt/rocm/hip /opt/rocm)
   set(CMAKE_CXX_COMPILER "${ROCM_COMPILER_PATH}/clang++")
@@ -90,14 +91,15 @@ if ((NOT OPENACC) AND OPENMP_FOUND)
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
 else ()
   # OpenACC is incompatible with OpenMP, either one or the other or none
-  if (OPENACC  AND ("${CMAKE_CXX_COMPILER_ID}" MATCHES "^NVHPC|PGI"))
+  if (OPENACC)
+      if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "^NVHPC|PGI")
+          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -acc -Minfo=acc")
+	  message(STATUS "Using PGI or Nvidia C++ compiler, added OpenACC compiler switches")
+      elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "^GNU")
+	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenacc -fopt-info-optimized-omp")
+	  message(STATUS "Using GNU C++ compiler, added OpenACC compiler switches")
+      endif ()
     message(STATUS "OpenACC enabled")
-    # These are the PGI openACC flags -- need to find out what the 
-    # corresponding options are for the CRAY, gcc, ... compilers 
-    # (if they exist)
-    #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -acc -Minfo=acc")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -acc -Minfo=acc")
-    #set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -acc -Minfo=acc")
   endif () 
 endif ()
 
