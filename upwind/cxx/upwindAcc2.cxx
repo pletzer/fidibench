@@ -61,7 +61,8 @@ public:
     int ntot = this->ntot;
     int inds[NDIMS];
 
-    #pragma acc data copy(fPtr[ntot]) create(fOldPtr[ntot]) copyin(coeffPtr[NDIMS], dimProdPtr[NDIMS], upDirectionPtr[NDIMS], numCellsPtr[NDIMS], deltaTime, ntot)
+    #pragma acc data copy(fPtr[0:ntot]) create(fOldPtr[0:ntot]) \
+      copyin(coeffPtr[0:NDIMS], dimProdPtr[0:NDIMS], upDirectionPtr[0:NDIMS], numCellsPtr[0:NDIMS], deltaTime, ntot)
     {
 
       for (int istep = 0; istep < numTimeSteps; ++istep) {
