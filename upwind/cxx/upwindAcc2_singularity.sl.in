@@ -1,0 +1,24 @@
+#!/bin/bash
+#SBATCH --job-name=upwindAcc2Cxx_sing
+#SBATCH --cpus-per-task=1
+#SBATCH --account=niwap99999
+#SBATCH --partition=niwa_work
+#SBATCH --cluster=maui_ancil
+#SBATCH --gpus-per-node=nvidia_a100_1g.10gb:1
+
+module load CUDA Singularity
+exe="@CMAKE_BINARY_DIR@/upwind/cxx/upwindAcc2Cxx"
+
+# adapt
+sif="/nesi/nobackup/pletzera/ngarch_apptainer/ngarch_nvhpc.sif"
+while getopts s: flag
+do
+    case "${flag}" in
+       s) sif=${OPTARG};;
+    esac
+done
+
+# opetion --nv is required for the container to use the host's GPU
+srun singularity exec --nv -B $PWD,/opt/nesi $sif $exe -numCells 256 -numSteps 10
+
+

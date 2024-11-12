@@ -6,6 +6,7 @@ configure_file(upwindAcc_mahuika_p100.sl.in upwindAcc_mahuika_p100.sl)
 configure_file(upwindAcc_mahuika_a100.sl.in upwindAcc_mahuika_a100.sl)
 configure_file(upwindAcc2_mahuika_p100.sl.in upwindAcc2_mahuika_p100.sl)
 configure_file(upwindAcc2_mahuika_a100.sl.in upwindAcc2_mahuika_a100.sl)
+configure_file(upwindAcc2_singularity.sl.in upwindAcc2_singularity.sl)
 
 if (HAVE_OPENMP)
 	add_definitions(-DHAVE_OPENMP)
