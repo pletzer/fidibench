@@ -120,6 +120,7 @@ contains
 
         ! iterate over the cells
         !$OMP PARALLEL DO PRIVATE(i, j, inds, oldIndex, upI)
+        !$acc parallel loop
         do i = 1, obj % ntot
 
             ! compute the index set of this cell
