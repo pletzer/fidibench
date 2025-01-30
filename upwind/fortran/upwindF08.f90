@@ -128,7 +128,8 @@ contains
         oldF = this % f
 
         ! iterate over the cells
-        do concurrent (i = 1:this % ntot)
+        !do concurrent (i = 1:this % ntot)
+        do i = 1, this % ntot
 
             ! compute the index set of this cell
             call this % getIndexSet(i, inds)
@@ -150,7 +151,7 @@ contains
                 ! update the field
                 this % f(i) = this % f(i) - &
               &   deltaTime*this % v(j)*this % upDirection(j)*(oldF(upI) - oldF(i))/this % deltas(j)
-                    
+         
                 ! reset the index
                 inds(j) = oldIndex
            enddo

@@ -39,9 +39,7 @@ module upwind_mod
             procedure :: del => upwind_del
             procedure :: advect => upwind_advect
             procedure :: saveVTK => upwind_saveVTK
-            procedure :: getIndexSet => upwind_getIndexSet
             procedure :: getFlatIndex => upwind_getFlatIndex
-            procedure :: updateField => upwind_updateField
 
     end type
 
@@ -131,7 +129,7 @@ contains
         ! iterate over the cells
         ! $acc kernels
         do i = 1, this % ntot
-            call this % updateField(i, deltaTime, oldF)
+            call upwind_updateField(this, i, deltaTime, oldF)
         enddo
 
     end subroutine
@@ -150,7 +148,7 @@ contains
         integer :: inds(this%ndims)
 
         ! compute the index set of this cell
-        call this % getIndexSet(i, inds)
+        call upwind_getIndexSet(this, i, inds)
 
         do j = 1, this % ndims
                 
