@@ -43,7 +43,6 @@ set_tests_properties(upwindFortran8
                      ENVIRONMENT "OMP_NUM_THREADS=8"
                      PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
 
-
 add_test(NAME upwindF03
          COMMAND upwindF03
         "${NUM_CELLS}" "${NUM_TIME_STEPS}")
@@ -52,7 +51,12 @@ add_test(NAME upwindF08
          COMMAND upwindF08
         "${NUM_CELLS}" "${NUM_TIME_STEPS}")
 
-set_tests_properties(upwindF03 upwindF08
+add_test(NAME upwindF08Acc
+         COMMAND upwindF08Acc
+                    "${NUM_CELLS}" "${NUM_TIME_STEPS}")
+
+set_tests_properties(upwindF03 upwindF08 upwindF08Acc
                      PROPERTIES
                      PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
 
+            
