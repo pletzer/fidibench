@@ -128,9 +128,14 @@ contains
         oldF = this % f
 
         ! iterate over the cells
-        !do concurrent (i = 1:this % ntot)
+#ifdef HAVE_OPENACC
+        ! don't use do concurrent since this will offload to the GPU 
+        ! using OpenACC, and OpenACC does not support type-bound routines
         do i = 1, this % ntot
-
+#else
+        ! should parallelize with OpenMP
+        do concurrent (i = 1:this % ntot)
+#endif
             ! compute the index set of this cell
             call this % getIndexSet(i, inds)
 
