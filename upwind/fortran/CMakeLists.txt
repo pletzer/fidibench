@@ -9,6 +9,7 @@ endif()
 add_executable(upwindFortran upwind.F90)
 add_executable(upwindF03 upwindF03.F90)
 add_executable(upwindF08 upwindF08.f90)
+add_executable(upwindF08Acc upwindF08Acc.f90)
 
 add_test(NAME upwindFortran1
          COMMAND upwindFortran
