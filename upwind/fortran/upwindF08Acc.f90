@@ -138,7 +138,7 @@ contains
     ! Update the field
     ! @param inds cell indices
     ! @param deltaTime time step
-    !$acc routine 
+    !$acc routine seq
     subroutine upwind_updateField(this, i, deltaTime, oldF)
         class(upwind_type) :: this
         integer, intent(in) :: i

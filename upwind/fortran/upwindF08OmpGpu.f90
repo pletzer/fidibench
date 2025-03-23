@@ -27,7 +27,7 @@ module upwind_mod
         real(r8), allocatable :: lengths(:)
         
         ! field as a flat array
-        real(r8), allocatable :: f(:)
+        real(r8), pointer :: f(:)
         
         ! product of the dimensions, used to switch back and forth 
         ! between the flat index and the multi-index representations
@@ -121,42 +121,55 @@ contains
         real(r8), allocatable :: oldF(:)
         integer :: i, j, oldIndex, upI
         integer :: inds(this % ndims)
+        real(r8), pointer :: fptr(:)
+        real(r8) :: v(this % ndims), deltas(this % ndims)
+        integer :: ntot, ndims, numCells(this % ndims), dimProd(this % ndims)
+        integer :: upDirection(this % ndims)
         
         ! allocate and copy the field
         allocate(oldF(this % ntot))
         
-        !$omp target teams distribute parallel do private(i)
         do i = 1, this % ntot
             oldF(i) = this % f(i)
         enddo
-        !$omp end target teams distribute parallel do
+
+        fptr => this % f
+        ntot = this % ntot
+        ndims = this % ndims
+        do j = 1, ndims
+            numCells(j) = this % numCells(j)
+            upDirection(j) = this % upDirection(j)
+            dimProd(j) = this % dimProd(j)
+            v(j) = this % v(j)
+            deltas(j) = this % deltas(j)
+        enddo
 
         ! iterate over the cells
         !$omp target teams distribute parallel do private(inds, j, oldIndex, upI)
-        do i = 1, this % ntot
+        do i = 1, ntot
 
             ! compute the index set of this cell
-            do j = 1, this % ndims
-                inds(j) = mod((i - 1)/this % dimProd(j), this % numCells(j)) + 1
+            do j = 1, ndims
+                inds(j) = mod((i - 1)/dimProd(j), numCells(j)) + 1
             enddo
 
-            do j = 1, this % ndims
+            do j = 1, ndims
                     
                 ! cache the cell index
                 oldIndex = inds(j)
                 
                 ! increment the cell index
-                inds(j) = inds(j) + this % upDirection(j)
+                inds(j) = inds(j) + upDirection(j)
                 
                 ! apply periodic BCs
-                inds(j) = modulo(inds(j) + this % numCells(j) - 1, this % numCells(j)) + 1
+                inds(j) = modulo(inds(j) + numCells(j) - 1, numCells(j)) + 1
                   
                 ! compute the new flat index 
-                upI = dot_product(this % dimProd, inds - 1) + 1 ! this % getFlatIndex(inds)
+                upI = dot_product(dimProd, inds - 1) + 1
                     
                 ! update the field
-                this % f(i) = this % f(i) - &
-              &   deltaTime*this % v(j)*this % upDirection(j)*(oldF(upI) - oldF(i))/this % deltas(j)
+                fptr(i) = fptr(i) - &
+                  &   deltaTime*v(j)*upDirection(j)*(oldF(upI) - oldF(i))/deltas(j)
                     
                 ! reset the index
                 inds(j) = oldIndex
