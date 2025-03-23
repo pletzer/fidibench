@@ -129,53 +129,38 @@ contains
         ! iterate over the cells
         !$omp target teams distribute parallel do private(inds, j, oldIndex, upI)
         do i = 1, this % ntot
-            call upwind_updateField(this, i, deltaTime, oldF)
+
+            ! compute the index set of this cell
+            do j = 1, this % ndims
+                inds(j) = mod((i - 1)/this % dimProd(j), this % numCells(j)) + 1
+            enddo
+
+            do j = 1, this % ndims
+                    
+                ! cache the cell index
+                oldIndex = inds(j)
+                
+                ! increment the cell index
+                inds(j) = inds(j) + this % upDirection(j)
+                
+                ! apply periodic BCs
+                inds(j) = modulo(inds(j) + this % numCells(j) - 1, this % numCells(j)) + 1
+                  
+                ! compute the new flat index 
+                upI = dot_product(this % dimProd, inds - 1) + 1 ! this % getFlatIndex(inds)
+                    
+                ! update the field
+                this % f(i) = this % f(i) - &
+              &   deltaTime*this % v(j)*this % upDirection(j)*(oldF(upI) - oldF(i))/this % deltas(j)
+                    
+                ! reset the index
+                inds(j) = oldIndex
+            enddo
         enddo
         !$omp end target teams distribute parallel do
         deallocate(oldF)
 
     end subroutine
-
-    ! Update the field
-    ! @param inds cell indices
-    ! @param deltaTime time step
-    !$acc routine 
-    subroutine upwind_updateField(this, i, deltaTime, oldF)
-        class(upwind_type) :: this
-        integer, intent(in) :: i
-        real(r8), intent(in) :: deltaTime
-        real(r8), intent(in) :: oldF(:)
-
-        integer :: j, oldIndex, upI
-        integer :: inds(this%ndims)
-
-        ! compute the index set of this cell
-        call upwind_getIndexSet(this, i, inds)
-
-        do j = 1, this % ndims
-                
-            ! cache the cell index
-            oldIndex = inds(j)
-            
-            ! increment the cell index
-            inds(j) = inds(j) + this % upDirection(j)
-            
-            ! apply periodic BCs
-            inds(j) = modulo(inds(j) + this % numCells(j) - 1, this % numCells(j)) + 1
-              
-            ! compute the new flat index 
-            upI = dot_product(this % dimProd, inds - 1) + 1 ! this % getFlatIndex(inds)
-                
-            ! update the field
-            this % f(i) = this % f(i) - &
-          &   deltaTime*this % v(j)*this % upDirection(j)*(oldF(upI) - oldF(i))/this % deltas(j)
-                
-            ! reset the index
-            inds(j) = oldIndex
-       enddo
-
-
-    end subroutine upwind_updateField
 
     subroutine upwind_saveVTK(this, filename)
         class(upwind_type) :: this
@@ -253,18 +238,6 @@ contains
             write(*, '(a, i10, a, e20.13)') 'i = ', i, ' f = ',  this % f(i)
         enddo
  
-    end subroutine
-
-    pure subroutine upwind_getIndexSet(this, flatIndex, res) 
-        class(upwind_type), intent(in) :: this
-        integer, intent(in) :: flatIndex
-        integer, intent(out) :: res(:)
-    
-        integer :: i
-        do i = 1, this % ndims
-            res(i) = mod((flatIndex - 1)/this % dimProd(i), this % numCells(i)) + 1
-        enddo
-
     end subroutine
     
     pure function upwind_getFlatIndex(this, inds) result(res) 
