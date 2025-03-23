@@ -128,7 +128,7 @@ contains
         oldF = this % f
 
         ! iterate over the cells
-#ifdef HAVE_OPENACC || HAVE_OPENMP_OFFLOAD
+#if defined(HAVE_OPENACC) || defined(HAVE_OPENMP_OFFLOAD)
         ! don't use "do concurrent" since this will offload to the device
         ! and type-bound routines are not supported
         do i = 1, this % ntot
