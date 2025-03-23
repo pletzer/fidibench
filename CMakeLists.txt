@@ -86,6 +86,7 @@ if (INTEL_ANALYZER)
 endif()
 
 if (OPENMP_OFFLOAD)
+  add_definitions(-DHAVE_OPENMP_OFFLOAD)
   if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "^NVHPC|PGI")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Minfo=all -mp=gpu")
     set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -mp=gpu")

@@ -128,9 +128,9 @@ contains
         oldF = this % f
 
         ! iterate over the cells
-#ifdef HAVE_OPENACC
-        ! don't use do concurrent since this will offload to the GPU 
-        ! using OpenACC, and OpenACC does not support type-bound routines
+#ifdef HAVE_OPENACC || HAVE_OPENMP_OFFLOAD
+        ! don't use "do concurrent" since this will offload to the device
+        ! and type-bound routines are not supported
         do i = 1, this % ntot
 #else
         ! should parallelize with OpenMP
