@@ -127,17 +127,18 @@ contains
         oldF = this % f
 
         ! iterate over the cells
-        ! $acc kernels
+        !$acc kernels
         do i = 1, this % ntot
             call upwind_updateField(this, i, deltaTime, oldF)
         enddo
+        !$acc end kernels
 
     end subroutine
 
     ! Update the field
     ! @param inds cell indices
     ! @param deltaTime time step
-    ! $acc routine 
+    !$acc routine 
     subroutine upwind_updateField(this, i, deltaTime, oldF)
         class(upwind_type) :: this
         integer, intent(in) :: i
@@ -162,7 +163,7 @@ contains
             inds(j) = modulo(inds(j) + this % numCells(j) - 1, this % numCells(j)) + 1
               
             ! compute the new flat index 
-            upI = this % getFlatIndex(inds)
+            upI = dot_product(this % dimProd, inds - 1) + 1 ! this % getFlatIndex(inds)
                 
             ! update the field
             this % f(i) = this % f(i) - &
