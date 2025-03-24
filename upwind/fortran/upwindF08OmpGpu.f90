@@ -140,14 +140,17 @@ contains
             deltas(j) = this % deltas(j)
         enddo
 
-        !$omp target teams distribute parallel do
+        !$omp target
+        !$omp teams distribute parallel do
         do i = 1, ntot
             oldF(i) = fptr(i)
         enddo
-        !$omp end target teams distribute parallel do
+        !$omp end teams distribute parallel do
+        !$omp end target
 
         ! iterate over the cells
-        !$omp target teams distribute parallel do private(inds, j, oldIndex, upI)
+        !$omp target
+        !$omp teams distribute parallel do private(inds, j, oldIndex, upI)
         do i = 1, ntot
 
             ! compute the index set of this cell
@@ -177,7 +180,8 @@ contains
                 inds(j) = oldIndex
             enddo
         enddo
-        !$omp end target teams distribute parallel do
+        !$omp end teams distribute parallel do
+        !$omp end target
         deallocate(oldF)
 
     end subroutine
