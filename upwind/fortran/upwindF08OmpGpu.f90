@@ -129,10 +129,6 @@ contains
         ! allocate and copy the field
         allocate(oldF(this % ntot))
         
-        do i = 1, this % ntot
-            oldF(i) = this % f(i)
-        enddo
-
         fptr => this % f
         ntot = this % ntot
         ndims = this % ndims
@@ -143,6 +139,12 @@ contains
             v(j) = this % v(j)
             deltas(j) = this % deltas(j)
         enddo
+
+        !$omp target teams distribute parallel do
+        do i = 1, ntot
+            oldF(i) = fptr(i)
+        enddo
+        !$omp end target teams distribute parallel do
 
         ! iterate over the cells
         !$omp target teams distribute parallel do private(inds, j, oldIndex, upI)
