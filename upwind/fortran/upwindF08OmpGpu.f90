@@ -141,16 +141,16 @@ contains
         enddo
 
         !$omp target
-        !$omp teams distribute parallel do
+        !$omp parallel do
         do i = 1, ntot
             oldF(i) = fptr(i)
         enddo
-        !$omp end teams distribute parallel do
-        !$omp end target
+        !$omp end parallel do
+        !!$omp end target
 
         ! iterate over the cells
-        !$omp target
-        !$omp teams distribute parallel do private(inds, j, oldIndex, upI)
+        !!$omp target
+        !$omp parallel do private(inds, j, oldIndex, upI)
         do i = 1, ntot
 
             ! compute the index set of this cell
@@ -180,7 +180,7 @@ contains
                 inds(j) = oldIndex
             enddo
         enddo
-        !$omp end teams distribute parallel do
+        !$omp end parallel do
         !$omp end target
         deallocate(oldF)
 
