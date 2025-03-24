@@ -27,7 +27,7 @@ module upwind_mod
         real(r8), allocatable :: lengths(:)
         
         ! field as a flat array
-        real(r8), allocatable :: f(:)
+        real(r8), pointer :: f(:)
         
         ! product of the dimensions, used to switch back and forth 
         ! between the flat index and the multi-index representations
@@ -39,7 +39,6 @@ module upwind_mod
             procedure :: del => upwind_del
             procedure :: advect => upwind_advect
             procedure :: saveVTK => upwind_saveVTK
-            procedure :: getIndexSet => upwind_getIndexSet
             procedure :: getFlatIndex => upwind_getFlatIndex
 
     end type
@@ -122,45 +121,62 @@ contains
         real(r8), allocatable :: oldF(:)
         integer :: i, j, oldIndex, upI
         integer :: inds(this % ndims)
+        real(r8), pointer :: fptr(:)
+        real(r8) :: v(this % ndims), deltas(this % ndims)
+        integer :: ntot, ndims, numCells(this % ndims), dimProd(this % ndims)
+        integer :: upDirection(this % ndims)
         
         ! allocate and copy the field
         allocate(oldF(this % ntot))
-        oldF = this % f
+        
+        do i = 1, this % ntot
+            oldF(i) = this % f(i)
+        enddo
+
+        fptr => this % f
+        ntot = this % ntot
+        ndims = this % ndims
+        do j = 1, ndims
+            numCells(j) = this % numCells(j)
+            upDirection(j) = this % upDirection(j)
+            dimProd(j) = this % dimProd(j)
+            v(j) = this % v(j)
+            deltas(j) = this % deltas(j)
+        enddo
 
         ! iterate over the cells
-#if defined(HAVE_OPENACC) || defined(HAVE_OPENMP_OFFLOAD)
-        ! don't use "do concurrent" since this will offload to the device
-        ! and type-bound routines are not supported
-        do i = 1, this % ntot
-#else
-        ! should parallelize with OpenMP
-        do concurrent (i = 1:this % ntot)
-#endif
-            ! compute the index set of this cell
-            call this % getIndexSet(i, inds)
+        !$omp target teams distribute parallel do private(inds, j, oldIndex, upI)
+        do i = 1, ntot
 
-            do j = 1, this % ndims
-                
+            ! compute the index set of this cell
+            do j = 1, ndims
+                inds(j) = mod((i - 1)/dimProd(j), numCells(j)) + 1
+            enddo
+
+            do j = 1, ndims
+                    
                 ! cache the cell index
                 oldIndex = inds(j)
                 
                 ! increment the cell index
-                inds(j) = inds(j) + this % upDirection(j)
+                inds(j) = inds(j) + upDirection(j)
                 
                 ! apply periodic BCs
-                inds(j) = modulo(inds(j) + this % numCells(j) - 1, this % numCells(j)) + 1
+                inds(j) = modulo(inds(j) + numCells(j) - 1, numCells(j)) + 1
                   
                 ! compute the new flat index 
-                upI = this % getFlatIndex(inds)
+                upI = dot_product(dimProd, inds - 1) + 1
                     
                 ! update the field
-                this % f(i) = this % f(i) - &
-              &   deltaTime*this % v(j)*this % upDirection(j)*(oldF(upI) - oldF(i))/this % deltas(j)
-         
+                fptr(i) = fptr(i) - &
+                  &   deltaTime*v(j)*upDirection(j)*(oldF(upI) - oldF(i))/deltas(j)
+                    
                 ! reset the index
                 inds(j) = oldIndex
-           enddo
+            enddo
         enddo
+        !$omp end target teams distribute parallel do
+        deallocate(oldF)
 
     end subroutine
 
@@ -240,18 +256,6 @@ contains
             write(*, '(a, i10, a, e20.13)') 'i = ', i, ' f = ',  this % f(i)
         enddo
  
-    end subroutine
-
-    pure subroutine upwind_getIndexSet(this, flatIndex, res) 
-        class(upwind_type), intent(in) :: this
-        integer, intent(in) :: flatIndex
-        integer, intent(out) :: res(:)
-    
-        integer :: i
-        do i = 1, this % ndims
-            res(i) = mod((flatIndex - 1)/this % dimProd(i), this % numCells(i)) + 1
-        enddo
-
     end subroutine
     
     pure function upwind_getFlatIndex(this, inds) result(res) 

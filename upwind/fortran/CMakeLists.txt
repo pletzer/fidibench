@@ -10,6 +10,8 @@ add_executable(upwindFortran upwind.F90)
 add_executable(upwindF03 upwindF03.F90)
 add_executable(upwindF08 upwindF08.F90)
 add_executable(upwindF08Acc upwindF08Acc.f90)
+add_executable(upwindF08OmpGpu upwindF08OmpGpu.f90)
+
 
 add_test(NAME upwindFortran1
          COMMAND upwindFortran
@@ -53,6 +55,11 @@ add_test(NAME upwindF08
 
 add_test(NAME upwindF08Acc
          COMMAND upwindF08Acc
+                    "${NUM_CELLS}" "${NUM_TIME_STEPS}")
+
+
+add_test(NAME upwindF08OmpGpu
+         COMMAND upwindF08OmpGpu
                     "${NUM_CELLS}" "${NUM_TIME_STEPS}")
 
 set_tests_properties(upwindF03 upwindF08 upwindF08Acc

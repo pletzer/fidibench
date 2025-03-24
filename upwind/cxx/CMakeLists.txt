@@ -37,7 +37,7 @@ target_link_libraries(upwindCxx PUBLIC fidibench "${EXTRA_LIBS}" OpenMP::OpenMP_
 add_executable(upwindOMPTasksCxx upwindOMPTasks.cxx)
 target_link_libraries(upwindOMPTasksCxx PUBLIC fidibench "${EXTRA_LIBS}" OpenMP::OpenMP_CXX)
 
-if (OPENMP_OFFLOAD OR ROCM)
+if (OPENMP_OFFLOAD)
   add_executable(upwindOMP5Cxx upwindOMP5.cxx)
   if (ROCM)
     target_link_libraries(upwindOMP5Cxx fidibench "hip::device")
