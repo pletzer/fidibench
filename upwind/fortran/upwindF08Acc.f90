@@ -27,7 +27,7 @@ module upwind_mod
         real(r8), allocatable :: lengths(:)
         
         ! field as a flat array
-        real(r8), allocatable :: f(:)
+        real(r8), pointer :: f(:)
         
         ! product of the dimensions, used to switch back and forth 
         ! between the flat index and the multi-index representations
@@ -44,6 +44,23 @@ module upwind_mod
     end type
 
 contains
+
+    subroutine getIndexSet(i, ndims, numCells, dimProd, inds)
+        implicit none
+        integer, intent(in) :: i
+        integer, intent(in) :: ndims
+        integer, intent(in) :: numCells(:)
+        integer, intent(in) :: dimProd(:)
+        integer, intent(out) :: inds(:)
+
+        !$acc routine
+
+        integer :: j
+
+        do j = 1, ndims
+            inds(j) = mod((i - 1)/dimProd(j), numCells(j)) + 1
+        enddo
+    end subroutine getIndexSet
 
     ! Constructor
     ! @param velocity velocity field (constant)
@@ -121,62 +138,67 @@ contains
         real(r8), allocatable :: oldF(:)
         integer :: i, j, oldIndex, upI
         integer :: inds(this % ndims)
+        real(r8), pointer :: fptr(:)
+        real(r8) :: v(this % ndims), deltas(this % ndims)
+        integer :: ntot, ndims, numCells(this % ndims), dimProd(this % ndims)
+        integer :: upDirection(this % ndims)
         
         ! allocate and copy the field
         allocate(oldF(this % ntot))
-        oldF = this % f
+        
+        fptr => this % f
+        ntot = this % ntot
+        ndims = this % ndims
+        do j = 1, ndims
+            numCells(j) = this % numCells(j)
+            upDirection(j) = this % upDirection(j)
+            dimProd(j) = this % dimProd(j)
+            v(j) = this % v(j)
+            deltas(j) = this % deltas(j)
+        enddo
+
+        !$acc parallel loop
+        do i = 1, ntot
+            oldF(i) = fptr(i)
+        enddo
+        !$acc end parallel loop
 
         ! iterate over the cells
-        !$acc kernels
-        do i = 1, this % ntot
-            call upwind_updateField(this, i, deltaTime, oldF)
+        !$acc parallel loop private(inds, j, oldIndex, upI)
+        do i = 1, ntot
+
+            ! compute the index set of this cell
+            call getIndexSet(i, ndims, numCells, dimProd, inds)
+            !do j = 1, ndims
+            !    inds(j) = mod((i - 1)/dimProd(j), numCells(j)) + 1
+            !enddo
+
+            do j = 1, ndims
+                    
+                ! cache the cell index
+                oldIndex = inds(j)
+                
+                ! increment the cell index
+                inds(j) = inds(j) + upDirection(j)
+                
+                ! apply periodic BCs
+                inds(j) = modulo(inds(j) + numCells(j) - 1, numCells(j)) + 1
+                  
+                ! compute the new flat index 
+                upI = dot_product(dimProd, inds - 1) + 1
+                    
+                ! update the field
+                fptr(i) = fptr(i) - &
+                  &   deltaTime*v(j)*upDirection(j)*(oldF(upI) - oldF(i))/deltas(j)
+                    
+                ! reset the index
+                inds(j) = oldIndex
+            enddo
         enddo
-        !$acc end kernels
+        !$acc end parallel loop
+        deallocate(oldF)
 
     end subroutine
-
-    ! Update the field
-    ! @param inds cell indices
-    ! @param deltaTime time step
-    subroutine upwind_updateField(this, i, deltaTime, oldF)
-        class(upwind_type) :: this
-        integer, intent(in) :: i
-        real(r8), intent(in) :: deltaTime
-        real(r8), intent(in) :: oldF(:)
-
-        integer :: j, oldIndex, upI
-        integer :: inds(this%ndims)
-
-        ! offload this routine to the GPU
-        !$acc routine seq
-
-        ! compute the index set of this cell
-        call upwind_getIndexSet(this, i, inds)
-
-        do j = 1, this % ndims
-                
-            ! cache the cell index
-            oldIndex = inds(j)
-            
-            ! increment the cell index
-            inds(j) = inds(j) + this % upDirection(j)
-            
-            ! apply periodic BCs
-            inds(j) = modulo(inds(j) + this % numCells(j) - 1, this % numCells(j)) + 1
-              
-            ! compute the new flat index 
-            upI = dot_product(this % dimProd, inds - 1) + 1 ! this % getFlatIndex(inds)
-                
-            ! update the field
-            this % f(i) = this % f(i) - &
-          &   deltaTime*this % v(j)*this % upDirection(j)*(oldF(upI) - oldF(i))/this % deltas(j)
-                
-            ! reset the index
-            inds(j) = oldIndex
-       enddo
-
-
-    end subroutine upwind_updateField
 
     subroutine upwind_saveVTK(this, filename)
         class(upwind_type) :: this
@@ -254,18 +276,6 @@ contains
             write(*, '(a, i10, a, e20.13)') 'i = ', i, ' f = ',  this % f(i)
         enddo
  
-    end subroutine
-
-    pure subroutine upwind_getIndexSet(this, flatIndex, res) 
-        class(upwind_type), intent(in) :: this
-        integer, intent(in) :: flatIndex
-        integer, intent(out) :: res(:)
-    
-        integer :: i
-        do i = 1, this % ndims
-            res(i) = mod((flatIndex - 1)/this % dimProd(i), this % numCells(i)) + 1
-        enddo
-
     end subroutine
     
     pure function upwind_getFlatIndex(this, inds) result(res) 
