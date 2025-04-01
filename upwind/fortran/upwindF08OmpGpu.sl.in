@@ -3,7 +3,7 @@
 #SBATCH --time=00:10:00      # Walltime (HH:MM:SS)
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
-#SBATCH --mem=4g
+#SBATCH --mem=6g
 ##SBTACH --gpus-per-node=A100-1g.5gb:1
 ##SBATCH --gpus-per-node=A100:1
 #SBATCH --gpus-per-node=P100:1
@@ -14,7 +14,7 @@ unset PYTHONPATH
 
 nvidia-smi 
 
-ncells=258
+ncells=512
 nsteps=10
 exe="apptainer exec --nv /nesi/nobackup/pletzera/ngarch_nvhpc.sif @CMAKE_BINARY_DIR@/upwind/fortran/upwindF08OmpGpu $ncells $nsteps"
 time $exe
