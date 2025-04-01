@@ -138,7 +138,6 @@ contains
     ! Update the field
     ! @param inds cell indices
     ! @param deltaTime time step
-    !$acc routine seq
     subroutine upwind_updateField(this, i, deltaTime, oldF)
         class(upwind_type) :: this
         integer, intent(in) :: i
@@ -149,7 +148,7 @@ contains
         integer :: inds(this%ndims)
 
         ! offload this routine to the GPU
-        !!$acc routine seq
+        !$acc routine seq
 
         ! compute the index set of this cell
         call upwind_getIndexSet(this, i, inds)

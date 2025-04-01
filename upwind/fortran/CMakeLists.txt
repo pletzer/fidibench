@@ -1,4 +1,5 @@
 configure_file(upwindF08Acc.sl.in upwindF08Acc.sl)
+configure_file(upwindF08OmpGpu.sl.in upwindF08OmpGpu.sl)
 
 if (HAVE_OPENMP)
 	add_definitions(-DHAVE_OPENMP)
