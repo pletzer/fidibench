@@ -45,6 +45,23 @@ module upwind_mod
 
 contains
 
+    subroutine getIndexSet(i, ndims, numCells, dimProd, inds)
+        implicit none
+        integer, intent(in) :: i
+        integer, intent(in) :: ndims
+        integer, intent(in) :: numCells(:)
+        integer, intent(in) :: dimProd(:)
+        integer, intent(out) :: inds(:)
+
+        !$omp declare target
+
+        integer :: j
+
+        do j = 1, ndims
+            inds(j) = mod((i - 1)/dimProd(j), numCells(j)) + 1
+        enddo
+    end subroutine getIndexSet
+
     ! Constructor
     ! @param velocity velocity field (constant)
     ! @param lengths domain lengths
@@ -146,17 +163,16 @@ contains
             oldF(i) = fptr(i)
         enddo
         !$omp end parallel do
-        !!$omp end target
 
         ! iterate over the cells
-        !!$omp target
         !$omp parallel do private(inds, j, oldIndex, upI)
         do i = 1, ntot
 
             ! compute the index set of this cell
-            do j = 1, ndims
-                inds(j) = mod((i - 1)/dimProd(j), numCells(j)) + 1
-            enddo
+            call getIndexSet(i, ndims, numCells, dimProd, inds)
+            !do j = 1, ndims
+            !    inds(j) = mod((i - 1)/dimProd(j), numCells(j)) + 1
+            !enddo
 
             do j = 1, ndims
                     

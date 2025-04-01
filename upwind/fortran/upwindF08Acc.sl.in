@@ -1,0 +1,21 @@
+#!/bin/bash -e
+#SBATCH --job-name=upwind # job name (shows up in the queue)
+#SBATCH --time=00:10:00      # Walltime (HH:MM:SS)
+#SBATCH --cpus-per-task=1
+#SBATCH --ntasks=1
+#SBATCH --mem=5g
+##SBTACH --gpus-per-node=A100-1g.5gb:1
+##SBATCH --gpus-per-node=A100:1
+#SBATCH --gpus-per-node=P100:1
+
+ml purge
+ml Apptainer CUDA/11.8.0
+unset PYTHONPATH
+
+nvidia-smi 
+
+ncells=128
+nsteps=10
+exe="apptainer exec --nv /nesi/nobackup/pletzera/ngarch_nvhpc.sif @CMAKE_BINARY_DIR@/upwind/fortran/upwindF08Acc $ncells $nsteps"
+time $exe
+

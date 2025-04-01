@@ -148,6 +148,9 @@ contains
         integer :: j, oldIndex, upI
         integer :: inds(this%ndims)
 
+        ! offload this routine to the GPU
+        !!$acc routine seq
+
         ! compute the index set of this cell
         call upwind_getIndexSet(this, i, inds)
 

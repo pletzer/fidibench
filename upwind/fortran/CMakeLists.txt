@@ -1,3 +1,5 @@
+configure_file(upwindF08Acc.sl.in upwindF08Acc.sl)
+
 if (HAVE_OPENMP)
 	add_definitions(-DHAVE_OPENMP)
 	message(STATUS "OpenMP enabled in Fortran")
