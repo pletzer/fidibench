@@ -53,7 +53,11 @@ contains
         integer, intent(in) :: dimProd(:)
         integer, intent(out) :: inds(:)
 
+#if defined(HAVE_OPENACC)
         !$acc routine
+#else
+        !$omp declare target
+#endif
 
         integer :: j
 
