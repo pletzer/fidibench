@@ -162,7 +162,11 @@ contains
         enddo
 
 #if defined(HAVE_OPENACC)
+    #if defined(USE_OPENACC_KERNELS)
+        !$acc kernels
+    #else
         !$acc parallel loop
+    #endif
 #else
         !$omp target
         !$omp parallel do
@@ -171,7 +175,11 @@ contains
             oldF(i) = fptr(i)
         enddo
 #if defined(HAVE_OPENACC)
+    #if defined(USE_OPENACC_KERNELS)
+        !$acc end kernels
+    #else
         !$acc end parallel loop
+    #endif
 #else
         !$omp end parallel do
         !$omp end target
@@ -179,7 +187,11 @@ contains
 
         ! iterate over the cells
 #if defined(HAVE_OPENACC)
+    #if defined(USE_OPENACC_KERNELS)
+        !$acc kernels
+    #else
         !$acc parallel loop private(inds, j, oldIndex, upI)
+    #endif
 #else
         !$omp target
         !$omp parallel do private(inds, j, oldIndex, upI)
@@ -215,7 +227,11 @@ contains
             enddo
         enddo
 #if defined(HAVE_OPENACC)
+    #if defined(USE_OPENACC_KERNELS)
+        !$acc end kernels
+    #else
         !$acc end parallel loop
+    #endif
 #else   
         !$omp end parallel do
         !$omp end target
