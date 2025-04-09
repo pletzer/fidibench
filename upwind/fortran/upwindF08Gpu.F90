@@ -162,7 +162,8 @@ contains
         enddo
 
 #if defined(HAVE_OPENACC)
-    #if defined(USE_OPENACC_KERNELS)
+    #if defined(HAVE_OPENACC_KERNELS)
+        #warning "Using OpenACC kernels directive"
         !$acc kernels
     #else
         !$acc parallel loop
@@ -175,7 +176,7 @@ contains
             oldF(i) = fptr(i)
         enddo
 #if defined(HAVE_OPENACC)
-    #if defined(USE_OPENACC_KERNELS)
+    #if defined(HAVE_OPENACC_KERNELS)
         !$acc end kernels
     #else
         !$acc end parallel loop
@@ -187,7 +188,8 @@ contains
 
         ! iterate over the cells
 #if defined(HAVE_OPENACC)
-    #if defined(USE_OPENACC_KERNELS)
+    #if defined(HAVE_OPENACC_KERNELS)
+        #warning "Using OpenACC kernels directive"
         !$acc kernels
     #else
         !$acc parallel loop private(inds, j, oldIndex, upI)
@@ -227,7 +229,7 @@ contains
             enddo
         enddo
 #if defined(HAVE_OPENACC)
-    #if defined(USE_OPENACC_KERNELS)
+    #if defined(HAVE_OPENACC_KERNELS)
         !$acc end kernels
     #else
         !$acc end parallel loop
