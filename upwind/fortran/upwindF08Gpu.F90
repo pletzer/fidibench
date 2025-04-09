@@ -53,7 +53,7 @@ contains
         integer, intent(in) :: dimProd(:)
         integer, intent(out) :: inds(:)
 
-        !$omp declare target
+        !$acc routine
 
         integer :: j
 
@@ -157,15 +157,29 @@ contains
             deltas(j) = this % deltas(j)
         enddo
 
+#if defined(HAVE_OPENACC)
+        !$acc parallel loop
+#else
         !$omp target
         !$omp parallel do
+#endif
         do i = 1, ntot
             oldF(i) = fptr(i)
         enddo
+#if defined(HAVE_OPENACC)
+        !$acc end parallel loop
+#else
         !$omp end parallel do
+        !$omp end target
+#endif
 
         ! iterate over the cells
+#if defined(HAVE_OPENACC)
+        !$acc parallel loop private(inds, j, oldIndex, upI)
+#else
+        !$omp target
         !$omp parallel do private(inds, j, oldIndex, upI)
+#endif
         do i = 1, ntot
 
             ! compute the index set of this cell
@@ -187,7 +201,7 @@ contains
                   
                 ! compute the new flat index 
                 upI = dot_product(dimProd, inds - 1) + 1
-                    
+                
                 ! update the field
                 fptr(i) = fptr(i) - &
                   &   deltaTime*v(j)*upDirection(j)*(oldF(upI) - oldF(i))/deltas(j)
@@ -196,8 +210,12 @@ contains
                 inds(j) = oldIndex
             enddo
         enddo
+#if defined(HAVE_OPENACC)
+        !$acc end parallel loop
+#else   
         !$omp end parallel do
         !$omp end target
+#endif
         deallocate(oldF)
 
     end subroutine

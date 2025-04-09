@@ -1,4 +1,5 @@
-configure_file(upwindF08Acc.sl.in upwindF08Acc.sl)
+configure_file(upwindF08AccCpu.sl.in upwindF08AccCpu.sl)
+configure_file(upwindF08AccGpu.sl.in upwindF08AccGpu.sl)
 configure_file(upwindF08OmpGpu.sl.in upwindF08OmpGpu.sl)
 
 if (HAVE_OPENMP)
@@ -12,8 +13,7 @@ endif()
 add_executable(upwindFortran upwind.F90)
 add_executable(upwindF03 upwindF03.F90)
 add_executable(upwindF08 upwindF08.F90)
-add_executable(upwindF08Acc upwindF08Acc.f90)
-add_executable(upwindF08OmpGpu upwindF08OmpGpu.f90)
+add_executable(upwindF08Gpu upwindF08Gpu.F90)
 
 
 add_test(NAME upwindFortran1
@@ -56,16 +56,11 @@ add_test(NAME upwindF08
          COMMAND upwindF08
         "${NUM_CELLS}" "${NUM_TIME_STEPS}")
 
-add_test(NAME upwindF08Acc
-         COMMAND upwindF08Acc
+add_test(NAME upwindF08Gpu
+         COMMAND upwindF08Gpu
                     "${NUM_CELLS}" "${NUM_TIME_STEPS}")
 
-
-add_test(NAME upwindF08OmpGpu
-         COMMAND upwindF08OmpGpu
-                    "${NUM_CELLS}" "${NUM_TIME_STEPS}")
-
-set_tests_properties(upwindF03 upwindF08 upwindF08Acc
+set_tests_properties(upwindF03 upwindF08 upwindF08Gpu
                      PROPERTIES
                      PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
 

@@ -1,0 +1,16 @@
+#!/bin/bash -e
+#SBATCH --job-name=upwind # job name (shows up in the queue)
+#SBATCH --time=00:10:00      # Walltime (HH:MM:SS)
+#SBATCH --cpus-per-task=1
+#SBATCH --ntasks=1
+#SBATCH --mem=6g
+
+ml purge
+ml Apptainer 
+unset PYTHONPATH
+
+ncells=512
+nsteps=10
+exe="apptainer exec /nesi/nobackup/pletzera/ngarch_nvhpc.sif @CMAKE_BINARY_DIR@/upwind/fortran/upwindF08 $ncells $nsteps"
+time $exe
+
