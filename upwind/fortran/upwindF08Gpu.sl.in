@@ -16,6 +16,6 @@ nvidia-smi
 
 ncells=512
 nsteps=10
-exe="apptainer exec --nv /nesi/nobackup/pletzera/ngarch_nvhpc.sif @CMAKE_BINARY_DIR@/upwind/fortran/upwindF08OmpGpu $ncells $nsteps"
+exe="apptainer exec --nv /nesi/nobackup/pletzera/ngarch_nvhpc.sif @CMAKE_BINARY_DIR@/upwind/fortran/upwindF08Gpu $ncells $nsteps"
 time $exe
 
