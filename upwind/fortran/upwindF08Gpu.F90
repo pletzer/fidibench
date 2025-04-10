@@ -53,7 +53,11 @@ contains
         integer, intent(in) :: dimProd(:)
         integer, intent(out) :: inds(:)
 
+#if defined(HAVE_OPENACC)
+        !$acc routine
+#else
         !$omp declare target
+#endif
 
         integer :: j
 
@@ -157,15 +161,43 @@ contains
             deltas(j) = this % deltas(j)
         enddo
 
+#if defined(HAVE_OPENACC)
+    #if defined(HAVE_OPENACC_KERNELS)
+        #warning "Using OpenACC kernels directive"
+        !$acc kernels
+    #else
+        !$acc parallel loop
+    #endif
+#else
         !$omp target
         !$omp parallel do
+#endif
         do i = 1, ntot
             oldF(i) = fptr(i)
         enddo
+#if defined(HAVE_OPENACC)
+    #if defined(HAVE_OPENACC_KERNELS)
+        !$acc end kernels
+    #else
+        !$acc end parallel loop
+    #endif
+#else
         !$omp end parallel do
+        !$omp end target
+#endif
 
         ! iterate over the cells
+#if defined(HAVE_OPENACC)
+    #if defined(HAVE_OPENACC_KERNELS)
+        #warning "Using OpenACC kernels directive"
+        !$acc kernels
+    #else
+        !$acc parallel loop private(inds, j, oldIndex, upI)
+    #endif
+#else
+        !$omp target
         !$omp parallel do private(inds, j, oldIndex, upI)
+#endif
         do i = 1, ntot
 
             ! compute the index set of this cell
@@ -187,7 +219,7 @@ contains
                   
                 ! compute the new flat index 
                 upI = dot_product(dimProd, inds - 1) + 1
-                    
+                
                 ! update the field
                 fptr(i) = fptr(i) - &
                   &   deltaTime*v(j)*upDirection(j)*(oldF(upI) - oldF(i))/deltas(j)
@@ -196,8 +228,16 @@ contains
                 inds(j) = oldIndex
             enddo
         enddo
+#if defined(HAVE_OPENACC)
+    #if defined(HAVE_OPENACC_KERNELS)
+        !$acc end kernels
+    #else
+        !$acc end parallel loop
+    #endif
+#else   
         !$omp end parallel do
         !$omp end target
+#endif
         deallocate(oldF)
 
     end subroutine
