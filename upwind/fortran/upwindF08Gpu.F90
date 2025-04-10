@@ -191,6 +191,7 @@ contains
     #if defined(HAVE_OPENACC_KERNELS)
         #warning "Using OpenACC kernels directive"
         !$acc kernels
+        !$acc loop independent, private(inds, oldIndex, upI, i, j)
     #else
         !$acc parallel loop private(inds, j, oldIndex, upI)
     #endif
