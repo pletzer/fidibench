@@ -1,3 +1,6 @@
+#ifndef _THREADS_PER_TEAM
+#define _THREADS_PER_TEAM 32
+#endif
 module upwind_mod
 
     implicit none
@@ -170,7 +173,7 @@ contains
     #endif
 #else
         !$omp target
-        !$omp parallel do
+        !$omp teams distribute parallel do thread_limit(_THREADS_PER_TEAM)
 #endif
         do i = 1, ntot
             oldF(i) = fptr(i)
@@ -182,7 +185,7 @@ contains
         !$acc end parallel loop
     #endif
 #else
-        !$omp end parallel do
+        !$omp end teams distribute parallel do
         !$omp end target
 #endif
 
@@ -197,7 +200,7 @@ contains
     #endif
 #else
         !$omp target
-        !$omp parallel do private(inds, j, oldIndex, upI)
+        !$omp teams distribute parallel do private(inds, j, oldIndex, upI) thread_limit(_THREADS_PER_TEAM)
 #endif
         do i = 1, ntot
 
@@ -236,7 +239,7 @@ contains
         !$acc end parallel loop
     #endif
 #else   
-        !$omp end parallel do
+        !$omp end teams distribute parallel do
         !$omp end target
 #endif
         deallocate(oldF)

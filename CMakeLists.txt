@@ -31,6 +31,8 @@ find_package(JuliaExecutable)
 set(NUM_CELLS "32" CACHE STRING "Number of cells along each direction when running tests")
 set(NUM_TIME_STEPS "10" CACHE STRING "Number of time steps when running tests")
 set(NUM_PROCS "4" CACHE STRING "Number of processes when running tests")
+set(THREADS_PER_TEAM "32" CACHE STRING "Number of threads (vector length) per team (gang) when offloading to GPU")
+add_definitions(-D_THREADS_PER_TEAM="${THREADS_PER_TEAM}")
 
 set(EXTRA_LIBS "" CACHE STRING "Extra libraries to link against")
 

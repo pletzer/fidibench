@@ -1,0 +1,18 @@
+#!/bin/bash -e
+#SBATCH --job-name=upwind # job name (shows up in the queue)
+#SBATCH --time=00:10:00      # Walltime (HH:MM:SS)
+#SBATCH --cpus-per-task=1
+#SBATCH --ntasks=1
+#SBATCH --mem=6g
+#SBATCH --partition=ncv5
+#SBATCH --gpus=1
+
+source ~spackadmin/bin/prg_nvhpc-24.11.3-psy-3.0
+
+nvidia-smi 
+
+ncells=128
+nsteps=10
+exe="@CMAKE_BINARY_DIR@/upwind/fortran/upwindF08Gpu $ncells $nsteps"
+time $exe
+

@@ -1,4 +1,5 @@
 configure_file(upwindF08Gpu.sl.in upwindF08Gpu.sl)
+configure_file(upwindF08Gpu_azure.sl.in upwindF08Gpu_azure.sl)
 
 if (HAVE_OPENMP)
 	add_definitions(-DHAVE_OPENMP)
