@@ -1,6 +1,9 @@
 #ifndef _THREADS_PER_TEAM
 #define _THREADS_PER_TEAM 32
 #endif
+#ifndef _TEAMS
+#define _TEAMS 64
+#endif
 module upwind_mod
 
     implicit none
@@ -169,7 +172,7 @@ contains
         #warning "Using OpenACC kernels directive"
         !$acc kernels
     #else
-        !$acc parallel loop
+        !$acc parallel loop 
     #endif
 #else
         !$omp target
