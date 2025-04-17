@@ -375,7 +375,6 @@ program main
     real(r8) :: lengths(ndims)
     real(r8) :: courant, dt, dx, val, chksum
     type(upwind_type) :: up
-    integer :: maxNumThreads, numThreads
 #ifdef HAVE_OPENMP
     !$omp parallel
     numThreads = omp_get_num_threads()
