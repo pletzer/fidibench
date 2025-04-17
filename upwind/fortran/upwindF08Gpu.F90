@@ -174,9 +174,11 @@ contains
     #else
         !$acc parallel loop 
     #endif
-#else
+#elif defined(HAVE_OPENMP_OFFLOAD)
         !$omp target
         !$omp teams distribute parallel do thread_limit(_THREADS_PER_TEAM)
+#elif defined(HAVE_OPENMP)
+        !$omp parallel do
 #endif
         do i = 1, ntot
             oldF(i) = fptr(i)
@@ -187,9 +189,11 @@ contains
     #else
         !$acc end parallel loop
     #endif
-#else
+#elif defined(HAVE_OPENMP_OFFLOAD)
         !$omp end teams distribute parallel do
         !$omp end target
+#elif defined(HAVE_OPENMP)
+        !$omp end parallel do
 #endif
 
         ! iterate over the cells
@@ -201,9 +205,11 @@ contains
     #else
         !$acc parallel loop private(inds, j, oldIndex, upI)
     #endif
-#else
+#elif defined(HAVE_OPENMP_OFFLOAD)
         !$omp target
         !$omp teams distribute parallel do private(inds, j, oldIndex, upI) thread_limit(_THREADS_PER_TEAM)
+#elif defined(HAVE_OPENMP)
+        !$omp parallel do private(inds, j, oldIndex, upI)
 #endif
         do i = 1, ntot
 
@@ -241,9 +247,11 @@ contains
     #else
         !$acc end parallel loop
     #endif
-#else   
+#elif defined(HAVE_OPENMP_OFFLOAD)  
         !$omp end teams distribute parallel do
         !$omp end target
+#elif defined(HAVE_OPENMP)
+        !$omp end parallel do
 #endif
         deallocate(oldF)
 
@@ -352,7 +360,9 @@ end subroutine str2int
 program main
 
     use upwind_mod
-    
+#ifdef HAVE_OPENMP
+    use omp_lib
+#endif
     implicit none
 
     integer, parameter :: ndims = 3
@@ -365,6 +375,14 @@ program main
     real(r8) :: lengths(ndims)
     real(r8) :: courant, dt, dx, val, chksum
     type(upwind_type) :: up
+    integer :: maxNumThreads, numThreads
+#ifdef HAVE_OPENMP
+    !$omp parallel
+    numThreads = omp_get_num_threads()
+    !$omp end parallel
+    maxNumThreads = omp_get_max_threads()
+    write(*, '(A,I4,A,I4)') 'Number of OpenMP threads: ', numThreads, ' out of a max number: ', maxNumThreads
+#endif
  
     numCells = -1
     doVtk = .FALSE.
