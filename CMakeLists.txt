@@ -13,6 +13,7 @@ option(OPENMP "Enable OpenMP support" ON)
 option(OPENMP_OFFLOAD "Enable OpenMP offloading to GPU support" OFF)
 option(ROCM "Enable ROCm, offloading to MI100 using OpenMPI 4.5" OFF)
 option(INTEL_ANALYZER "Add compiler options for Intel Analyzer" OFF)
+option(GPROF "Add gprof compiler option for profiling" OFF)
 
 set(OPT_FLAGS "" CACHE STRING "compiler optimization flags")
 
@@ -86,7 +87,14 @@ if (INTEL_ANALYZER)
    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -tcollect $ENV{VT_ADD_LIBS}")
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -tcollect $ENV{VT_ADD_LIBS}")
    set(CMAKE_Fortran_FLAGS 
-      "${CMAKE_CXX_FLAGS} -g -tcollect $ENV{VT_ADD_LIBS}")
+      "${CMAKE_Fortran_FLAGS} -g -tcollect $ENV{VT_ADD_LIBS}")
+endif()
+
+if (GPROF)
+   message(STATUS "Adding -pg compiler option for gprof")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -pg")
 endif()
 
 if (OPENMP_OFFLOAD)
