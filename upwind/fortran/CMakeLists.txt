@@ -1,6 +1,23 @@
 configure_file(upwindF08Gpu.sl.in upwindF08Gpu.sl)
 configure_file(upwindF08Gpu_azure.sl.in upwindF08Gpu_azure.sl)
 
+if (PSYCLONE_EXECUTABLE)
+    message(STATUS "Running ${PSYCLONE_EXECUTABLE}")
+    execute_process(COMMAND ${PSYCLONE_EXECUTABLE} -s psy_omp.py -o ${CMAKE_SRC_DIR}/upwind/fortran/upwindF03Psy.F90 upwindF03.F90
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    RESULT_VARIABLE psyclone_result
+                    OUTPUT_VARIABLE psyclone_output
+                    ERROR_VARIABLE psyclone_error)
+    message(STATUS "psy_omp.py output: ${psyclone_output}")
+    message(STATUS "psy_omp.py error: ${psyclone_error}")
+    if (psyclone_result EQUAL 0)
+        message(STATUS "Psyclone transformation applied successfully.")
+        set(PSYCLONE_TRANSFORMED TRUE)
+    endif()
+else()
+    message(STATUS "Psyclone executable not found. Will not apply OpenMP transformation.")
+endif()
+
 if (HAVE_OPENMP)
 	add_definitions(-DHAVE_OPENMP)
 	message(STATUS "OpenMP enabled in Fortran")

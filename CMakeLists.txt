@@ -22,11 +22,16 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPT_FLAGS}")
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OPT_FLAGS}")
 
 find_package(OpenMP)
+#find_program(PSYCLONE psyclone)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # CMake needs help with clang 
 find_package(PythonExecutable)
 find_package(JuliaExecutable)
+find_program(PSYCLONE_EXECUTABLE psyclone)
+if (PSYCLONE_EXECUTABLE)
+  message(STATUS "Psyclone executable found: ${PSYCLONE_EXECUTABLE}.")  
+endif()
 
 # Use cmake -D NUM_CELLS=# and -D NUM_TIME_STEPS=# to change default values
 set(NUM_CELLS "32" CACHE STRING "Number of cells along each direction when running tests")

@@ -128,7 +128,6 @@ contains
         oldF = this % f
 
         ! iterate over the cells
-        !$OMP PARALLEL DO PRIVATE(i, j, inds, oldIndex, upI)
         do i = 1, this % ntot
 
             ! compute the index set of this cell
@@ -156,7 +155,6 @@ contains
                 inds(j) = oldIndex
            enddo
         enddo
-        !$OMP END PARALLEL DO
 
     end subroutine
 
