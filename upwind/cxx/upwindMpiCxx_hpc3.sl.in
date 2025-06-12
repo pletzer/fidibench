@@ -1,0 +1,12 @@
+#!/bin/bash
+#SBATCH --job-name=upwindMpiCxx
+#SBATCH --time=00:30:00
+#SBATCH --account=nesi99999
+#SBATCH --mem=20g
+#SBATCH --nodes=2
+#SBTACH --ntasks=128
+#SBATCH --hint=nomultithread
+
+exe="@CMAKE_BINARY_DIR@/upwind/cxx/upwindMpiCxx"
+time srun $exe -numCells 1024 -numSteps 2
+

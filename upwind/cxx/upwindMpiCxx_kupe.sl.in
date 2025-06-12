@@ -1,9 +1,0 @@
-#!/bin/bash
-#SBATCH --job-name=upwindMpiCxx
-#SBATCH --time=00:10:00
-#SBATCH --partition=NeSI
-#SBATCH --account=nesi99999
-
-exe="@CMAKE_BINARY_DIR@/upwind/cxx/upwindMpiCxx"
-time srun $exe -numCells 800 -numSteps 2
-

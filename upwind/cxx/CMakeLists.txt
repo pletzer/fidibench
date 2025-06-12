@@ -1,4 +1,4 @@
-configure_file(upwindMpiCxx_kupe.sl.in upwindMpiCxx_kupe.sl)
+configure_file(upwindMpiCxx_hpc3.sl.in upwindMpiCxx_hpc3.sl)
 configure_file(upwindCxx_kupe.sl.in upwindCxx_kupe.sl)
 configure_file(upwindCxx_mahuika.sl.in upwindCxx_mahuika.sl)
 configure_file(upwindCxx_maui.sl.in upwindCxx_maui.sl)
