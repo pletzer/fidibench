@@ -1,0 +1,14 @@
+Bootstrap: docker
+From: ubuntu:22.04
+%post
+    apt-get update && apt-get install -y \
+        build-essential \
+        g++ \
+        gfortran \
+        openmpi-common openmpi-bin libopenmpi-dev
+    git clone https://github.com/pletzer/fidibench
+    cd fidibench
+    mkdir build && cd build && cmake ..
+    cmake --build .
+    mkdir -p /software/fidibench
+    cmake --install . --prefix /software/fidibench
