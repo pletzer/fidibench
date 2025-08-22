@@ -1,15 +1,186 @@
 Bootstrap: docker
 From: ubuntu:22.04
+
+%environment
+    # Basic OpenMPI paths
+    export OMPI_DIR=/opt/ompi
+    export PATH="/opt/ompi/bin:$PATH"
+    export LD_LIBRARY_PATH="/opt/ompi/lib:$LD_LIBRARY_PATH"
+    export MANPATH="/opt/ompi/share/man:$MANPATH"
+    export PKG_CONFIG_PATH="/opt/ompi/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+    # UCX/OpenMPI specific settings
+    export UCX_IB_ENABLE_CUDA_AFFINITY=n
+    export UCX_NET_DEVICES=mlx5_0:1
+    export UCX_IB_REG_METHODS=direct
+    export OMPI_MCA_btl_openib_allow_ib=1
+    export OMPI_MCA_btl_openib_if_include="mlx5_0:1"
+    export OMPI_MCA_pml=ucx
+    export OMPI_MCA_osc=ucx
+    export OMPI_MCA_btl=^openib
+
+    # PMI settings
+    export PMIX_MCA_psec=native
+    export OMPI_MCA_btl_vader_single_copy_mechanism=none
+
+    # Make sure we have reasonable default paths
+    export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+
+
 %post
-    apt-get update && apt-get install -y \
+    # Install essential build tools and dependencies
+    apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        ca-certificates \
+        wget \
         git \
-        build-essential cmake \
-        g++ \
+        tar \
+        gzip \
+        perl \
+        python3 \
+        python-is-python3 \
+        automake \
+        autoconf \
+        cmake \
+        libtool \
+        flex \
+        hwloc \
+        pkg-config \
+        zlib1g-dev \
+        libnuma-dev \
+        libhwloc-dev \
+        libslurm-dev \
+        slurm-wlm \
+        libpmi2-0 \
+        libpmi0 \
+        libpmi2-0-dev \
+        libpmi0-dev \
+        libslurm-dev \
+        rdma-core \
+        libibverbs1 \
+        libibverbs-dev \
+        ibverbs-providers \
+        librdmacm1 \
+        librdmacm-dev \
+        perftest \
+        libevent-dev \
+        libevent-core-2.1-7 \
+        libevent-extra-2.1-7 \
+        libevent-openssl-2.1-7 \
+        libevent-pthreads-2.1-7 \
+        libev-dev \
+        libssl-dev \
+        openssl \
         gfortran \
-        openmpi-common openmpi-bin libopenmpi-dev
+        && rm -rf /var/lib/apt/lists/*
+
+    # Create IB related symlinks if they do not exist
+    mkdir -p /etc/libibverbs.d
+    ln -sf /usr/lib/x86_64-linux-gnu/libibverbs.so.1 /usr/lib/libibverbs.so
+    ln -sf /usr/lib/x86_64-linux-gnu/librdmacm.so.1 /usr/lib/librdmacm.so
+
+    # Install libevent from source to ensure all components are available
+    cd /tmp
+    wget https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz
+    tar xzf libevent-2.1.12-stable.tar.gz
+    cd libevent-2.1.12-stable
+    ./configure --prefix=/usr
+    make -j$(nproc)
+    make install
+    ldconfig
+
+    # Create symlinks for PMI libraries
+    ln -sf /usr/lib/x86_64-linux-gnu/libpmi2.so.0 /usr/lib/libpmi2.so
+    ln -sf /usr/lib/x86_64-linux-gnu/libpmi.so.0 /usr/lib/libpmi.so
+
+    # Install UCX with proper IB support
+    export UCX_VERSION=1.14.1
+    cd /tmp
+    wget https://github.com/openucx/ucx/releases/download/v${UCX_VERSION}/ucx-${UCX_VERSION}.tar.gz
+    tar -xvf ucx-${UCX_VERSION}.tar.gz
+    cd ucx-${UCX_VERSION}
+    ./configure --prefix=/usr \
+        --enable-optimizations \
+        --enable-mt \
+        --enable-numa \
+        --with-verbs \
+        --with-rdmacm \
+        --enable-gdr \
+        --enable-mlx5-dv
+    make -j$(nproc)
+    make install
+    ldconfig
+
+    # Install PMIx
+    cd /tmp
+    wget https://github.com/openpmix/openpmix/releases/download/v4.2.7/pmix-4.2.7.tar.gz
+    tar -xvf pmix-4.2.7.tar.gz
+    cd pmix-4.2.7
+    ./configure --prefix=/usr \
+        --disable-python-bindings \
+        --with-libevent=/usr \
+        --with-libevent-libdir=/usr/lib
+    make -j$(nproc)
+    make install
+    ldconfig
+
+    # Build and install OpenMPI
+    cd /tmp
+    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.5.tar.gz
+    tar -xvf openmpi-4.1.5.tar.gz
+    cd openmpi-4.1.5
+
+    # Configure OpenMPI with updated options for IB support
+    ./configure --prefix=/opt/ompi \
+        --with-ucx=/usr \
+        --with-slurm=/usr \
+        --with-pmix=/usr \
+        --with-pmi=/usr \
+        --with-verbs=/usr \
+        --with-verbs-libdir=/usr/lib/x86_64-linux-gnu \
+        --enable-mpirun-prefix-by-default \
+        --enable-orterun-prefix-by-default \
+        --with-pmi-libdir=/usr/lib/x86_64-linux-gnu \
+        --enable-mpi1-compatibility \
+        --with-hwloc=/usr \
+        --enable-builtin-atomics \
+        --with-zlib \
+        --enable-heterogeneous \
+        --enable-mpi-fortran=yes \
+        --enable-static=no
+
+    make -j$(nproc)
+    make install
+
+    # Cleanup
+    cd /
+    rm -rf /tmp/ompi /tmp/pmix* /tmp/ucx* /tmp/libevent*
+
+    # build fidibench
     git clone https://github.com/pletzer/fidibench
     cd fidibench
     mkdir build && cd build && cmake ..
     cmake --build .
     mkdir -p /software/fidibench
     cmake --install . --prefix /software/fidibench
+
+%labels
+    Author Dinindu Senanayake
+    Version v1.0
+    OpenMPI_Version 4.1.5
+
+%help
+    This container provides OpenMPI 4.1.5 built with:
+    - Slurm support with PMIx
+    - PMI/PMI2 support
+    - Infiniband support
+    - UCX support
+    - Hardware locality (hwloc) support
+
+    To build:
+    $ apptainer build openmpi.sif openmpi.def
+
+    To run:
+    $ srun --mpi=pmix apptainer exec openmpi.sif ./your_mpi_program
+
