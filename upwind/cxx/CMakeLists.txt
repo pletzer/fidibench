@@ -1,7 +1,6 @@
 configure_file(upwindMpiCxx_hpc3.sl.in upwindMpiCxx_hpc3.sl)
-configure_file(upwindCxx_kupe.sl.in upwindCxx_kupe.sl)
+configure_file(upwindMpiCxx_hpc3_vtune.sl.in upwindMpiCxx_hpc3_vtune.sl)
 configure_file(upwindCxx_mahuika.sl.in upwindCxx_mahuika.sl)
-configure_file(upwindCxx_maui.sl.in upwindCxx_maui.sl)
 configure_file(upwindAcc_mahuika_p100.sl.in upwindAcc_mahuika_p100.sl)
 configure_file(upwindAcc_mahuika_a100.sl.in upwindAcc_mahuika_a100.sl)
 configure_file(upwindAcc2_mahuika_p100.sl.in upwindAcc2_mahuika_p100.sl)

@@ -1,0 +1,13 @@
+#!/bin/bash
+#SBATCH --job-name=upwindMpiCxx
+#SBATCH --time=00:10:00
+#SBATCH --account=nesi99999
+#SBATCH --mem=10g
+#SBTACH --ntasks=32
+#SBATCH --hint=nomultithread
+
+ml VTune
+
+exe="@CMAKE_BINARY_DIR@/upwind/cxx/upwindMpiCxx"
+srun vtune -collect hotspots -result-dir vtune-res $exe -numCells 256 -numSteps 10
+
