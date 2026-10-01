@@ -103,8 +103,11 @@ class Upwind:
       print('{0} {1}'.format(i, self.f[i]))
 
   def __del__(self):
-    self.f.free()
-    self.fOld.free()
+    # f/fOld may not exist if __init__ exited early
+    if hasattr(self, 'f'):
+      self.f.free()
+    if hasattr(self, 'fOld'):
+      self.fOld.free()
 
   def gatherRoot(self):
     """

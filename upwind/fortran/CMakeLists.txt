@@ -28,7 +28,7 @@ add_test(NAME upwindFortran1
 set_tests_properties(upwindFortran1
                      PROPERTIES
                      ENVIRONMENT "OMP_NUM_THREADS=1"
-                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*(1(\\.000[0-9]*)?|0\\.999[0-9]*)[^0-9.]")
 
 add_test(NAME upwindFortran2
          COMMAND upwindFortran
@@ -36,7 +36,7 @@ add_test(NAME upwindFortran2
 set_tests_properties(upwindFortran2
                      PROPERTIES
                      ENVIRONMENT "OMP_NUM_THREADS=2"
-                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*(1(\\.000[0-9]*)?|0\\.999[0-9]*)[^0-9.]")
 
 add_test(NAME upwindFortran4
          COMMAND upwindFortran
@@ -44,7 +44,7 @@ add_test(NAME upwindFortran4
 set_tests_properties(upwindFortran4
                      PROPERTIES
                      ENVIRONMENT "OMP_NUM_THREADS=4"
-                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*(1(\\.000[0-9]*)?|0\\.999[0-9]*)[^0-9.]")
 
 add_test(NAME upwindFortran8
          COMMAND upwindFortran
@@ -52,7 +52,7 @@ add_test(NAME upwindFortran8
 set_tests_properties(upwindFortran8
                      PROPERTIES
                      ENVIRONMENT "OMP_NUM_THREADS=8"
-                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*(1(\\.000[0-9]*)?|0\\.999[0-9]*)[^0-9.]")
 
 add_test(NAME upwindF03
          COMMAND upwindF03
@@ -68,6 +68,6 @@ add_test(NAME upwindF08Gpu
 
 set_tests_properties(upwindF03 upwindF08 upwindF08Gpu
                      PROPERTIES
-                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*(1(\\.000[0-9]*)?|0\\.999[0-9]*)[^0-9.]")
 
             

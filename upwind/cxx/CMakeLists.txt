@@ -57,7 +57,7 @@ add_test(NAME upwindCxx1
 set_tests_properties(upwindCxx1
                      PROPERTIES 
                      ENVIRONMENT "OMP_NUM_THREADS=1"
-                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*(1(\\.000[0-9]*)?|0\\.999[0-9]*)[^0-9.]")
 
 add_test(NAME upwindCxx2
          COMMAND upwindCxx
@@ -65,7 +65,7 @@ add_test(NAME upwindCxx2
 set_tests_properties(upwindCxx2
                      PROPERTIES 
                      ENVIRONMENT "OMP_NUM_THREADS=2"
-                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*(1(\\.000[0-9]*)?|0\\.999[0-9]*)[^0-9.]")
 
 add_test(NAME upwindCxx4
          COMMAND upwindCxx
@@ -73,7 +73,7 @@ add_test(NAME upwindCxx4
 set_tests_properties(upwindCxx4
                      PROPERTIES 
                      ENVIRONMENT "OMP_NUM_THREADS=4"
-                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*(1(\\.000[0-9]*)?|0\\.999[0-9]*)[^0-9.]")
 
 add_test(NAME upwindCxx8
          COMMAND upwindCxx
@@ -81,14 +81,14 @@ add_test(NAME upwindCxx8
 set_tests_properties(upwindCxx8
                      PROPERTIES 
                      ENVIRONMENT "OMP_NUM_THREADS=8"
-                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*(1(\\.000[0-9]*)?|0\\.999[0-9]*)[^0-9.]")
 
 add_test(NAME upwindCxx
          COMMAND upwindCxx
         "${NUM_CELLS}" "${NUM_TIME_STEPS}")
 set_tests_properties(upwindCxx
                      PROPERTIES 
-                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*(1(\\.000[0-9]*)?|0\\.999[0-9]*)[^0-9.]")
 
 add_test(NAME upwindAccCxx 
          COMMAND upwindAccCxx
@@ -96,7 +96,7 @@ add_test(NAME upwindAccCxx
 
 set_tests_properties(upwindAccCxx
                      PROPERTIES 
-                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*(1(\\.000[0-9]*)?|0\\.999[0-9]*)[^0-9.]")
 
 add_test(NAME upwindAcc2Cxx 
          COMMAND upwindAcc2Cxx
@@ -104,5 +104,5 @@ add_test(NAME upwindAcc2Cxx
 
 set_tests_properties(upwindAcc2Cxx
                      PROPERTIES 
-                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1|0\\.999]")
+                     PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*(1(\\.000[0-9]*)?|0\\.999[0-9]*)[^0-9.]")
 

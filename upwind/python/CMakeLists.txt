@@ -15,15 +15,15 @@ if (PYTHON_EXECUTABLE)
   #          "${NUM_CELLS}" "${NUM_TIME_STEPS}")
 
   add_test(NAME upwindPythonMpiN
-           COMMAND "${MPIEXEC}" "${MPIEXEC_NUMPROC_FLAG}" "${MPIEXEC_MAX_NUMPROCS}"
+           COMMAND "${MPIEXEC}" "${MPIEXEC_NUMPROC_FLAG}" "${NUM_PROCS}"
            "${PYTHON_EXECUTABLE}"
            "${CMAKE_SOURCE_DIR}/upwind/python/upwindMPI.py"
            "${NUM_CELLS}" "${NUM_TIME_STEPS}")
 
   # set_tests_properties(upwindPython upwindPythonMpi1 upwindPythonMpiN
   #                      PROPERTIES 
-  #                      PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1\\.0|0\\.999]")
+  #                      PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*(1(\\.000[0-9]*)?|0\\.999[0-9]*)[^0-9.]")
   set_tests_properties(upwindPython upwindPythonMpiN
                        PROPERTIES 
-                       PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1\\.0|0\\.999]")
+                       PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*(1(\\.000[0-9]*)?|0\\.999[0-9]*)[^0-9.]")
 endif()

@@ -10,6 +10,6 @@ if (JULIA_EXECUTABLE)
 
   set_tests_properties(upwindJulia upwindJulia3 
   	                   PROPERTIES 
-  	                   PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*[1\\.0|0\\.999]")
+  	                   PASS_REGULAR_EXPRESSION "[Cc]heck sum:[ ]*(1(\\.000[0-9]*)?|0\\.999[0-9]*)[^0-9.]")
 
 endif()
