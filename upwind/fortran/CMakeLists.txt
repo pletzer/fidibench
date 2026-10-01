@@ -14,6 +14,13 @@ add_executable(upwindF03 upwindF03.F90)
 add_executable(upwindF08 upwindF08.F90)
 add_executable(upwindF08Gpu upwindF08Gpu.F90)
 
+# each source defines its own upwind_mod, keep the .mod files apart so that
+# parallel builds don't pick up another target's module
+foreach(tgt upwindFortran upwindF03 upwindF08 upwindF08Gpu)
+	set_target_properties(${tgt} PROPERTIES
+	                      Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mod_${tgt})
+endforeach()
+
 
 add_test(NAME upwindFortran1
          COMMAND upwindFortran
