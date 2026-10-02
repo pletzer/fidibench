@@ -134,7 +134,14 @@ contains
         do i = 1, this % ntot
 #else
         ! should parallelize with OpenMP
+#if defined(__INTEL_LLVM_COMPILER)
+        ! ifx runs do concurrent in parallel with -fiopenmp, the loop
+        ! temporaries must be private to each iteration (a BLOCK construct
+        ! triggers an ifx internal compiler error, gfortran rejects local())
+        do concurrent (i = 1:this % ntot) local(j, oldIndex, upI, inds)
+#else
         do concurrent (i = 1:this % ntot)
+#endif
 #endif
             ! compute the index set of this cell
             call this % getIndexSet(i, inds)
